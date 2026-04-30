@@ -2,9 +2,12 @@
 
 Parsing Wavefront OBJ files and creation of JavaFX mesh views 
 
-![Mesh Viewer App](images/meshviewer.png)
+![Mesh Viewer App - Alien Animal](images/meshviewer.png)
 
-## Sample code for creating a JavaFX mesh view from an OBJ file loaded via an URL:
+
+![Mesh Viewer App - Aya](images/meshviewer-aya.png)
+
+### Sample code for creating a JavaFX mesh view from an OBJ file loaded via an URL:
 
 ```
 ObjFileParser parser = new ObjFileParser(objFileURL, StandardCharsets.UTF_8);
