@@ -6,7 +6,11 @@ plugins {
     alias(libs.plugins.osdetector)
 }
 
+
 subprojects {
+    group = "de.amr"
+    version = "1.0."
+
     // 1. Apply plugins
     apply(plugin: "java")
     // For plugins loaded from the version catalog it has to be done like this:
@@ -16,6 +20,7 @@ subprojects {
     // 2. Declare repositories
     repositories {
         mavenCentral()
+        mavenLocal()
     }
 
     // 3. Configure Java toolchain
@@ -37,8 +42,6 @@ subprojects {
     }
 }
 
-group = "de.amr"
-version = 1.0
 
 // Define installer package format depending on operating system
 ext.installerPkg = [linux: "deb", "osx": "dmg", windows: "msi"][osdetector.os]
