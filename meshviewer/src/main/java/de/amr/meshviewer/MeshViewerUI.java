@@ -373,6 +373,7 @@ public class MeshViewerUI {
 
         selectionArea = new VBox(treeScrollPane, spacer, modelInfoPane);
         selectionArea.setFillWidth(true);
+        selectionArea.visibleProperty().bind(selectionArea.managedProperty());
     }
 
     private void createNavigationTree() {
