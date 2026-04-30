@@ -18,7 +18,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
-import javafx.geometry.VPos;
 import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.input.Dragboard;
@@ -414,10 +413,9 @@ public class MeshViewerUI {
         final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
         root.setValue(new LabelNode(title));
         root.getChildren().clear();
-        final MeshBuilder meshBuilder = new MeshBuilder(objModel);
-        addNavigationTreeLevel(meshBuilder.buildMeshViewsByObject(),   "Mesh Views by Object");
-        addNavigationTreeLevel(meshBuilder.buildMeshViewsByGroup(),    "Mesh Views by Group");
-        addNavigationTreeLevel(meshBuilder.buildMeshViewsByMaterial(), "Mesh Views by Material");
+        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT),   "Mesh Views by Object");
+        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP),    "Mesh Views by Group");
+        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL), "Mesh Views by Material");
     }
 
     private void addNavigationTreeLevel(Map<String, MeshView> meshViews, String title) {
