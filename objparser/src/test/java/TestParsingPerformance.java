@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021-2026 Armin Reichert (MIT License)
+ */
+
 import de.amr.objparser.ObjFileParser;
 import org.junit.jupiter.api.*;
 import org.tinylog.configuration.Configuration;
