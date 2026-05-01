@@ -325,11 +325,6 @@ public class ObjFileParser {
             sizes = computeObjSizes(stream);
         }
 
-        long lineCount;
-        try (InputStream stream = url.openStream()) {
-            lineCount = countLinesFast(stream);
-        }
-
         try (InputStream stream = url.openStream();
              var reader = new BufferedReader(new InputStreamReader(stream, charset))) {
 
@@ -347,16 +342,6 @@ public class ObjFileParser {
             model.setSource(sb.toString());
             return model;
         }
-    }
-
-    public static long countLinesFast(InputStream in) throws IOException {
-        byte[] buf = new byte[8192];
-        long count = 0;
-        int n;
-        while ((n = in.read(buf)) != -1) {
-            for (int i = 0; i < n; i++) if (buf[i] == '\n') count++;
-        }
-        return count;
     }
 
     /* -------------------------------------------------------------
