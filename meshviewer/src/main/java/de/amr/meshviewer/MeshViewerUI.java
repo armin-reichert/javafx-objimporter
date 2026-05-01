@@ -172,13 +172,10 @@ public class MeshViewerUI {
             pivot.getTransforms().addLast(new Rotate(initial.rotateZ(), Rotate.Z_AXIS));
         }
 
-        if (autoRotateAnimation == null) {
-            createAutoRotateAnimation();
-        }
         if (sample.initialState().autoRotate()) {
-            autoRotateAnimation.play();
+            autoRotateAnimation().play();
         } else {
-            autoRotateAnimation.stop();
+            autoRotateAnimation().stop();
         }
     }
 
@@ -297,6 +294,13 @@ public class MeshViewerUI {
         fillLight.setTranslateZ(-300);
 
         parent.getChildren().addAll(ambient, keyLight, fillLight);
+    }
+
+    private Animation autoRotateAnimation() {
+        if (autoRotateAnimation == null) {
+            createAutoRotateAnimation();
+        }
+        return autoRotateAnimation;
     }
 
     private void createAutoRotateAnimation() {
@@ -639,12 +643,5 @@ public class MeshViewerUI {
             startAutoRotate();
             flash("Auto-Rotate started");
         }
-    }
-
-    private Animation autoRotateAnimation() {
-        if (autoRotateAnimation == null) {
-            createAutoRotateAnimation();
-        }
-        return autoRotateAnimation;
     }
 }
