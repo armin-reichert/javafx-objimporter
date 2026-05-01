@@ -1,7 +1,6 @@
-// Declare external plugins but do NOT apply them to the root project
 plugins {
-    alias(libs.plugins.javafx) apply false
     alias(libs.plugins.osdetector)
+    alias(libs.plugins.javafx) apply false
 }
 
 // Repositories and coordinates for ALL modules
@@ -19,7 +18,6 @@ subprojects {
     // 1. Apply plugins
     apply plugin: "java"
     apply plugin: libs.plugins.javafx.get().pluginId
-    apply plugin: libs.plugins.osdetector.get().pluginId
     apply plugin: "maven-publish"
 
     // 2. Java toolchain
@@ -58,18 +56,15 @@ subprojects {
             }
         }
     }
-
-
-
-    // Define installer package format depending on operating system
-    ext.installerPkg = [linux: "deb", "osx": "dmg", windows: "msi"][osdetector.os]
-
-    logger.lifecycle("osdetector.os            = ${osdetector.os}")
-    logger.lifecycle("osdetector.arch          = ${osdetector.arch}")
-    logger.lifecycle("osdetector.classifier    = ${osdetector.classifier}")
-    logger.lifecycle("Installer package format = ${installerPkg}")
-    logger.lifecycle("Java version             = ${libs.versions.java.get()}")
-    logger.lifecycle("JavaFX version           = ${libs.versions.javafx.get()}")
-    logger.lifecycle("TinyLog version          = ${libs.versions.tinylog.get()}")
-
 }
+
+// Define installer package format depending on operating system
+ext.installerPkg = [linux: "deb", "osx": "dmg", windows: "msi"][osdetector.os]
+
+logger.lifecycle("osdetector.os            = ${osdetector.os}")
+logger.lifecycle("osdetector.arch          = ${osdetector.arch}")
+logger.lifecycle("osdetector.classifier    = ${osdetector.classifier}")
+logger.lifecycle("Installer package format = ${installerPkg}")
+logger.lifecycle("Java version             = ${libs.versions.java.get()}")
+logger.lifecycle("JavaFX version           = ${libs.versions.javafx.get()}")
+logger.lifecycle("TinyLog version          = ${libs.versions.tinylog.get()}")

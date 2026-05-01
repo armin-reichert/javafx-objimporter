@@ -4,10 +4,9 @@
 
 plugins {
     id "application"
-    id "maven-publish"
     alias(libs.plugins.javafx)
     alias(libs.plugins.jlink)
-    alias(libs.plugins.osdetector)
+    //alias(libs.plugins.osdetector)
 }
 
 dependencies {
