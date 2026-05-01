@@ -17,6 +17,16 @@ public class MeshViewerApp extends Application {
             new SampleState(-10, 0, 0, 0, true)),
 
         new SampleModel(
+            "Scooter",
+            getClass().getResource("/scooter/Scooter-normals.obj"),
+            new SampleState(-2, 0, 0, 0, true)),
+
+        new SampleModel(
+            "Scooter (Smooth)",
+            getClass().getResource("/scooter/Scooter-smgrps.obj"),
+            new SampleState(-2, 0, 0, 0, true)),
+
+        new SampleModel(
             "Alien Animal",
             getClass().getResource("/alien_animal/Alien Animal.obj"),
             new SampleState(-50, 0, 0, 0, true)),
