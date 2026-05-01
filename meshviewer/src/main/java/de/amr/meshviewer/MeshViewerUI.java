@@ -94,8 +94,9 @@ public class MeshViewerUI {
     private FlashMessageOverlay flashMessageOverlay;
     private SubScene previewSubScene;
     private PerspectiveCamera cam;
-    private VBox selectionArea;
+    private Pane selectionArea;
     private ObjModelInfoPanel modelInfoPane;
+    private Pane modelInfoArea;
     private FileChooser fileChooser;
     // Displayed mesh view is contained in this group:
     private Group pivot;
@@ -196,7 +197,7 @@ public class MeshViewerUI {
 
     private void createUI(double width, double height) {
         createCamera();
-        createLayout(width, height);
+        createLayout();
 
         final Scene scene = new Scene(rootPane);
         setPreviewControlHandlers();
@@ -219,33 +220,52 @@ public class MeshViewerUI {
         cam.setFarClip(10_000);
     }
 
-    private void createLayout(double width, double height) {
+    private void createLayout() {
         world = new Group();
         addLights(world);
 
-        previewSubScene = new SubScene(world, width, height, true, SceneAntialiasing.BALANCED);
+        previewSubScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         previewSubScene.setCamera(cam);
         previewSubScene.fillProperty().bind(previewSubScene.focusedProperty()
             .map(hasFocus -> hasFocus? FOCUSSED_COLOR : UNFOCUSSED_COLOR));
 
         flashMessageOverlay = new FlashMessageOverlay();
 
-        final StackPane previewArea = new StackPane(previewSubScene, flashMessageOverlay);
-
-        previewSubScene.widthProperty().bind(previewArea.widthProperty());
-        previewSubScene.heightProperty().bind(previewArea.heightProperty());
-
         fileChooser = new FileChooser();
         fileChooser.setTitle("Open OBJ File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Files", "*.obj"));
 
         createSelectionArea();
+        createModelInfoArea();
         createMenus(stage, selectionArea);
+
+        StackPane centerPane = new StackPane(previewSubScene, flashMessageOverlay);
+        centerPane.setBackground(Background.fill(Color.YELLOW));
+
+        previewSubScene.heightProperty().bind(centerPane.heightProperty());
+        previewSubScene.widthProperty().bind(centerPane.widthProperty());
 
         rootPane = new BorderPane();
         rootPane.setTop(menuBar);
-        rootPane.setCenter(previewArea);
+        rootPane.setCenter(centerPane);
         rootPane.setLeft(selectionArea);
+        rootPane.setRight(modelInfoArea);
+    }
+
+    private void createSelectionArea() {
+        createNavigationTree();
+
+        final ScrollPane scroll = new ScrollPane(navigationTreeView);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
+
+        selectionArea = new VBox(scroll);
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+    }
+
+    private void createModelInfoArea() {
+        modelInfoPane = new ObjModelInfoPanel();
+        modelInfoArea = new VBox(modelInfoPane);
     }
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
@@ -362,25 +382,6 @@ public class MeshViewerUI {
         samplesMenu.disableProperty().bind(Bindings.isEmpty(sampleModels));
 
         menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu);
-    }
-
-    private void createSelectionArea() {
-        createNavigationTree();
-
-        final ScrollPane treeScrollPane = new ScrollPane(navigationTreeView);
-        treeScrollPane.setMaxHeight(300);
-        treeScrollPane.setFitToWidth(true);
-        treeScrollPane.setFitToHeight(true);
-
-        modelInfoPane = new ObjModelInfoPanel();
-        modelInfoPane.maxHeightProperty().bind(modelInfoPane.prefHeightProperty());
-
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        selectionArea = new VBox(treeScrollPane, spacer, modelInfoPane);
-        selectionArea.setFillWidth(true);
-        selectionArea.visibleProperty().bind(selectionArea.managedProperty());
     }
 
     private void createNavigationTree() {
