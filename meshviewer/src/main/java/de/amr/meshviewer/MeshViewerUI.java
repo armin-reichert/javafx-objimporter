@@ -68,6 +68,7 @@ public class MeshViewerUI {
 
     public static final int DEFAULT_ANGLE_X = 0;
     public static final int DEFAULT_ANGLE_Y = 0;
+
     public static final double AUTO_ROTATE_SPEED = 0.1;
 
     public static final int DEFAULT_ZOOM = -30;

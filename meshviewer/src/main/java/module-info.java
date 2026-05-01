@@ -4,4 +4,5 @@ module de.amr.meshviewer {
     requires de.amr.objparser;
 
     exports de.amr.meshviewer;
+    exports de.amr.samples;
 }
