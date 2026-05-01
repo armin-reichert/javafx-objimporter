@@ -6,7 +6,7 @@ plugins {
 
 // Repositories and coordinates for ALL modules
 allprojects {
-    group = "de.amr"
+    group = "com.github.armin-reichert"
     version = "0.0.1"
 
     repositories {

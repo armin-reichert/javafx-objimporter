@@ -7,9 +7,6 @@ plugins {
     id "maven-publish"
 }
 
-group = "de.amr"
-version = "0.0.1"
-
 dependencies {
     implementation(libs.fastutil)
     implementation(libs.bundles.tinylog)
