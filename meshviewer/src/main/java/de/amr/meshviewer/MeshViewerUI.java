@@ -94,6 +94,8 @@ public class MeshViewerUI {
     // UI
     private final Stage stage;
     private BorderPane rootPane;
+    private StackPane centerPane;
+    private SplitPane layoutSplit;
     private Group world;
     private FlashMessageOverlay flashMessageOverlay;
     private SubScene previewSubScene;
@@ -249,11 +251,11 @@ public class MeshViewerUI {
         createModelInfoArea();
         createMenus(stage, selectionArea);
 
-        StackPane centerPane = new StackPane(previewSubScene, flashMessageOverlay);
+        centerPane = new StackPane(previewSubScene, flashMessageOverlay);
         centerPane.setBackground(Background.fill(Color.YELLOW));
 
-        SplitPane split = new SplitPane(selectionArea, centerPane, modelInfoArea);
-        split.setOrientation(Orientation.HORIZONTAL);
+        layoutSplit = new SplitPane(selectionArea, centerPane, modelInfoArea);
+        layoutSplit.setOrientation(Orientation.HORIZONTAL);
 
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
         selectionArea.setMaxWidth(SELECTION_AREA_WIDTH);
@@ -263,9 +265,13 @@ public class MeshViewerUI {
 
         rootPane = new BorderPane();
         rootPane.setTop(menuBar);
-        rootPane.setCenter(split);
+        rootPane.setCenter(layoutSplit);
 
-        previewSubScene.widthProperty().bind(rootPane.widthProperty().subtract(500));
+        var previewWidthLoss = Bindings.createDoubleBinding(
+            () -> SELECTION_AREA_WIDTH + (modelInfoArea.isVisible() ? modelInfoArea.getWidth() : 0),
+            modelInfoArea.visibleProperty(), modelInfoArea.widthProperty()
+        );
+        previewSubScene.widthProperty().bind(rootPane.widthProperty().subtract(previewWidthLoss));
         previewSubScene.heightProperty().bind(centerPane.heightProperty());
     }
 
@@ -278,6 +284,15 @@ public class MeshViewerUI {
 
         selectionArea = new VBox(scroll);
         VBox.setVgrow(scroll, Priority.ALWAYS);
+    }
+
+    private void showModelInfo(boolean visible) {
+        modelInfoArea.setVisible(visible);
+        if (visible) {
+            layoutSplit.getItems().setAll(selectionArea, centerPane, modelInfoArea);
+        } else {
+            layoutSplit.getItems().setAll(selectionArea, centerPane);
+        }
     }
 
     private void createModelInfoArea() {
@@ -356,7 +371,10 @@ public class MeshViewerUI {
     }
 
     private void createMenus(Stage stage, Pane selectionArea) {
+
+        // -----------------------------
         // File menu
+        // -----------------------------
 
         Menu fileMenu = new Menu("File");
 
@@ -382,17 +400,25 @@ public class MeshViewerUI {
 
         exitItem.setOnAction(_ -> Platform.exit());
 
+        // -----------------------------
         // View menu
+        // -----------------------------
 
         final Menu viewMenu = new Menu("View");
+
+        final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Model Statistics");
+        miModelInfoVisible.setOnAction(_ -> showModelInfo(miModelInfoVisible.isSelected()));
+        miModelInfoVisible.setSelected(true);
 
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
         miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
         drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
 
-        viewMenu.getItems().addAll(miWireframe);
+        viewMenu.getItems().addAll(miWireframe, miModelInfoVisible);
 
+        // -----------------------------
         // Samples menu
+        // -----------------------------
 
         samplesMenu = new Menu("Samples");
         samplesMenu.disableProperty().bind(Bindings.isEmpty(sampleModels));
