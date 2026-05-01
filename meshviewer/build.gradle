@@ -4,9 +4,21 @@
 
 plugins {
     id "application"
+    id "maven-publish"
     alias(libs.plugins.javafx)
     alias(libs.plugins.jlink)
     alias(libs.plugins.osdetector)
+}
+
+group = "de.amr"
+version = "0.0.1"
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 dependencies {
