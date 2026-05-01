@@ -6,7 +6,7 @@ plugins {
 
 // Repositories and coordinates for ALL modules
 allprojects {
-    group = "com.github.armin-reichert"
+    group = "com.github.armin-reichert.javafx-objimporter"
     version = "0.0.1"
 
     repositories {
