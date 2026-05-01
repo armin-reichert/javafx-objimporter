@@ -37,7 +37,6 @@ import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -130,41 +129,34 @@ public class MeshViewerUI {
     public void show() {
         stage.show();
         if (!sampleModels.isEmpty()) {
-            showSampleModel(sampleModels.getFirst());
-        }
-    }
-
-    public void showObjModel(File objFile) {
-        requireNonNull(objFile);
-        try {
-            final URL url = objFile.toURI().toURL();
-            showObjModel(url);
-            workDir = objFile.getParentFile();
-        } catch (MalformedURLException x) {
-            Logger.error(x, "Cannot show OBJ model, file={}", objFile);
-        }
-    }
-
-    public void showObjModel(URL url) {
-        requireNonNull(url);
-        try {
-            loadModelFromURL(url);
-            selectFirstObjectNodeInNavigationTree();
-            resetTransformsAndCamera();
-            Platform.runLater(previewSubScene::requestFocus);
-        } catch (Exception x) {
-            Logger.error(x, "Cannot show OBJ model, URL={}", url);
+            try {
+                showSampleModel(sampleModels.getFirst());
+            } catch (IOException x){
+                Logger.error(x, "Cannot show first sample model");
+                flash("Cannot show sample model");
+            }
         }
     }
 
     public void addSampleModel(SampleModel sample) {
+        requireNonNull(sample);
         sampleModels.add(sample);
-        MenuItem item = new MenuItem(sample.title());
-        item.setOnAction(_ -> showSampleModel(sample));
+
+        final var item = new MenuItem(sample.title());
+        item.setOnAction(_ -> {
+            try {
+                showSampleModel(sample);
+            } catch (IOException x) {
+                Logger.error(x, "Cannot show sample model");
+                flash("Cannot show sample model");
+            }
+        });
         samplesMenu.getItems().add(item);
     }
 
-    public void showSampleModel(SampleModel sample) {
+    // Private
+
+    private void showSampleModel(SampleModel sample) throws IOException {
         showObjModel(sample.url());
 
         SampleState initial = sample.initialState();
@@ -190,7 +182,20 @@ public class MeshViewerUI {
         }
     }
 
-    // Private
+    private void showObjModel(File objFile) throws IOException {
+        requireNonNull(objFile);
+        final URL url = objFile.toURI().toURL();
+        showObjModel(url);
+        workDir = objFile.getParentFile();
+    }
+
+    private void showObjModel(URL url) throws IOException {
+        requireNonNull(url);
+        loadModelFromURL(url);
+        selectFirstObjectNodeInNavigationTree();
+        resetTransformsAndCamera();
+        Platform.runLater(previewSubScene::requestFocus);
+    }
 
     private void createUI(double width, double height) {
         createCamera();
@@ -323,7 +328,12 @@ public class MeshViewerUI {
             }
             final File objFile = fileChooser.showOpenDialog(stage);
             if (objFile != null) {
-                showObjModel(objFile);
+                try {
+                    showObjModel(objFile);
+                } catch (IOException x) {
+                    Logger.error(x, "Cannot show OBJ model from file {}", objFile);
+                    flash("Cannot show OBJ model");
+                }
             }
         });
 
@@ -578,7 +588,11 @@ public class MeshViewerUI {
                 // Only accept OBJ files
                 if (file.getName().toLowerCase().endsWith(".obj")) {
                     success = true;
-                    showObjModel(file);
+                    try {
+                        showObjModel(file);
+                    } catch (IOException x) {
+                        Logger.error(x, "Cannot show OBJ model file {}", file);
+                    }
                 }
             }
             e.setDropCompleted(success);
