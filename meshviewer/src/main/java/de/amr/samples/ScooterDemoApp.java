@@ -23,6 +23,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Derived from <a href="https://github.com/AlmasB/javafx3d-samples/blob/master/src/main/java/com/almasb/fx3d/modelloading/ModelLoadApp.java">Almas B's sample app</a>
+ */
 public class ScooterDemoApp extends Application {
 
     public static final double AUTO_ROTATE_SPEED = 0.2;
