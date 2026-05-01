@@ -52,7 +52,7 @@ subprojects {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/armin-reichert/javafx-objimporter")
                 credentials {
-                    username = System.getenv("GITHUB_ACTOR")
+                    username = "github"
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
