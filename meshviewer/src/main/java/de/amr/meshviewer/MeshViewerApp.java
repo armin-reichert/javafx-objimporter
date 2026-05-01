@@ -32,8 +32,11 @@ public class MeshViewerApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        final double height = 0.8 * Screen.getPrimary().getBounds().getHeight();
-        final double width = 1.5 * height;
+        final double screenHeight = Screen.getPrimary().getBounds().getHeight();
+        final double screenWidth = Screen.getPrimary().getBounds().getWidth();
+        final double aspect = screenWidth / screenHeight;
+        final double height = 0.90 * screenHeight;
+        final double width = aspect * height;
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height);
         for (SampleModel sample : SAMPLES) {
             ui.addSampleModel(sample);

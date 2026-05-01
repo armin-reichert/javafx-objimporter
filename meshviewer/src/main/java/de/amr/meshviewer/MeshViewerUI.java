@@ -246,8 +246,8 @@ public class MeshViewerUI {
         SplitPane split = new SplitPane(selectionArea, centerPane, modelInfoArea);
         split.setOrientation(Orientation.HORIZONTAL);
 
-        selectionArea.setMinWidth(250);
-        selectionArea.setMaxWidth(250);
+        selectionArea.setMinWidth(300);
+        selectionArea.setMaxWidth(300);
 
         modelInfoArea.setMinWidth(200);
         modelInfoArea.setMaxWidth(200);
@@ -377,14 +377,11 @@ public class MeshViewerUI {
 
         final Menu viewMenu = new Menu("View");
 
-        final CheckMenuItem miNavigation = new CheckMenuItem("Navigation");
-        miNavigation.selectedProperty().bindBidirectional(selectionArea.managedProperty());
-
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
         miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
         drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
 
-        viewMenu.getItems().addAll(miNavigation, miWireframe);
+        viewMenu.getItems().addAll(miWireframe);
 
         // Samples menu
 
