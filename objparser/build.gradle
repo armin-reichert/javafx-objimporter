@@ -10,14 +10,6 @@ plugins {
 group = "de.amr"
 version = "0.0.1"
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-}
-
 dependencies {
     implementation(libs.fastutil)
     implementation(libs.bundles.tinylog)
