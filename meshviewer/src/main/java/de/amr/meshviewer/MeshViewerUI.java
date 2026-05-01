@@ -31,7 +31,6 @@ import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.stage.FileChooser;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.tinylog.Logger;
@@ -116,9 +115,7 @@ public class MeshViewerUI {
 
     public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
-
         createUI(width, height);
-
         objModel.addListener((_, _, newModel) -> {
             if (newModel != null) {
                 populateNavigationTree(newModel, createTreeTitle(newModel));
@@ -134,7 +131,6 @@ public class MeshViewerUI {
         stage.show();
         if (!sampleModels.isEmpty()) {
             showSampleModel(sampleModels.getFirst());
-            Platform.runLater(previewSubScene::requestFocus);
         }
     }
 
@@ -155,6 +151,7 @@ public class MeshViewerUI {
             loadModelFromURL(url);
             selectFirstObjectNodeInNavigationTree();
             resetTransformsAndCamera();
+            Platform.runLater(previewSubScene::requestFocus);
         } catch (Exception x) {
             Logger.error(x, "Cannot show OBJ model, URL={}", url);
         }
