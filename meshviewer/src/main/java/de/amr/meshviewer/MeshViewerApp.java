@@ -5,6 +5,7 @@
 package de.amr.meshviewer;
 
 import javafx.application.Application;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class MeshViewerApp extends Application {
@@ -31,7 +32,9 @@ public class MeshViewerApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        final MeshViewerUI ui = new MeshViewerUI(stage);
+        final double height = 0.8 * Screen.getPrimary().getBounds().getHeight();
+        final double width = 1.5 * height;
+        final MeshViewerUI ui = new MeshViewerUI(stage, width, height);
         for (SampleModel sample : SAMPLES) {
             ui.addSampleModel(sample);
         }

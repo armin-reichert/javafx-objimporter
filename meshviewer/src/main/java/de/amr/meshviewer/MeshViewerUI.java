@@ -114,11 +114,8 @@ public class MeshViewerUI {
     private final Rotate autoRotateY = new Rotate(0, Rotate.Y_AXIS);
     private Point3D autoRotateAxis = Rotate.Y_AXIS; // horizontally be default
 
-    public MeshViewerUI(Stage stage) {
+    public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
-
-        final double height = 0.8 * Screen.getPrimary().getBounds().getHeight();
-        final double width = 1.5 * height;
 
         createUI(width, height);
 
