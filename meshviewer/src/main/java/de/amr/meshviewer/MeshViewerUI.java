@@ -49,6 +49,9 @@ public class MeshViewerUI {
 
     public static final String STAGE_TITLE = "JavaFX OBJ Mesh Viewer";
 
+    public static final int SELECTION_AREA_WIDTH = 300;
+    public static final int MODEL_INFO_AREA_WIDTH = 200;
+
     public static final String KEY_AUTO_ROTATE_HORIZONTALLY = "h";
     public static final String KEY_AUTO_ROTATE_VERTICALLY = "v";
     public static final String KEY_ROTATE_LEFT = "l";
@@ -201,6 +204,12 @@ public class MeshViewerUI {
         createLayout();
 
         final Scene scene = new Scene(rootPane);
+        final URL cssURL = getClass().getResource("/app.css");
+        if (cssURL != null) {
+            scene.getStylesheets().add(cssURL.toExternalForm());
+        } else {
+            Logger.error("Cannot load app.css");
+        }
         setPreviewControlHandlers();
         addFileDragNDropSupport(scene);
 
@@ -246,17 +255,17 @@ public class MeshViewerUI {
         SplitPane split = new SplitPane(selectionArea, centerPane, modelInfoArea);
         split.setOrientation(Orientation.HORIZONTAL);
 
-        selectionArea.setMinWidth(300);
-        selectionArea.setMaxWidth(300);
+        selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
+        selectionArea.setMaxWidth(SELECTION_AREA_WIDTH);
 
-        modelInfoArea.setMinWidth(200);
-        modelInfoArea.setMaxWidth(200);
+        modelInfoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);
+        modelInfoArea.setMaxWidth(MODEL_INFO_AREA_WIDTH);
 
         rootPane = new BorderPane();
         rootPane.setTop(menuBar);
         rootPane.setCenter(split);
 
-        previewSubScene.widthProperty().bind(centerPane.widthProperty());
+        previewSubScene.widthProperty().bind(rootPane.widthProperty().subtract(500));
         previewSubScene.heightProperty().bind(centerPane.heightProperty());
     }
 
