@@ -17,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
+import javafx.geometry.Orientation;
 import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.control.*;
@@ -96,7 +97,7 @@ public class MeshViewerUI {
     private PerspectiveCamera cam;
     private Pane selectionArea;
     private ObjModelInfoPanel modelInfoPane;
-    private Pane modelInfoArea;
+    private ScrollPane modelInfoArea;
     private FileChooser fileChooser;
     // Displayed mesh view is contained in this group:
     private Group pivot;
@@ -242,14 +243,21 @@ public class MeshViewerUI {
         StackPane centerPane = new StackPane(previewSubScene, flashMessageOverlay);
         centerPane.setBackground(Background.fill(Color.YELLOW));
 
-        previewSubScene.heightProperty().bind(centerPane.heightProperty());
-        previewSubScene.widthProperty().bind(centerPane.widthProperty());
+        SplitPane split = new SplitPane(selectionArea, centerPane, modelInfoArea);
+        split.setOrientation(Orientation.HORIZONTAL);
+
+        selectionArea.setMinWidth(250);
+        selectionArea.setMaxWidth(250);
+
+        modelInfoArea.setMinWidth(200);
+        modelInfoArea.setMaxWidth(200);
 
         rootPane = new BorderPane();
         rootPane.setTop(menuBar);
-        rootPane.setCenter(centerPane);
-        rootPane.setLeft(selectionArea);
-        rootPane.setRight(modelInfoArea);
+        rootPane.setCenter(split);
+
+        previewSubScene.widthProperty().bind(centerPane.widthProperty());
+        previewSubScene.heightProperty().bind(centerPane.heightProperty());
     }
 
     private void createSelectionArea() {
@@ -265,7 +273,9 @@ public class MeshViewerUI {
 
     private void createModelInfoArea() {
         modelInfoPane = new ObjModelInfoPanel();
-        modelInfoArea = new VBox(modelInfoPane);
+        modelInfoArea = new ScrollPane(modelInfoPane);
+        modelInfoArea.setMinWidth(300);
+        modelInfoArea.setPrefWidth(300);
     }
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
