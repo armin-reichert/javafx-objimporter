@@ -143,6 +143,7 @@ public class MeshViewerUI {
                 flash("Cannot show sample model");
             }
         }
+        showModelInfo(false);
     }
 
     public void addSampleModel(SampleModel sample) {
@@ -254,7 +255,7 @@ public class MeshViewerUI {
         centerPane = new StackPane(previewSubScene, flashMessageOverlay);
         centerPane.setBackground(Background.fill(Color.YELLOW));
 
-        layoutSplit = new SplitPane(selectionArea, centerPane, modelInfoArea);
+        layoutSplit = new SplitPane();
         layoutSplit.setOrientation(Orientation.HORIZONTAL);
 
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
@@ -408,7 +409,6 @@ public class MeshViewerUI {
 
         final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Model Statistics");
         miModelInfoVisible.setOnAction(_ -> showModelInfo(miModelInfoVisible.isSelected()));
-        miModelInfoVisible.setSelected(true);
 
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
         miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
