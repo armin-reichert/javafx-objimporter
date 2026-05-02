@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
@@ -84,6 +85,10 @@ public class MeshViewerUI {
 
     private final ObservableList<SampleModel> sampleModels = FXCollections.observableArrayList();
 
+    private Map<String, MeshView> currentObjectMeshViews;
+    private Map<String, MeshView> currentGroupMeshViews;
+    private Map<String, MeshView> currentMaterialMeshViews;
+
     // Flip around x-axis (otherwise many objects are upside-down initially)
     private final Rotate flipYDirection = new Rotate(180, Rotate.X_AXIS);
 
@@ -125,9 +130,16 @@ public class MeshViewerUI {
         createUI(width, height);
         objModel.addListener((_, _, newModel) -> {
             if (newModel != null) {
+                currentObjectMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
+                currentGroupMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
+                currentMaterialMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_MATERIAL);
                 populateNavigationTree(newModel, createTreeTitle(newModel));
                 selectFirstObjectNodeInNavigationTree();
                 modelInfoPane.update(newModel, loadingTime.get());
+            } else {
+                currentObjectMeshViews = Map.of();
+                currentGroupMeshViews = Map.of();
+                currentMaterialMeshViews = Map.of();
             }
         });
     }
@@ -310,21 +322,15 @@ public class MeshViewerUI {
         objModel.set(parsedModel);
     }
 
-    private void displayMeshView(MeshView meshView) {
-        if (meshView == null) return;
-
-        meshView.setCullFace(CullFace.NONE);
-        meshView.drawModeProperty().bind(drawMode);
-
-        //TODO reconsider
-        meshView.getTransforms().clear();
-        center(meshView);
-
-        pivot = new Group(meshView);
-        center(pivot);
-
+    private void displayMeshViews(List<MeshView> meshViews) {
+        pivot = new Group();
+        for (MeshView meshView : meshViews) {
+            meshView.setCullFace(CullFace.NONE);
+            meshView.drawModeProperty().bind(drawMode);
+            pivot.getChildren().add(meshView);
+        }
         pivot.getTransforms().addAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
-
+        center(pivot);
         world.getChildren().setAll(pivot);
         previewSubScene.requestFocus();
     }
@@ -425,7 +431,7 @@ public class MeshViewerUI {
     }
 
     private void createNavigationTree() {
-        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new LabelNode("No OBJ file loaded"));
+        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new InnerTreeNode(InnerTreeNode.Type.Model, "No OBJ model loaded"));
         root.setExpanded(true);
 
         navigationTreeView = new TreeView<>(root);
@@ -433,9 +439,19 @@ public class MeshViewerUI {
         navigationTreeView.setShowRoot(true);
 
         navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_, _, item) -> {
+            Logger.info("Selected item: {}", item);
             if (item == null) return;
-            if (item.getValue() instanceof MeshNode meshNode) {
-                displayMeshView(meshNode.meshView);
+            switch (item.getValue()) {
+                case MeshNode meshNode -> displayMeshViews(List.of(meshNode.meshView));
+                case InnerTreeNode innerNode -> {
+                    switch (innerNode.type) {
+                        case Object -> displayMeshViews(currentObjectMeshViews.values().stream().toList());
+                        case Group -> displayMeshViews(currentGroupMeshViews.values().stream().toList());
+                        case Material -> displayMeshViews(currentMaterialMeshViews.values().stream().toList());
+                        default -> {}
+                    }
+                }
+                default -> {}
             }
         });
 
@@ -450,7 +466,7 @@ public class MeshViewerUI {
                 }
 
                 setText(switch (value) {
-                    case LabelNode labelNode -> labelNode.label;
+                    case InnerTreeNode innerTreeNode -> innerTreeNode.label;
                     case MeshNode meshNode -> meshNode.meshName;
                     default -> "Unknown tree node";
                 });
@@ -460,16 +476,22 @@ public class MeshViewerUI {
 
     private void populateNavigationTree(ObjModel objModel, String title) {
         final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
-        root.setValue(new LabelNode(title));
+        root.setValue(new InnerTreeNode(InnerTreeNode.Type.Model, title));
         root.getChildren().clear();
-        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT),   "Mesh Views by Object");
-        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP),    "Mesh Views by Group");
-        addNavigationTreeLevel(MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL), "Mesh Views by Material");
+        addLevel(InnerTreeNode.Type.Object,   currentObjectMeshViews);
+        addLevel(InnerTreeNode.Type.Group,    currentGroupMeshViews);
+        addLevel(InnerTreeNode.Type.Material, currentMaterialMeshViews);
     }
 
-    private void addNavigationTreeLevel(Map<String, MeshView> meshViews, String title) {
+    private void addLevel(InnerTreeNode.Type type, Map<String, MeshView> meshViews) {
+        String title = switch (type) {
+            case Object  -> "Mesh Views by Object";
+            case Group -> "Mesh Views by Group";
+            case Material  -> "Mesh Views by Material";
+            default -> "";
+        };
         if (meshViews.isEmpty()) title += " (None)";
-        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new LabelNode(title));
+        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new InnerTreeNode(type, title));
         root.setExpanded(true);
         meshViews.keySet().stream().sorted().forEach(meshName -> {
             final var meshNode = new MeshNode(meshName, meshViews.get(meshName));

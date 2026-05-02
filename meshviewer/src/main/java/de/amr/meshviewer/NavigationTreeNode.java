@@ -4,5 +4,5 @@
 
 package de.amr.meshviewer;
 
-public sealed class NavigationTreeNode permits LabelNode, MeshNode {
+public sealed class NavigationTreeNode permits InnerTreeNode, MeshNode {
 }
