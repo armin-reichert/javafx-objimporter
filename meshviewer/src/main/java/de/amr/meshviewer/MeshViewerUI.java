@@ -134,7 +134,7 @@ public class MeshViewerUI {
                 currentGroupMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
                 currentMaterialMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_MATERIAL);
                 populateNavigationTree(newModel, createTreeTitle(newModel));
-                selectFirstObjectNodeInNavigationTree();
+                selectAllGroupsNodeInNavigationTree();
                 modelInfoPane.update(newModel, loadingTime.get());
             } else {
                 currentObjectMeshViews = Map.of();
@@ -210,7 +210,7 @@ public class MeshViewerUI {
     private void showObjModel(URL url) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
-        selectFirstObjectNodeInNavigationTree();
+        selectAllGroupsNodeInNavigationTree();
         resetTransformsAndCamera();
         Platform.runLater(previewSubScene::requestFocus);
     }
@@ -500,14 +500,11 @@ public class MeshViewerUI {
         navigationTreeView.getRoot().getChildren().add(root);
     }
 
-    private void selectFirstObjectNodeInNavigationTree() {
+    private void selectAllGroupsNodeInNavigationTree() {
         final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
-        if (!root.getChildren().isEmpty()) {
-            final TreeItem<NavigationTreeNode> objects = root.getChildren().getFirst();
-            if (!objects.getChildren().isEmpty()) {
-                final TreeItem<NavigationTreeNode> firstObject = objects.getChildren().getFirst();
-                navigationTreeView.getSelectionModel().select(firstObject);
-            }
+        if (root.getChildren().size() >= 2) {
+            final TreeItem<NavigationTreeNode> allGroups = root.getChildren().get(1);
+            navigationTreeView.getSelectionModel().select(allGroups);
         }
     }
 
