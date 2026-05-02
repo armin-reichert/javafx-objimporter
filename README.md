@@ -29,3 +29,18 @@ ObjModel objModel = new ObjFileParser(objFileURL, StandardCharsets.UTF_8).parse(
 Map<String, MeshView> meshes = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
 ```
 
+#### Using the library from another Gradle project
+
+To use this library from your Gradle project, currently you have to use your local Maven repository and add the following dependendies to your build.gradle:
+
+```
+dependencies {
+    implementation("com.github.armin-reichert.javafx-objimporter:objparser:0.0.1")
+    implementation("com.github.armin-reichert.javafx-objimporter:meshviewer:0.0.1")
+}
+```
+
+(Before, of course you have to build and publish the library as shown above.)
+
+Please give me feedback if that causes some issue.
+
