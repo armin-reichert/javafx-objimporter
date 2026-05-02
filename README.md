@@ -39,8 +39,16 @@ dependencies {
     implementation("com.github.armin-reichert.javafx-objimporter:meshviewer:0.0.1")
 }
 ```
+Your application's module-info.java must have the following entries:
+
+```
+requires de.amr.objparser;
+requires de.amr.meshviewer;
+
+exports whatever.your.app.module.is.named;
+```
 
 (Before, of course you have to build and publish the library as shown above.)
 
-Please give me feedback if that causes some issue.
+Please give me feedback if that causes any trouble!
 
