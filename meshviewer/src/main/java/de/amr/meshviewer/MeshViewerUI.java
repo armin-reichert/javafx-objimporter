@@ -282,7 +282,7 @@ public class MeshViewerUI {
         selectionArea = new VBox(navigationTreeView);
         //selectionArea.setBackground(Background.fill(Color.RED));
 
-        navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(50));
+        navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
     }
 
     private void showModelInfo(boolean visible) {
@@ -471,10 +471,10 @@ public class MeshViewerUI {
         if (meshViews.isEmpty()) title += " (None)";
         final TreeItem<NavigationTreeNode> root = new TreeItem<>(new LabelNode(title));
         root.setExpanded(true);
-        for (String meshName : meshViews.keySet()) {
+        meshViews.keySet().stream().sorted().forEach(meshName -> {
             final var meshNode = new MeshNode(meshName, meshViews.get(meshName));
             root.getChildren().add(new TreeItem<>(meshNode));
-        }
+        });
         navigationTreeView.getRoot().getChildren().add(root);
     }
 
