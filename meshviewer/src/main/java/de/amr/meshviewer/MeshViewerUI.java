@@ -96,7 +96,7 @@ public class MeshViewerUI {
     private final Stage stage;
     private BorderPane rootPane;
     private StackPane centerPane;
-    private SplitPane layoutSplit;
+    private final SplitPane layoutSplit = new SplitPane();;
     private Group world;
     private FlashMessageOverlay flashMessageOverlay;
     private SubScene previewSubScene;
@@ -256,7 +256,6 @@ public class MeshViewerUI {
         centerPane = new StackPane(previewSubScene, flashMessageOverlay);
         centerPane.setBackground(Background.fill(Color.YELLOW));
 
-        layoutSplit = new SplitPane();
         layoutSplit.setOrientation(Orientation.HORIZONTAL);
 
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
@@ -280,12 +279,10 @@ public class MeshViewerUI {
     private void createSelectionArea() {
         createNavigationTree();
 
-        final ScrollPane scroll = new ScrollPane(navigationTreeView);
-        scroll.setFitToWidth(true);
-        scroll.setFitToHeight(true);
+        selectionArea = new VBox(navigationTreeView);
+        //selectionArea.setBackground(Background.fill(Color.RED));
 
-        selectionArea = new VBox(scroll);
-        VBox.setVgrow(scroll, Priority.ALWAYS);
+        navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(50));
     }
 
     private void showModelInfo(boolean visible) {
