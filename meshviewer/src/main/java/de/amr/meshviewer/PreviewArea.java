@@ -12,10 +12,7 @@ import javafx.scene.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Stop;
+import javafx.scene.paint.*;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
@@ -28,6 +25,18 @@ import java.io.IOException;
 import java.util.Map;
 
 public class PreviewArea extends StackPane {
+
+    public static final Paint DARK_GRADIENT = new LinearGradient(
+        0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+        new Stop(0, Color.web("#222")),
+        new Stop(1, Color.web("#555"))
+    );
+
+    public static final Paint BRIGHT_GRADIENT = new LinearGradient(
+        0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+        new Stop(0, Color.LIGHTSKYBLUE.darker()),
+        new Stop(1, Color.LIGHTSKYBLUE.brighter())
+    );
 
     public static final String KEY_AUTO_ROTATE_HORIZONTALLY = "h";
     public static final String KEY_AUTO_ROTATE_VERTICALLY = "v";
@@ -144,6 +153,7 @@ public class PreviewArea extends StackPane {
             if (e.getClickCount() == 2) {
                 reset();
             }
+            assignFocusToSubScene();
             e.consume();
         });
 
@@ -186,18 +196,8 @@ public class PreviewArea extends StackPane {
     }
 
     private void configureBackground() {
-        final var darkGradient = new LinearGradient(
-            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-            new Stop(0, Color.web("#222")),
-            new Stop(1, Color.web("#555"))
-        );
-        final var brightGradient = new LinearGradient(
-            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-            new Stop(0, Color.web("#666")),
-            new Stop(1, Color.web("#aaa"))
-        );
         backgroundProperty().bind(subScene.focusedProperty()
-            .map(focussed -> focussed? brightGradient : darkGradient)
+            .map(focussed -> focussed? BRIGHT_GRADIENT : DARK_GRADIENT)
             .map(Background::fill)
         );
     }

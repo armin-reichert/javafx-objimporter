@@ -42,9 +42,11 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
     }
 
     private String removeAnonObjectPrefix(String text) {
-        final Matcher m = ANON_OBJECT_PATTERN.matcher(text);
-        if (m.matches()) {
-            return m.group(1); // the OBJ file group name part
+        if (text != null) {
+            final Matcher m = ANON_OBJECT_PATTERN.matcher(text);
+            if (m.matches()) {
+                return m.group(1); // the OBJ file group name part
+            }
         }
         return text;
     }
