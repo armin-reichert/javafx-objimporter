@@ -6,3 +6,36 @@
     -fx-max-height: 0;
     -fx-cursor: default; /* prevents resize cursor */
 }
+
+.tree-view {
+    -fx-background-color: black;
+    -fx-control-inner-background: black;
+    -fx-text-fill: white;
+}
+
+.tree-cell {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.tree-cell:hover {
+    -fx-background-color: #222;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #444;
+    -fx-text-fill: white;
+}
+
+.tree-cell:focused {
+    -fx-background-color: #555;
+}
+
+.tree-view .scroll-bar {
+    -fx-background-color: black;
+}
+
+/* Disclosure arrow (triangle) */
+.tree-view .tree-disclosure-node > .arrow {
+    -fx-background-color: white;
+}
