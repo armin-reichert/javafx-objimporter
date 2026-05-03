@@ -6,8 +6,12 @@ import javafx.scene.control.TreeView;
 import javafx.scene.shape.MeshView;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
+
+    public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
     public ObjModelNavigationTree() {
         final var root = new TreeItem<NavigationTreeNode>(new InnerTreeNode(InnerTreeNode.Type.Model, "No OBJ model loaded"));
@@ -27,13 +31,22 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
                     return;
                 }
 
-                setText(switch (value) {
+                final String label = switch (value) {
                     case InnerTreeNode innerTreeNode -> innerTreeNode.label;
-                    case MeshNode meshNode -> meshNode.meshName;
+                    case MeshNode meshNode -> removeAnonObjectPrefix(meshNode.meshName);
                     default -> "Unknown tree node";
-                });
+                };
+                setText(label);
             }
         });
+    }
+
+    private String removeAnonObjectPrefix(String text) {
+        final Matcher m = ANON_OBJECT_PATTERN.matcher(text);
+        if (m.matches()) {
+            return m.group(1); // the OBJ file group name part
+        }
+        return text;
     }
 
     public void populate(
