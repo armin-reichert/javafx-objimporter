@@ -5,7 +5,6 @@
 package de.amr.meshviewer;
 
 import de.amr.objparser.ObjModel;
-import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
@@ -31,10 +30,6 @@ public class ObjModelInfoPanel extends GridPane {
 
     public ObjModelInfoPanel(String id) {
         setId(id); // for CSS
-
-        //setHgap(10);
-        //setVgap(6);
-        //setPadding(new Insets(10));
 
         addRow(0, new Label("Vertices:"), lblVertices);
         addRow(1, new Label("TexCoords:"), lblTexCoords);

@@ -108,7 +108,7 @@ public class MeshViewerUI {
     private PerspectiveCamera cam;
     private Pane selectionArea;
     private ObjModelInfoPanel modelInfoPane;
-    private ScrollPane modelInfoArea;
+    private Pane modelInfoArea;
     private FileChooser fileChooser;
     // Displayed mesh view is contained in this group:
     private Group pivot;
@@ -263,7 +263,7 @@ public class MeshViewerUI {
 
         createSelectionArea();
         createModelInfoArea();
-        createMenus(stage, selectionArea);
+        createMenus(stage);
 
         centerPane = new StackPane(previewSubScene, flashMessageOverlay);
         centerPane.setBackground(Background.fill(Color.YELLOW));
@@ -308,9 +308,8 @@ public class MeshViewerUI {
 
     private void createModelInfoArea() {
         modelInfoPane = new ObjModelInfoPanel("objModelInfo");
-        modelInfoArea = new ScrollPane(modelInfoPane);
-        modelInfoArea.setMinWidth(300);
-        modelInfoArea.setPrefWidth(300);
+        modelInfoArea = new VBox(modelInfoPane);
+        modelInfoArea.setBackground(Background.fill(Color.BLACK));
     }
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
@@ -375,7 +374,7 @@ public class MeshViewerUI {
         autoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
-    private void createMenus(Stage stage, Pane selectionArea) {
+    private void createMenus(Stage stage) {
 
         // -----------------------------
         // File menu
