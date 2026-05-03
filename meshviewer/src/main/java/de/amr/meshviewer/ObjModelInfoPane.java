@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class ObjModelInfoPanel extends GridPane {
+public class ObjModelInfoPane extends GridPane {
 
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.GERMANY);
     private static final String NA = "-";
@@ -30,7 +30,7 @@ public class ObjModelInfoPanel extends GridPane {
     private final Label lblParsingTime = new Label();
     private final Label lblMeshCreationTime = new Label();
 
-    public ObjModelInfoPanel(String id) {
+    public ObjModelInfoPane(String id) {
         setId(id); // for CSS
 
         addRow(0, new Label("Vertices:"), lblVertices);
@@ -41,8 +41,8 @@ public class ObjModelInfoPanel extends GridPane {
         addRow(5, new Label("Faces:"), lblFaces);
         addRow(6, new Label("Smoothing Groups:"), lblSmoothingGroups);
         addRow(7, new Label("Materials:"), lblMaterials);
-        addRow(8, new Label("Parsing Time:"), lblParsingTime);
-        addRow(9, new Label("Mesh CreationTime:"), lblMeshCreationTime);
+        addRow(8, new Label("Parsing:"), lblParsingTime);
+        addRow(9, new Label("Mesh Creation:"), lblMeshCreationTime);
     }
 
     public void update(ObjModel model, Duration parsingTime, Duration meshCreationTime) {

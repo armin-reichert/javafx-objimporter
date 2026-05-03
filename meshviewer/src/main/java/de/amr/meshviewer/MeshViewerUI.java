@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -44,6 +45,7 @@ import static java.util.Objects.requireNonNull;
 public class MeshViewerUI {
 
     public static final String STAGE_TITLE = "JavaFX OBJ Mesh Viewer";
+    public static final String NO_OBJ_MODEL_TITLE = "No OBJ model";
 
     public static final int SELECTION_AREA_WIDTH = 300;
     public static final int MODEL_INFO_AREA_WIDTH = 200;
@@ -59,6 +61,7 @@ public class MeshViewerUI {
     private Map<String, MeshView> currentObjectMeshViews;
     private Map<String, MeshView> currentGroupMeshViews;
     private Map<String, MeshView> currentMaterialMeshViews;
+    private File currentModelDir;
 
     // UI
     private final Stage stage;
@@ -79,46 +82,27 @@ public class MeshViewerUI {
 
     // Model Info Area
     private Pane infoArea;
-    private ObjModelInfoPanel modelInfoPane;
-
-    private File workDir;
+    private ObjModelInfoPane infoPane;
 
     public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
         createUI(width, height);
-        addModelListener();
+        objModel.addListener(this::onObjModelChange);
     }
 
-    private void addModelListener() {
-        objModel.addListener((_, _, newModel) -> {
-            if (newModel != null) {
-                final Instant start = Instant.now();
-                currentObjectMeshViews   = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
-                currentGroupMeshViews    = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
-                currentMaterialMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_MATERIAL);
-                final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
-                meshCreationTime.set(Duration.millis(duration.toMillis()));
-                navigationTreeView.populate(
-                    createTreeTitle(newModel),
-                    currentObjectMeshViews,
-                    currentGroupMeshViews,
-                    currentMaterialMeshViews
-                );
-                selectAllGroupsNodeInNavigationTree();
-                modelInfoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
-            } else {
-                currentObjectMeshViews = Map.of();
-                currentGroupMeshViews = Map.of();
-                currentMaterialMeshViews = Map.of();
-                navigationTreeView.populate(
-                    "No OBJ model",
-                    currentObjectMeshViews,
-                    currentGroupMeshViews,
-                    currentMaterialMeshViews
-                );
-                modelInfoPane.update(null, null, null);
-            }
-        });
+    private void onObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
+        if (newModel != null) {
+            createMeshViews(newModel);
+            navigationTreeView.populate(createTreeTitle(newModel), currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            selectAllGroupsNodeInNavigationTree();
+            infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
+        } else {
+            currentObjectMeshViews = Map.of();
+            currentGroupMeshViews = Map.of();
+            currentMaterialMeshViews = Map.of();
+            navigationTreeView.populate(NO_OBJ_MODEL_TITLE, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            infoPane.update(null, null, null);
+        }
     }
 
     // Public
@@ -160,7 +144,7 @@ public class MeshViewerUI {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
         selectAllGroupsNodeInNavigationTree();
-        workDir = objFile.getParentFile();
+        currentModelDir = objFile.getParentFile();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
     }
@@ -200,7 +184,6 @@ public class MeshViewerUI {
 
         splitLayout.setOrientation(Orientation.HORIZONTAL);
 
-
         rootPane = new BorderPane();
         rootPane.setTop(menuBar);
         rootPane.setCenter(splitLayout);
@@ -213,15 +196,15 @@ public class MeshViewerUI {
         previewArea.subScene().heightProperty().bind(previewArea.heightProperty());
     }
 
-    private void createPreviewArea() {
-        previewArea = new PreviewArea();
-        previewArea.drawMode.bindBidirectional(drawMode);
-    }
-
     private void createObjFileChooser() {
         fileChooser = new FileChooser();
         fileChooser.setTitle("Open OBJ File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Files", "*.obj"));
+    }
+
+    private void createPreviewArea() {
+        previewArea = new PreviewArea();
+        previewArea.drawMode.bindBidirectional(drawMode);
     }
 
     private void createSelectionArea() {
@@ -232,8 +215,15 @@ public class MeshViewerUI {
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
     }
 
+    private void createInfoArea() {
+        infoPane = new ObjModelInfoPane("objModelInfo");
+        infoArea = new VBox(infoPane);
+        infoArea.setBackground(Background.fill(Color.BLACK));
+        infoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);
+        infoArea.setMaxWidth(MODEL_INFO_AREA_WIDTH);
+    }
+
     private void showModelInfo(boolean visible) {
-        infoArea.setVisible(visible);
         if (visible) {
             splitLayout.getItems().setAll(selectionArea, previewArea, infoArea);
         } else {
@@ -241,21 +231,26 @@ public class MeshViewerUI {
         }
     }
 
-    private void createInfoArea() {
-        modelInfoPane = new ObjModelInfoPanel("objModelInfo");
-        infoArea = new VBox(modelInfoPane);
-        infoArea.setBackground(Background.fill(Color.BLACK));
-        infoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);
-        infoArea.setMaxWidth(MODEL_INFO_AREA_WIDTH);
+    private void loadModelFromURL(URL objFileURL) throws IOException {
+        final ObjModel model = parseObjModel(objFileURL);
+        objModel.set(model);
     }
 
-    private void loadModelFromURL(URL objFileURL) throws IOException {
-        final var parser = new ObjFileParser(objFileURL, StandardCharsets.UTF_8);
-        final long start = System.nanoTime();
-        final ObjModel model = parser.parse();
-        final long millis = (System.nanoTime() - start) / 1_000_000;
-        parsingTime.set(Duration.millis(millis));
-        objModel.set(model);
+    private ObjModel parseObjModel(URL objFileURL) throws IOException {
+        final Instant start = Instant.now();
+        final ObjModel model = new ObjFileParser(objFileURL, StandardCharsets.UTF_8).parse();
+        final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
+        parsingTime.set(Duration.millis(duration.toMillis()));
+        return model;
+    }
+
+    private void createMeshViews(ObjModel objModel) {
+        final Instant start = Instant.now();
+        currentObjectMeshViews   = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT);
+        currentGroupMeshViews    = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
+        currentMaterialMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL);
+        final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
+        meshCreationTime.set(Duration.millis(duration.toMillis()));
     }
 
     private void createMenus(Stage stage) {
@@ -272,8 +267,8 @@ public class MeshViewerUI {
         fileMenu.getItems().addAll(openItem, exitItem);
 
         openItem.setOnAction(_ -> {
-            if (workDir != null && workDir.exists()) {
-                fileChooser.setInitialDirectory(workDir);
+            if (currentModelDir != null && currentModelDir.exists()) {
+                fileChooser.setInitialDirectory(currentModelDir);
             }
             final File objFile = fileChooser.showOpenDialog(stage);
             if (objFile != null) {
