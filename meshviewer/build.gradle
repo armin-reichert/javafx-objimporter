@@ -10,10 +10,9 @@ plugins {
 }
 
 dependencies {
-    implementation(
-        libs.bundles.tinylog,
-        project(":objparser")
-    )
+    implementation(libs.fastutil)
+    implementation(libs.bundles.tinylog)
+    implementation(project(":objparser"))
 }
 
 javafx {
