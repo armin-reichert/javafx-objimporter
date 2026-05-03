@@ -397,7 +397,8 @@ public class MeshViewerUI {
         DialogPane pane = about.getDialogPane();
         pane.getButtonTypes().add(ButtonType.CLOSE);
 
-        pane.setStyle("""
+        pane.setStyle(
+"""
     -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
     -fx-padding: 20;
     -fx-font-size: 14px;
@@ -407,15 +408,20 @@ public class MeshViewerUI {
     -fx-border-radius: 4;
 """);
 
-        Label content = new Label("""
+        final var content = new Label(
+"""
 MeshViewer — 3D Preview for JavaFX
 
-Explore OBJ models with smooth rotation, zooming, wireframe mode,
-auto‑rotation, and a focus‑aware gradient preview area.
+Explore JavaFX mesh views with geometry and materials defined in OBJ models.
+
 
 DISCLAIMER:
-Copilot AI has been used for code improvements (do NOT tell this on Reddit!)
-Written by a meat-eating, "unvaxxed", "climate-denying" old white man who hates gender-ideology.
+
+OBJ parser development supported by Copilot AI.
+(Do *not* tell this on Reddit or you will get censured!)
+
+Written by an "unvaxxed", "climate change denying" old white man
+who hates wokeness and gender bullshit.
 
 © 2026 Armin Reichert
 """);
