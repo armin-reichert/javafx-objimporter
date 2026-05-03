@@ -4,6 +4,7 @@ module de.amr.meshviewer {
     requires it.unimi.dsi.fastutil;
     requires de.amr.objparser;
 
+    exports de.amr.meshbuilder;
     exports de.amr.meshviewer;
     exports de.amr.samples;
 }

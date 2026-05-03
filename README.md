@@ -21,8 +21,6 @@ Map<String, MeshView> meshes = MeshBuilder.build(objModel, MeshBuilder.BuildMode
 
 #### Using the library from another Gradle project
 
-TODO: I am planning to use Cloudsmith as Maven repository
-
 ```
 dependencies {
     implementation("de.amr:objparser:0.0.1")
@@ -33,10 +31,9 @@ Your application's module-info.java must have the following entries:
 
 ```
 requires de.amr.objparser;
-requires de.amr.meshviewer;
+requires de.amr.meshbuilder;
 
 exports whatever.your.app.module.is.named;
 ```
 
-Please give me feedback if that causes any trouble!
-
+TODO: I am planning to use Cloudsmith as Maven repository
