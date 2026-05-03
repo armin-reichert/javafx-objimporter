@@ -38,9 +38,17 @@ subprojects {
         options.compilerArgs.addAll(["-Xlint:deprecation", "-Xlint:unchecked"])
     }
 
-    // 5. Publishing to Cloudsmith
+    // 5. Publishing to Maven local and to Cloudsmith
     publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+
         repositories {
+            mavenLocal()
+
             maven {
                 name = "cloudsmith"
                 url = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
