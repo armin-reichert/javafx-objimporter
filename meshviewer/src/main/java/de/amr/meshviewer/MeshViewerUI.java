@@ -98,7 +98,7 @@ public class MeshViewerUI {
     private final Stage stage;
     private BorderPane rootPane;
     private StackPane centerPane;
-    private final SplitPane layoutSplit = new SplitPane();;
+    private final SplitPane layoutSplit = new SplitPane();
     private Group world;
     private FlashMessageOverlay flashMessageOverlay;
     private SubScene previewSubScene;
@@ -109,7 +109,7 @@ public class MeshViewerUI {
     private FileChooser fileChooser;
     // Displayed mesh view is contained in this group:
     private Group pivot;
-    private TreeView<NavigationTreeNode> navigationTreeView;
+    private ObjModelNavigationTree navigationTreeView;
     private MenuBar menuBar;
     private Menu samplesMenu;
 
@@ -130,7 +130,12 @@ public class MeshViewerUI {
                 currentObjectMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
                 currentGroupMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
                 currentMaterialMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_MATERIAL);
-                populateNavigationTree(newModel, createTreeTitle(newModel));
+                navigationTreeView.populate(
+                    createTreeTitle(newModel),
+                    currentObjectMeshViews,
+                    currentGroupMeshViews,
+                    currentMaterialMeshViews
+                );
                 selectAllGroupsNodeInNavigationTree();
                 modelInfoPane.update(newModel, loadingTime.get());
             } else {
@@ -424,13 +429,7 @@ public class MeshViewerUI {
     }
 
     private void createNavigationTree() {
-        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new InnerTreeNode(InnerTreeNode.Type.Model, "No OBJ model loaded"));
-        root.setExpanded(true);
-
-        navigationTreeView = new TreeView<>(root);
-        navigationTreeView.setFocusTraversable(false);
-        navigationTreeView.setShowRoot(true);
-
+        navigationTreeView = new ObjModelNavigationTree();
         navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_, _, item) -> {
             Logger.info("Selected item: {}", item);
             if (item == null) return;
@@ -447,51 +446,8 @@ public class MeshViewerUI {
                 default -> {}
             }
         });
-
-        navigationTreeView.setCellFactory(_ -> new TreeCell<>() {
-            @Override
-            protected void updateItem(NavigationTreeNode value, boolean empty) {
-                super.updateItem(value, empty);
-
-                if (empty || value == null) {
-                    setText(null);
-                    return;
-                }
-
-                setText(switch (value) {
-                    case InnerTreeNode innerTreeNode -> innerTreeNode.label;
-                    case MeshNode meshNode -> meshNode.meshName;
-                    default -> "Unknown tree node";
-                });
-            }
-        });
     }
 
-    private void populateNavigationTree(ObjModel objModel, String title) {
-        final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
-        root.setValue(new InnerTreeNode(InnerTreeNode.Type.Model, title));
-        root.getChildren().clear();
-        addLevel(InnerTreeNode.Type.Object,   currentObjectMeshViews);
-        addLevel(InnerTreeNode.Type.Group,    currentGroupMeshViews);
-        addLevel(InnerTreeNode.Type.Material, currentMaterialMeshViews);
-    }
-
-    private void addLevel(InnerTreeNode.Type type, Map<String, MeshView> meshViews) {
-        String title = switch (type) {
-            case Object  -> "Mesh Views by Object";
-            case Group -> "Mesh Views by Group";
-            case Material  -> "Mesh Views by Material";
-            default -> "";
-        };
-        if (meshViews.isEmpty()) title += " (None)";
-        final TreeItem<NavigationTreeNode> root = new TreeItem<>(new InnerTreeNode(type, title));
-        root.setExpanded(true);
-        meshViews.keySet().stream().sorted().forEach(meshName -> {
-            final var meshNode = new MeshNode(meshName, meshViews.get(meshName));
-            root.getChildren().add(new TreeItem<>(meshNode));
-        });
-        navigationTreeView.getRoot().getChildren().add(root);
-    }
 
     private void selectAllGroupsNodeInNavigationTree() {
         final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
