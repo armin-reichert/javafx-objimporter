@@ -24,7 +24,7 @@ Map<String, MeshView> meshes = MeshBuilder.build(objModel, MeshBuilder.BuildMode
 ```
 dependencies {
     implementation("de.amr:objparser:0.0.1")
-    implementation("de.amr:meshviewer:0.0.1")
+    implementation("de.amr:meshbuilder:0.0.1")
 }
 ```
 Your application's module-info.java must have the following entries:
