@@ -27,7 +27,8 @@ public class ObjModelInfoPanel extends GridPane {
     private final Label lblFaces = new Label();
     private final Label lblSmoothingGroups = new Label();
     private final Label lblMaterials = new Label();
-    private final Label lblLoadingTime = new Label();
+    private final Label lblParsingTime = new Label();
+    private final Label lblMeshCreationTime = new Label();
 
     public ObjModelInfoPanel(String id) {
         setId(id); // for CSS
@@ -40,14 +41,20 @@ public class ObjModelInfoPanel extends GridPane {
         addRow(5, new Label("Faces:"), lblFaces);
         addRow(6, new Label("Smoothing Groups:"), lblSmoothingGroups);
         addRow(7, new Label("Materials:"), lblMaterials);
-        addRow(8, new Label("LoadingTime:"), lblLoadingTime);
+        addRow(8, new Label("Parsing Time:"), lblParsingTime);
+        addRow(9, new Label("Mesh CreationTime:"), lblMeshCreationTime);
     }
 
-    public void update(ObjModel model, Duration loadingTime) {
-        if (loadingTime != null) {
-            lblLoadingTime.setText("%.3f sec".formatted(loadingTime.toSeconds()));
+    public void update(ObjModel model, Duration parsingTime, Duration meshCreationTime) {
+        if (parsingTime != null) {
+            lblParsingTime.setText("%.3f sec".formatted(parsingTime.toSeconds()));
         } else {
-            lblLoadingTime.setText(NA);
+            lblParsingTime.setText(NA);
+        }
+        if (meshCreationTime != null) {
+            lblMeshCreationTime.setText("%.3f sec".formatted(meshCreationTime.toSeconds()));
+        } else {
+            lblMeshCreationTime.setText(NA);
         }
 
         if (model == null) {
@@ -59,7 +66,8 @@ public class ObjModelInfoPanel extends GridPane {
             lblFaces.setText(NA);
             lblSmoothingGroups.setText(NA);
             lblMaterials.setText(NA);
-            lblLoadingTime.setText(NA);
+            lblParsingTime.setText(NA);
+            lblMaterials.setText(NA);
         }
         else {
 

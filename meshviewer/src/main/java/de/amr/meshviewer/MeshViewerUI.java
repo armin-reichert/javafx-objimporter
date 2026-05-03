@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +50,9 @@ public class MeshViewerUI {
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
     private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    private final ObjectProperty<Duration> loadingTime = new SimpleObjectProperty<>(Duration.ZERO);
+
+    private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
+    private final ObjectProperty<Duration> meshCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
     private final ObservableList<SampleModel> sampleModels = FXCollections.observableArrayList();
 
@@ -89,9 +92,12 @@ public class MeshViewerUI {
     private void addModelListener() {
         objModel.addListener((_, _, newModel) -> {
             if (newModel != null) {
-                currentObjectMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
-                currentGroupMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
+                final Instant start = Instant.now();
+                currentObjectMeshViews   = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
+                currentGroupMeshViews    = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_GROUP);
                 currentMaterialMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_MATERIAL);
+                final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
+                meshCreationTime.set(Duration.millis(duration.toMillis()));
                 navigationTreeView.populate(
                     createTreeTitle(newModel),
                     currentObjectMeshViews,
@@ -99,7 +105,7 @@ public class MeshViewerUI {
                     currentMaterialMeshViews
                 );
                 selectAllGroupsNodeInNavigationTree();
-                modelInfoPane.update(newModel, loadingTime.get());
+                modelInfoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
             } else {
                 currentObjectMeshViews = Map.of();
                 currentGroupMeshViews = Map.of();
@@ -110,7 +116,7 @@ public class MeshViewerUI {
                     currentGroupMeshViews,
                     currentMaterialMeshViews
                 );
-                modelInfoPane.update(null, null);
+                modelInfoPane.update(null, null, null);
             }
         });
     }
@@ -246,10 +252,10 @@ public class MeshViewerUI {
     private void loadModelFromURL(URL objFileURL) throws IOException {
         final var parser = new ObjFileParser(objFileURL, StandardCharsets.UTF_8);
         final long start = System.nanoTime();
-        final ObjModel parsedModel = parser.parse();
+        final ObjModel model = parser.parse();
         final long millis = (System.nanoTime() - start) / 1_000_000;
-        loadingTime.set(Duration.millis(millis));
-        objModel.set(parsedModel);
+        parsingTime.set(Duration.millis(millis));
+        objModel.set(model);
     }
 
     private void createMenus(Stage stage) {
