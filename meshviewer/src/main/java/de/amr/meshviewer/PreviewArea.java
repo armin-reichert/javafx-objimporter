@@ -25,7 +25,7 @@ import javafx.util.Duration;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
 public class PreviewArea extends StackPane {
 
@@ -203,13 +203,13 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.showMessage(message);
     }
 
-    public void displayMeshViews(List<MeshView> meshViews) {
+    public void displayMeshViews(Map<String, MeshView> meshViews) {
         pivot = new Group();
-        for (MeshView meshView : meshViews) {
+        meshViews.values().forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
             meshView.drawModeProperty().bind(drawMode);
             pivot.getChildren().add(meshView);
-        }
+        });
         pivot.getTransforms().addAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
         center(pivot);
         world.getChildren().setAll(pivot);

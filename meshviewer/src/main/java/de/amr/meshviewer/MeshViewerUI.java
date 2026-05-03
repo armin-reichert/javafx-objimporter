@@ -37,7 +37,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.requireNonNull;
@@ -325,13 +324,13 @@ public class MeshViewerUI {
             Logger.info("Selected item: {}", item);
             if (item == null) return;
             switch (item.getValue()) {
-                case MeshNode meshNode -> previewArea.displayMeshViews(List.of(meshNode.meshView));
+                case MeshNode meshNode -> previewArea.displayMeshViews(Map.of(meshNode.meshName, meshNode.meshView));
                 case InnerTreeNode innerNode -> {
                     switch (innerNode.type) {
-                        case Object   -> previewArea.displayMeshViews(currentObjectMeshViews.values().stream().toList());
-                        case Group    -> previewArea.displayMeshViews(currentGroupMeshViews.values().stream().toList());
-                        case Material -> previewArea.displayMeshViews(currentMaterialMeshViews.values().stream().toList());
-                        default       -> {}
+                        case Model    -> {}
+                        case Object   -> previewArea.displayMeshViews(currentObjectMeshViews);
+                        case Group    -> previewArea.displayMeshViews(currentGroupMeshViews);
+                        case Material -> previewArea.displayMeshViews(currentMaterialMeshViews);
                     }
                 }
                 default -> {}
@@ -351,7 +350,6 @@ public class MeshViewerUI {
         final String url = objModel.url();
         return URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
     }
-
 
     private void addFileDragNDropSupport(Scene scene) {
         // Accept file drag-over
@@ -421,11 +419,9 @@ Written by a meat-eating, "unvaxxed", "climate-denying" old white man who hates 
 
 © 2026 Armin Reichert
 """);
+
         content.setStyle("-fx-text-fill: #d0d0d0;");
-
         pane.setContent(content);
-
         about.showAndWait();
-
     }
 }
