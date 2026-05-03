@@ -26,8 +26,6 @@ import static java.util.Objects.requireNonNull;
  */
 public class ObjFileParser {
 
-    public static final int SOURCE_LINES_LIMIT = 999;
-
     /* -------------------------------------------------------------
      *  SIZE INFO
      * ------------------------------------------------------------- */
@@ -87,123 +85,8 @@ public class ObjFileParser {
     }
 
     /* -------------------------------------------------------------
-     *  FAST FLOAT PARSER
-     * ------------------------------------------------------------- */
-
-    private static final class FastFloat {
-        public static float parse(String s, int start, int end) {
-            boolean neg = false;
-            int i = start;
-
-            if (i < end) {
-                char c = s.charAt(i);
-                if (c == '-') { neg = true; i++; }
-                else if (c == '+') i++;
-            }
-
-            double val = 0.0;
-
-            while (i < end) {
-                char c = s.charAt(i);
-                if (c < '0' || c > '9') break;
-                val = val * 10 + (c - '0');
-                i++;
-            }
-
-            if (i < end && s.charAt(i) == '.') {
-                i++;
-                double factor = 0.1;
-                while (i < end) {
-                    char c = s.charAt(i);
-                    if (c < '0' || c > '9') break;
-                    val += (c - '0') * factor;
-                    factor *= 0.1;
-                    i++;
-                }
-            }
-
-            if (i < end && (s.charAt(i) == 'e' || s.charAt(i) == 'E')) {
-                i++;
-                boolean expNeg = false;
-                if (i < end && s.charAt(i) == '-') { expNeg = true; i++; }
-                else if (i < end && s.charAt(i) == '+') i++;
-
-                int exp = 0;
-                while (i < end) {
-                    char c = s.charAt(i);
-                    if (c < '0' || c > '9') break;
-                    exp = exp * 10 + (c - '0');
-                    i++;
-                }
-
-                val = val * Math.pow(10, expNeg ? -exp : exp);
-            }
-
-            return neg ? (float)-val : (float)val;
-        }
-    }
-
-    /* -------------------------------------------------------------
      *  FAST TOKENIZERS
      * ------------------------------------------------------------- */
-
-    private static final class FastSpaceTokenizer {
-        private String s;
-        private int len;
-        private int pos;
-        private int start;
-        private int end;
-
-        public void reset(String s) {
-            this.s = s;
-            this.len = s.length();
-            this.pos = 0;
-        }
-
-        public boolean next() {
-            while (pos < len && Character.isWhitespace(s.charAt(pos))) pos++;
-            if (pos >= len) return false;
-
-            start = pos;
-            while (pos < len && !Character.isWhitespace(s.charAt(pos))) pos++;
-            end = pos;
-            return true;
-        }
-
-        public String source() { return s; }
-        public int tokenStart() { return start; }
-        public int tokenEnd() { return end; }
-        public String token() { return s.substring(start, end); }
-    }
-
-    private static final class FastFaceRefTokenizer {
-        public void split(String ref, int[] out) {
-            int len = ref.length();
-            int part = 0;
-            int start = 0;
-
-            for (int i = 0; i < len; i++) {
-                if (ref.charAt(i) == '/') {
-                    out[part++] = parseInt(ref, start, i);
-                    start = i + 1;
-                }
-            }
-            out[part] = parseInt(ref, start, len);
-        }
-
-        private int parseInt(String s, int start, int end) {
-            if (start == end) return Integer.MIN_VALUE;
-            int sign = 1;
-            int i = start;
-            if (s.charAt(i) == '-') { sign = -1; i++; }
-            int val = 0;
-            while (i < end) {
-                val = val * 10 + (s.charAt(i) - '0');
-                i++;
-            }
-            return val * sign;
-        }
-    }
 
     private final FastSpaceTokenizer spaceTok = new FastSpaceTokenizer();
     private final FastFaceRefTokenizer faceTok = new FastFaceRefTokenizer();
@@ -285,7 +168,11 @@ public class ObjFileParser {
     }
 
     public ObjModel parse() throws IOException {
-        final var objModel = createEmptyModel(objFileURL, charset);
+        return parse(0);
+    }
+
+    public ObjModel parse(int maxSourceLines) throws IOException {
+        final var objModel = createEmptyModel(objFileURL, charset, maxSourceLines);
 
         try (InputStream stream = objFileURL.openStream();
              var reader = new BufferedReader(new InputStreamReader(stream, charset))) {
@@ -319,7 +206,7 @@ public class ObjFileParser {
      *  MODEL CREATION WITH PRE-SCAN
      * ------------------------------------------------------------- */
 
-    private ObjModel createEmptyModel(URL url, Charset charset) throws IOException {
+    private ObjModel createEmptyModel(URL url, Charset charset, int maxSourceLines) throws IOException {
         ObjSizeInfo sizes;
         try (InputStream stream = url.openStream()) {
             sizes = computeObjSizes(stream);
@@ -331,7 +218,7 @@ public class ObjFileParser {
             final StringBuilder sb = new StringBuilder();
             int lineNo = 1;
 
-            for (; lineNo <= SOURCE_LINES_LIMIT; lineNo++) {
+            for (; lineNo <= maxSourceLines; lineNo++) {
                 String line = reader.readLine();
                 if (line == null) break;
                 sb.append(line).append("\n");
@@ -408,13 +295,13 @@ public class ObjFileParser {
         spaceTok.reset(s);
 
         spaceTok.next();
-        float x = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float x = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         spaceTok.next();
-        float y = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float y = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         spaceTok.next();
-        float z = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float z = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         model.vertices.add(x);
         model.vertices.add(y);
@@ -425,10 +312,10 @@ public class ObjFileParser {
         spaceTok.reset(s);
 
         spaceTok.next();
-        float u = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float u = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         spaceTok.next();
-        float v = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float v = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         model.texCoords.add(u);
         model.texCoords.add(v);
@@ -438,13 +325,13 @@ public class ObjFileParser {
         spaceTok.reset(s);
 
         spaceTok.next();
-        float x = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float x = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         spaceTok.next();
-        float y = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float y = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         spaceTok.next();
-        float z = FastFloat.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
+        float z = FastFloatParser.parse(spaceTok.source(), spaceTok.tokenStart(), spaceTok.tokenEnd());
 
         model.normals.add(x);
         model.normals.add(y);
@@ -487,7 +374,7 @@ public class ObjFileParser {
     private void triangulate(ObjModel model, List<ObjFaceVertex> v) {
         if (v.size() < 3) return;
 
-        ObjFaceVertex v0 = v.get(0);
+        ObjFaceVertex v0 = v.getFirst();
 
         for (int i = 1; i < v.size() - 1; i++) {
             ObjFaceVertex v1 = v.get(i);

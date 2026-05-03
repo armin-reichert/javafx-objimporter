@@ -35,8 +35,7 @@ public class TestParsingPerformance {
         // Count lines
         InputStream stream = url.openStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-        String line;
-        while ((line = reader.readLine()) != null) {
+        while (reader.readLine() != null) {
             ++lineCount;
         }
     }
