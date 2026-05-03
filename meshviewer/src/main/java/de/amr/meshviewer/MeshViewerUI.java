@@ -62,9 +62,6 @@ public class MeshViewerUI {
     public static final String KEY_AUTOPLAY_TOGGLE = " ";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
 
-    public static final Color FOCUSSED_COLOR   = Color.gray(0.66);
-    public static final Color UNFOCUSSED_COLOR = Color.gray(0.33);
-
     public static final int ROTATE_SINGLE_STEP_DEGREES = 10;
 
     public static final int DEFAULT_ANGLE_X = 0;
@@ -228,15 +225,12 @@ public class MeshViewerUI {
         }
         setPreviewControlHandlers();
         addFileDragNDropSupport(scene);
+        createObjFileChooser();
 
         stage.setScene(scene);
         stage.setTitle(STAGE_TITLE);
         stage.setWidth(width);
         stage.setHeight(height);
-        stage.heightProperty().addListener((_,_,h) -> {
-            Logger.info("Stage height={}", h);
-            //TODO After resizing stage and resizing back, layout gets corrupt
-        });
     }
 
     private void createCamera() {
@@ -252,26 +246,20 @@ public class MeshViewerUI {
 
         previewSubScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         previewSubScene.setCamera(cam);
-        previewSubScene.fillProperty().bind(previewSubScene.focusedProperty()
-            .map(hasFocus -> hasFocus? FOCUSSED_COLOR : UNFOCUSSED_COLOR));
 
         flashMessageOverlay = new FlashMessageOverlay();
-
-        fileChooser = new FileChooser();
-        fileChooser.setTitle("Open OBJ File");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Files", "*.obj"));
 
         createSelectionArea();
         createModelInfoArea();
         createMenus(stage);
 
         centerPane = new StackPane(previewSubScene, flashMessageOverlay);
-        centerPane.setBackground(Background.fill(Color.YELLOW));
+        centerPane.setId("preview");
 
         layoutSplit.setOrientation(Orientation.HORIZONTAL);
 
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
-        selectionArea.setMaxWidth(SELECTION_AREA_WIDTH);
+        //selectionArea.setMaxWidth(SELECTION_AREA_WIDTH);
 
         modelInfoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);
         modelInfoArea.setMaxWidth(MODEL_INFO_AREA_WIDTH);
@@ -286,6 +274,12 @@ public class MeshViewerUI {
         );
         previewSubScene.widthProperty().bind(rootPane.widthProperty().subtract(previewWidthLoss));
         previewSubScene.heightProperty().bind(centerPane.heightProperty());
+    }
+
+    private void createObjFileChooser() {
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Open OBJ File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Files", "*.obj"));
     }
 
     private void createSelectionArea() {

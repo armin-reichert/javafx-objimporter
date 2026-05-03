@@ -4,7 +4,7 @@
     -fx-padding: 0;
     -fx-max-width: 0;
     -fx-max-height: 0;
-    -fx-cursor: default; /* prevents resize cursor */
+    -fx-cursor: default;
 }
 
 .tree-view {
@@ -59,4 +59,14 @@
 #objModelInfo .text-field {
     -fx-background-color: #222;
     -fx-text-fill: white;
+}
+
+/* Default background (no focus) */
+#preview {
+    -fx-background-color: linear-gradient(to bottom, #666, #AAA);
+}
+
+/* When the preview area has focus */
+#preview:focused {
+    -fx-background-color: linear-gradient(to bottom, #888, #CCC);
 }
