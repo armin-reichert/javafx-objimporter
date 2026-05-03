@@ -288,7 +288,7 @@ public class MeshViewerUI {
 
         final Menu viewMenu = new Menu("View");
 
-        final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Model Statistics");
+        final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Statistics");
         miModelInfoVisible.setOnAction(_ -> showModelInfo(miModelInfoVisible.isSelected()));
 
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
