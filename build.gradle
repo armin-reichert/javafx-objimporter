@@ -54,6 +54,13 @@ subprojects {
                     password = System.getenv("GITHUB_TOKEN")
                 }
             }
+            maven {
+                url "https://dl.cloudsmith.io/basic/armin-reichert-qt4o/javafx-objimporter/maven/"
+                credentials {
+                    username = "armin-reichert"
+                    password = System.getenv("CLOUDSMITH_API_KEY")
+                }
+            }
         }
     }
 }
