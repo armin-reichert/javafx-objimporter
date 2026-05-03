@@ -37,7 +37,11 @@ public class MeshViewerApp extends Application {
 
         new SampleModel("Aya",
             getClass().getResource("/aya_japanese_girl/091_W_Aya_100K.obj"),
-            new SampleState(-2800, 0, 0, 0))
+            new SampleState(-2800, 0, 0, 0)),
+
+        new SampleModel("Pac-Man (by Gianmarco Cavallaccio)",
+            getClass().getResource("/pacman/pacman.obj"),
+            new SampleState(-42, 30, 0, 0))
     };
 
     @Override
