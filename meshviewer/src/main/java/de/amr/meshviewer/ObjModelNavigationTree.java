@@ -13,7 +13,7 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         final var root = new TreeItem<NavigationTreeNode>(new InnerTreeNode(InnerTreeNode.Type.Model, "No OBJ model loaded"));
         root.setExpanded(true);
 
-        setFocusTraversable(false);
+        //setFocusTraversable(false);
         setRoot(root);
         setShowRoot(true);
 

@@ -61,12 +61,3 @@
     -fx-text-fill: white;
 }
 
-/* Default background (no focus) */
-#preview {
-    -fx-background-color: linear-gradient(to bottom, #666, #AAA);
-}
-
-/* When the preview area has focus */
-#preview:focused {
-    -fx-background-color: linear-gradient(to bottom, #888, #CCC);
-}
