@@ -49,16 +49,16 @@ public class PreviewArea extends StackPane {
     public static final int ZOOM_MIN = -10_000;
     public static final int ZOOM_MAX = -2;
 
-    public static final double ZOOM_RATE_NORMAL = 0.02;
-    public static final double ZOOM_RATE_LARGE = 0.5;
+    public static final double ZOOM_RATE_NORMAL = 0.5;
+    public static final double ZOOM_RATE_LARGE  = 2.0;
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
 
     private final SubScene subScene;
     private final PerspectiveCamera cam;
     private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
-    private final Group world = new Group();
-    private Group pivot; // currently shown mesh view (set) is contained in this group
+    private final Group previewGroup = new Group();
+    private Group meshesPivot; // currently shown mesh view (set) is contained in this group
     private double mouseOldX, mouseOldY;
 
     // Flip around x-axis (otherwise many objects are upside-down initially)
@@ -79,7 +79,7 @@ public class PreviewArea extends StackPane {
 
         cam = new PerspectiveCamera(true);
 
-        subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
+        subScene = new SubScene(previewGroup, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
         subScene.focusedProperty().addListener((_, _, focussed) ->
             Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
@@ -103,9 +103,7 @@ public class PreviewArea extends StackPane {
 
     private void setKeyboardAndMouseHandlers() {
         subScene.setOnKeyPressed(e -> {
-            boolean shift = e.isShiftDown();
-            boolean control = e.isControlDown();
-            boolean controlShift = control && shift;
+            boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
             switch (e.getCode()) {
                 case PLUS  -> {
                     int delta = controlShift ? 100 : shift ? 10 : 1;
@@ -142,7 +140,7 @@ public class PreviewArea extends StackPane {
         });
 
         subScene.setOnMouseClicked(e -> {
-            Logger.info("Mouse clicked {}", e);
+            Logger.trace("Mouse clicked {}", e);
             if (e.getClickCount() == 2) {
                 reset();
             }
@@ -150,14 +148,14 @@ public class PreviewArea extends StackPane {
         });
 
         subScene.setOnMousePressed(e -> {
-            Logger.info("Mouse pressed {}", e);
+            Logger.trace("Mouse pressed {}", e);
             mouseOldX = e.getSceneX();
             mouseOldY = e.getSceneY();
             e.consume();
         });
 
         subScene.setOnMouseDragged(e -> {
-            Logger.info("Mouse dragged {}", e);
+            Logger.trace("Mouse dragged {}", e);
             double dx = e.getSceneX() - mouseOldX;
             double dy = e.getSceneY() - mouseOldY;
 
@@ -177,10 +175,13 @@ public class PreviewArea extends StackPane {
         });
 
         subScene.setOnScroll(e -> {
-            final double rate = e.isShiftDown() ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
-            zoomBy(e.getDeltaY() * rate);
-            Logger.info("Scroll event {}", e);
-            e.consume();
+            Logger.trace("Scroll event {}", e);
+            boolean control = e.isControlDown();
+            // Note: SHIFT + scroll is interpreted as horizontal scroll and deltaY is 0 in this case!
+            double rate = control ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+            double dy = e.getDeltaY() / 40.0; // normalize
+            Logger.info("delta={}", dy);
+            zoomBy(dy * rate);
         });
     }
 
@@ -215,15 +216,15 @@ public class PreviewArea extends StackPane {
     }
 
     public void displayMeshViews(Map<String, MeshView> meshViews) {
-        pivot = new Group();
+        meshesPivot = new Group();
         meshViews.values().forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
             meshView.drawModeProperty().bind(drawMode);
-            pivot.getChildren().add(meshView);
+            meshesPivot.getChildren().add(meshView);
         });
-        pivot.getTransforms().addAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
-        center(pivot);
-        world.getChildren().setAll(pivot);
+        meshesPivot.getTransforms().addAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
+        center(meshesPivot);
+        previewGroup.getChildren().setAll(meshesPivot);
         assignFocusToSubScene();
     }
 
@@ -259,7 +260,7 @@ public class PreviewArea extends StackPane {
         fillLight.setTranslateY(200);
         fillLight.setTranslateZ(-300);
 
-        world.getChildren().addAll(ambient, keyLight, fillLight);
+        previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
     }
 
     public void initSampleModel(SampleModel sample) throws IOException {
@@ -268,13 +269,13 @@ public class PreviewArea extends StackPane {
         camZoom.setZ(initial.zoom());
 
         if (initial.rotateX() != 0) {
-            pivot.getTransforms().addLast(new Rotate(initial.rotateX(), Rotate.X_AXIS));
+            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateX(), Rotate.X_AXIS));
         }
         if (initial.rotateY() != 0) {
-            pivot.getTransforms().addLast(new Rotate(initial.rotateY(), Rotate.Y_AXIS));
+            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateY(), Rotate.Y_AXIS));
         }
         if (initial.rotateZ() != 0) {
-            pivot.getTransforms().addLast(new Rotate(initial.rotateZ(), Rotate.Z_AXIS));
+            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateZ(), Rotate.Z_AXIS));
         }
     }
 
