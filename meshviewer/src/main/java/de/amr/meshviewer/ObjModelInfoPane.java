@@ -70,7 +70,6 @@ public class ObjModelInfoPane extends GridPane {
             lblMaterials.setText(NA);
         }
         else {
-
             lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
             lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
             lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));

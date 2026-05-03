@@ -305,7 +305,18 @@ public class MeshViewerUI {
         samplesMenu = new Menu("Samples");
         samplesMenu.disableProperty().bind(Bindings.isEmpty(sampleModels));
 
-        menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu);
+        // -----------------------------
+        // About menu
+        // -----------------------------
+
+        final var helpMenu = new Menu("?");
+
+        final MenuItem miAbout = new MenuItem("About Mesh Viewer");
+        miAbout.setOnAction(_ -> showAboutDialog());
+
+        helpMenu.getItems().setAll(miAbout);
+
+        menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu, helpMenu);
     }
 
     private void createNavigationTree() {
@@ -379,5 +390,42 @@ public class MeshViewerUI {
                 });
             }
         });
+    }
+
+    private void showAboutDialog() {
+        Dialog<Void> about = new Dialog<>();
+        about.setTitle("About MeshViewer");
+
+        DialogPane pane = about.getDialogPane();
+        pane.getButtonTypes().add(ButtonType.CLOSE);
+
+        pane.setStyle("""
+    -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
+    -fx-padding: 20;
+    -fx-font-size: 14px;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #3a6ea5;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+""");
+
+        Label content = new Label("""
+MeshViewer — 3D Preview for JavaFX
+
+Explore OBJ models with smooth rotation, zooming, wireframe mode,
+auto‑rotation, and a focus‑aware gradient preview area.
+
+DISCLAIMER:
+Copilot AI has been used for code improvements (do NOT tell this on Reddit!)
+Written by a meat-eating, "unvaxxed", "climate-denying" old white man who hates gender-ideology.
+
+© 2026 Armin Reichert
+""");
+        content.setStyle("-fx-text-fill: #d0d0d0;");
+
+        pane.setContent(content);
+
+        about.showAndWait();
+
     }
 }
