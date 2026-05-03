@@ -1,0 +1,17 @@
+/*
+ * Copyright (c) 2026 Armin Reichert (MIT License)
+ */
+
+plugins {
+    alias(libs.plugins.javafx)
+}
+
+dependencies {
+    implementation(libs.fastutil)
+    implementation(libs.bundles.tinylog)
+    implementation(project(":objparser"))
+}
+
+javafx {
+    modules = ["javafx.base", "javafx.graphics" ]
+}

@@ -3,8 +3,8 @@ module de.amr.meshviewer {
     requires org.tinylog.api;
     requires it.unimi.dsi.fastutil;
     requires de.amr.objparser;
+    requires de.amr.meshbuilder;
 
-    exports de.amr.meshbuilder;
     exports de.amr.meshviewer;
     exports de.amr.samples;
 }
