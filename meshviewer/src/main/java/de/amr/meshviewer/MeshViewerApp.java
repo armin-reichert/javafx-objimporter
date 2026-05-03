@@ -49,7 +49,7 @@ public class MeshViewerApp extends Application {
         final double screenHeight = Screen.getPrimary().getBounds().getHeight();
         final double screenWidth = Screen.getPrimary().getBounds().getWidth();
         final double aspect = screenWidth / screenHeight;
-        final double height = Math.min(0.90 * screenHeight, 900);
+        final double height = Math.min(0.90 * screenHeight, 800);
         final double width = aspect * height;
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height);
         for (SampleModel sample : SAMPLES) {
