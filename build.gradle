@@ -44,12 +44,9 @@ subprojects {
             maven {
                 name = "cloudsmith"
                 url = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
-                def releasesRepoUrl = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
-                def snapshotsRepoUrl = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
-                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                 credentials {
-                    username = 'USERNAME'
-                    password = 'API-KEY'
+                    username = 'armin.reichert@web.de'
+                    password = 'csa_c099432bd157e59c78b6ad30e2a56468GOQQ'
                 }
             }
         }
