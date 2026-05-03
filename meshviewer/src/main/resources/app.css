@@ -39,3 +39,24 @@
 .tree-view .tree-disclosure-node > .arrow {
     -fx-background-color: white;
 }
+
+#objModelInfo {
+    -fx-background-color: black;
+    -fx-text-fill: white;
+
+    /* layout spacing */
+    -fx-hgap: 10;
+    -fx-vgap: 6;
+    -fx-padding: 10;
+}
+
+/* Ensure labels inside the grid are white */
+#objModelInfo .label {
+    -fx-text-fill: white;
+}
+
+/* Optional: style text fields or other controls inside the grid */
+#objModelInfo .text-field {
+    -fx-background-color: #222;
+    -fx-text-fill: white;
+}

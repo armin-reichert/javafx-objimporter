@@ -307,7 +307,7 @@ public class MeshViewerUI {
     }
 
     private void createModelInfoArea() {
-        modelInfoPane = new ObjModelInfoPanel();
+        modelInfoPane = new ObjModelInfoPanel("objModelInfo");
         modelInfoArea = new ScrollPane(modelInfoPane);
         modelInfoArea.setMinWidth(300);
         modelInfoArea.setPrefWidth(300);

@@ -29,10 +29,12 @@ public class ObjModelInfoPanel extends GridPane {
     private final Label lblMaterials = new Label();
     private final Label lblLoadingTime = new Label();
 
-    public ObjModelInfoPanel() {
-        setHgap(10);
-        setVgap(6);
-        setPadding(new Insets(10));
+    public ObjModelInfoPanel(String id) {
+        setId(id); // for CSS
+
+        //setHgap(10);
+        //setVgap(6);
+        //setPadding(new Insets(10));
 
         addRow(0, new Label("Vertices:"), lblVertices);
         addRow(1, new Label("TexCoords:"), lblTexCoords);
