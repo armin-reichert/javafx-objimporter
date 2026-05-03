@@ -4,4 +4,4 @@
 
 package de.amr.meshviewer;
 
-public record SampleState(int zoom, int rotateX, int rotateY, int rotateZ, boolean autoRotate) {}
+public record SampleState(int zoom, int rotateX, int rotateY, int rotateZ) {}

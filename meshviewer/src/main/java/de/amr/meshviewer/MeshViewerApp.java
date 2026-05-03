@@ -14,30 +14,30 @@ public class MeshViewerApp extends Application {
         new SampleModel(
             "Teapot",
             getClass().getResource("/newell_teaset/teapot.obj"),
-            new SampleState(-10, 0, 0, 0, true)),
+            new SampleState(-10, 0, 90, 0)),
 
         new SampleModel(
             "Scooter",
             getClass().getResource("/scooter/Scooter-normals.obj"),
-            new SampleState(-2, 0, 0, 0, true)),
+            new SampleState(-2, 0, 0, 0)),
 
         new SampleModel(
             "Scooter (Smooth)",
             getClass().getResource("/scooter/Scooter-smgrps.obj"),
-            new SampleState(-2, 0, 0, 0, true)),
+            new SampleState(-2, 0, 0, 0)),
 
         new SampleModel(
             "Alien Animal",
             getClass().getResource("/alien_animal/Alien Animal.obj"),
-            new SampleState(-50, 0, 0, 0, true)),
+            new SampleState(-50, 0, 0, 0)),
 
         new SampleModel("Beagle",
             getClass().getResource("/beagle/13041_Beagle_v1_L1.obj"),
-            new SampleState(-150, 0, 0, 0, false)),
+            new SampleState(-150, 0, 0, 0)),
 
         new SampleModel("Aya",
             getClass().getResource("/aya_japanese_girl/091_W_Aya_100K.obj"),
-            new SampleState(-2800, 0, 0, 0, true))
+            new SampleState(-2800, 0, 0, 0))
     };
 
     @Override

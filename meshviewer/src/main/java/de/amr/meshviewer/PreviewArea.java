@@ -276,12 +276,6 @@ public class PreviewArea extends StackPane {
         if (initial.rotateZ() != 0) {
             pivot.getTransforms().addLast(new Rotate(initial.rotateZ(), Rotate.Z_AXIS));
         }
-
-        if (sample.initialState().autoRotate()) {
-            autoRotateAnimation().play();
-        } else {
-            autoRotateAnimation().stop();
-        }
     }
 
     private Animation autoRotateAnimation() {
