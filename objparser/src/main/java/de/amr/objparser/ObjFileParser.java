@@ -212,23 +212,28 @@ public class ObjFileParser {
             sizes = computeObjSizes(stream);
         }
 
-        try (InputStream stream = url.openStream();
-             var reader = new BufferedReader(new InputStreamReader(stream, charset))) {
+        // Maybe grab the first source lines to display them in a viewer
+        final StringBuilder sb = new StringBuilder();
+        if (maxSourceLines > 0) {
+            try (InputStream stream = url.openStream();
+                 var reader = new BufferedReader(new InputStreamReader(stream, charset))) {
 
-            final StringBuilder sb = new StringBuilder();
-            int lineNo = 1;
+                int lineNo = 1;
 
-            for (; lineNo <= maxSourceLines; lineNo++) {
-                String line = reader.readLine();
-                if (line == null) break;
-                sb.append(line).append("\n");
+                for (; lineNo <= maxSourceLines; lineNo++) {
+                    String line = reader.readLine();
+                    if (line == null) break;
+                    sb.append(line).append("\n");
+                }
+
             }
-
-            ObjModel model = new ObjModel(sizes);
-            model.setUrl(url.toExternalForm());
-            model.setSource(sb.toString());
-            return model;
         }
+
+        final var model = new ObjModel(sizes);
+        model.setUrl(url.toExternalForm());
+        model.setSource(sb.toString());
+
+        return model;
     }
 
     /* -------------------------------------------------------------
