@@ -5,7 +5,7 @@ plugins {
 
 // Repositories and coordinates for ALL modules
 allprojects {
-    group = "com.github.armin-reichert.javafx-objimporter"
+    group = "de.amr"
     version = "0.0.1"
 
     repositories {
@@ -38,7 +38,7 @@ subprojects {
         options.compilerArgs.addAll(["-Xlint:deprecation", "-Xlint:unchecked"])
     }
 
-    // 5. Publishing to GitHub Packages
+    // 5. Publishing to Cloudsmith
     publishing {
         publications {
             mavenJava(MavenPublication) {
@@ -46,27 +46,16 @@ subprojects {
             }
         }
         repositories {
-            /*
             maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/armin-reichert/javafx-objimporter")
+                name = "cloudsmith"
+                url = uri("https://upload.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/")
                 credentials {
-                    username = "github"
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-             */
-
-            maven {
-                url "https://dl.cloudsmith.io/basic/armin-reichert-qt4o/javafx-objimporter/"
-                credentials {
-                    username = "armin-reichert"
+                    username = System.getenv("CLOUDSMITH_USERNAME")
                     password = System.getenv("CLOUDSMITH_API_KEY")
                 }
             }
         }
-    }
-}
+    }}
 
 // Define installer package format depending on operating system
 ext.installerPkg = [linux: "deb", "osx": "dmg", windows: "msi"][osdetector.os]

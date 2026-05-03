@@ -26,10 +26,10 @@ application {
 
 jlink {
     options = [
-            "--compress", "zip-9",
-            "--strip-debug",
-            "--no-header-files",
-            "--no-man-pages"
+        "--compress", "zip-9",
+        "--strip-debug",
+        "--no-header-files",
+        "--no-man-pages"
     ]
     launcher {
         name = "MeshViewer FX"
