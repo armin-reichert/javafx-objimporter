@@ -77,28 +77,31 @@ public class PreviewArea extends StackPane {
     public PreviewArea() {
         setId("preview");
 
-        setPickOnBounds(false);
-
         cam = new PerspectiveCamera(true);
+
         subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
-        subScene.setFocusTraversable(true);
         subScene.focusedProperty().addListener((_, _, focussed) ->
             Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
 
         configureCamera();
         addLights();
-        setHandlers();
+        setKeyboardAndMouseHandlers();
         configureBackground();
         getChildren().setAll(subScene, flashMessageOverlay);
 
+        // Make key events work as expected
+        subScene.setFocusTraversable(true);
         flashMessageOverlay.setFocusTraversable(false);
-        flashMessageOverlay.setMouseTransparent(true);
 
-        setOnMouseClicked(_ -> assignFocusToSubScene());
+        // Make mouse events work as expected
+        setPickOnBounds(false);
+        flashMessageOverlay.setMouseTransparent(true);
+        flashMessageOverlay.setPickOnBounds(false);
+        subScene.setPickOnBounds(true);
     }
 
-    private void setHandlers() {
+    private void setKeyboardAndMouseHandlers() {
         subScene.setOnKeyPressed(e -> {
             boolean shift = e.isShiftDown();
             boolean control = e.isControlDown();
@@ -133,13 +136,17 @@ public class PreviewArea extends StackPane {
             }
         });
 
-        subScene.setOnKeyTyped(e -> onKeyTypedInPreview(e.getCharacter()));
+        subScene.setOnKeyTyped(e -> {
+            onKeyTypedInPreview(e.getCharacter());
+            e.consume();
+        });
 
         subScene.setOnMouseClicked(e -> {
             Logger.info("Mouse clicked {}", e);
             if (e.getClickCount() == 2) {
                 reset();
             }
+            e.consume();
         });
 
         subScene.setOnMousePressed(e -> {
@@ -165,11 +172,15 @@ public class PreviewArea extends StackPane {
 
             mouseOldX = e.getSceneX();
             mouseOldY = e.getSceneY();
+
+            e.consume();
         });
 
         subScene.setOnScroll(e -> {
             final double rate = e.isShiftDown() ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
             zoomBy(e.getDeltaY() * rate);
+            Logger.info("Scroll event {}", e);
+            e.consume();
         });
     }
 
