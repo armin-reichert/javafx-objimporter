@@ -17,6 +17,7 @@ import java.util.Objects;
 public class ObjModelInfoPanel extends GridPane {
 
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.GERMANY);
+    private static final String NA = "-";
 
     private final Label lblVertices = new Label();
     private final Label lblTexCoords = new Label();
@@ -43,50 +44,55 @@ public class ObjModelInfoPanel extends GridPane {
     }
 
     public void update(ObjModel model, Duration loadingTime) {
-        if (model == null) {
-            lblVertices.setText("-");
-            lblTexCoords.setText("-");
-            lblNormals.setText("-");
-            lblObjects.setText("-");
-            lblGroups.setText("-");
-            lblFaces.setText("-");
-            lblSmoothingGroups.setText("-");
-            lblMaterials.setText("-");
-            lblLoadingTime.setText("-");
-            return;
+        if (loadingTime != null) {
+            lblLoadingTime.setText("%.3f sec".formatted(loadingTime.toSeconds()));
+        } else {
+            lblLoadingTime.setText(NA);
         }
 
-        lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
-        lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
-        lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
+        if (model == null) {
+            lblVertices.setText(NA);
+            lblTexCoords.setText(NA);
+            lblNormals.setText(NA);
+            lblObjects.setText(NA);
+            lblGroups.setText(NA);
+            lblFaces.setText(NA);
+            lblSmoothingGroups.setText(NA);
+            lblMaterials.setText(NA);
+            lblLoadingTime.setText(NA);
+        }
+        else {
 
-        lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
+            lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
+            lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
+            lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
 
-        int groupCount = model.objects.stream()
-            .mapToInt(o -> o.groups.size())
-            .sum();
-        lblGroups.setText(NUMBER_FORMAT.format(groupCount));
+            lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
 
-        int faceCount = model.objects.stream()
-            .flatMap(o -> o.groups.stream())
-            .mapToInt(g -> g.faces.size())
-            .sum();
-        lblFaces.setText(NUMBER_FORMAT.format(faceCount));
+            int groupCount = model.objects.stream()
+                .mapToInt(o -> o.groups.size())
+                .sum();
+            lblGroups.setText(NUMBER_FORMAT.format(groupCount));
 
-        long smoothingGroups = model.objects.stream()
-            .flatMap(o -> o.groups.stream())
-            .flatMap(g -> g.faces.stream())
-            .map(f -> f.smoothingGroup)
-            .filter(Objects::nonNull)
-            .distinct()
-            .count();
-        lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroups));
+            int faceCount = model.objects.stream()
+                .flatMap(o -> o.groups.stream())
+                .mapToInt(g -> g.faces.size())
+                .sum();
+            lblFaces.setText(NUMBER_FORMAT.format(faceCount));
 
-        int materialCount = model.materialLibsMap.values().stream()
-            .mapToInt(Map::size)
-            .sum();
-        lblMaterials.setText(NUMBER_FORMAT.format(materialCount));
+            long smoothingGroups = model.objects.stream()
+                .flatMap(o -> o.groups.stream())
+                .flatMap(g -> g.faces.stream())
+                .map(f -> f.smoothingGroup)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+            lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroups));
 
-        lblLoadingTime.setText("%.3f sec".formatted(loadingTime.toSeconds()));
+            int materialCount = model.materialLibsMap.values().stream()
+                .mapToInt(Map::size)
+                .sum();
+            lblMaterials.setText(NUMBER_FORMAT.format(materialCount));
+        }
     }
 }

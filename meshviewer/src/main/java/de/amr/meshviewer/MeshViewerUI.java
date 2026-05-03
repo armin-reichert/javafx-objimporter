@@ -96,28 +96,35 @@ public class MeshViewerUI {
 
     // UI
     private final Stage stage;
-    private BorderPane rootPane;
-    private StackPane centerPane;
-    private final SplitPane layoutSplit = new SplitPane();
-    private Group world;
-    private FlashMessageOverlay flashMessageOverlay;
-    private SubScene previewSubScene;
-    private PerspectiveCamera cam;
-    private Pane selectionArea;
-    private ObjModelInfoPanel modelInfoPane;
-    private Pane modelInfoArea;
-    private FileChooser fileChooser;
-    // Displayed mesh view is contained in this group:
-    private Group pivot;
-    private ObjModelNavigationTree navigationTreeView;
     private MenuBar menuBar;
     private Menu samplesMenu;
+    private FileChooser fileChooser;
 
-    private File workDir;
+    // Layout
+    private BorderPane rootPane;
+    private final SplitPane layoutSplit = new SplitPane();
+    private FlashMessageOverlay flashMessageOverlay;
+
+    // Selection Area
+    private Pane selectionArea;
+    private ObjModelNavigationTree navigationTreeView;
+
+    // Preview Area
+    private StackPane centerPane;
+    private SubScene previewSubScene;
+    private PerspectiveCamera cam;
+    private Group world;
+    private Group pivot; // currently shown mesh view (set) is contained in this group
     private double mouseOldX, mouseOldY;
 
-    // Animation
-    private Animation autoRotateAnimation;
+    // Model Info Area
+    private Pane modelInfoArea;
+    private ObjModelInfoPanel modelInfoPane;
+
+    private File workDir;
+
+    // Preview Animation
+    private Animation previewAutoRotateAnimation;
     private final Rotate autoRotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate autoRotateY = new Rotate(0, Rotate.Y_AXIS);
     private Point3D autoRotateAxis = Rotate.Y_AXIS; // horizontally be default
@@ -125,6 +132,10 @@ public class MeshViewerUI {
     public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
         createUI(width, height);
+        addModelListener();
+    }
+
+    private void addModelListener() {
         objModel.addListener((_, _, newModel) -> {
             if (newModel != null) {
                 currentObjectMeshViews = MeshBuilder.build(newModel, MeshBuilder.BuildMode.BY_OBJECT);
@@ -142,6 +153,13 @@ public class MeshViewerUI {
                 currentObjectMeshViews = Map.of();
                 currentGroupMeshViews = Map.of();
                 currentMaterialMeshViews = Map.of();
+                navigationTreeView.populate(
+                    "No OBJ model",
+                    currentObjectMeshViews,
+                    currentGroupMeshViews,
+                    currentMaterialMeshViews
+                );
+                modelInfoPane.update(null, null);
             }
         });
     }
@@ -354,14 +372,14 @@ public class MeshViewerUI {
     }
 
     private Animation autoRotateAnimation() {
-        if (autoRotateAnimation == null) {
+        if (previewAutoRotateAnimation == null) {
             createAutoRotateAnimation();
         }
-        return autoRotateAnimation;
+        return previewAutoRotateAnimation;
     }
 
     private void createAutoRotateAnimation() {
-        autoRotateAnimation = new Timeline(
+        previewAutoRotateAnimation = new Timeline(
             new KeyFrame(Duration.millis(16), _ -> {
                 if (autoRotateAxis == Rotate.X_AXIS) {
                     autoRotateX.setAngle(autoRotateX.getAngle() + AUTO_ROTATE_SPEED);
@@ -370,7 +388,7 @@ public class MeshViewerUI {
                 }
             }) // ~60 FPS
         );
-        autoRotateAnimation.setCycleCount(Animation.INDEFINITE);
+        previewAutoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
     private void createMenus(Stage stage) {
