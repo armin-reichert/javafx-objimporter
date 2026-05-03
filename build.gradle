@@ -40,22 +40,22 @@ subprojects {
 
     // 5. Publishing to Cloudsmith
     publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
-            }
-        }
         repositories {
             maven {
                 name = "cloudsmith"
-                url = uri("https://upload.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/")
+                url = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
+                def releasesRepoUrl = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
+                def snapshotsRepoUrl = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
                 credentials {
-                    username = System.getenv("CLOUDSMITH_USERNAME")
-                    password = System.getenv("CLOUDSMITH_API_KEY")
+                    username = 'USERNAME'
+                    password = 'API-KEY'
                 }
             }
         }
-    }}
+    }
+
+}
 
 // Define installer package format depending on operating system
 ext.installerPkg = [linux: "deb", "osx": "dmg", windows: "msi"][osdetector.os]
