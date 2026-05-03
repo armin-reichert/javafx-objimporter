@@ -394,7 +394,7 @@ public class MeshViewerUI {
 
     private void showAboutDialog() {
         Dialog<Void> about = new Dialog<>();
-        about.setTitle("About MeshViewer");
+        about.setTitle("About");
 
         DialogPane pane = about.getDialogPane();
         pane.getButtonTypes().add(ButtonType.CLOSE);
