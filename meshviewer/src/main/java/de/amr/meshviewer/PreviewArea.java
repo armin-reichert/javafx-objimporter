@@ -22,7 +22,7 @@ import javafx.util.Duration;
 import org.tinylog.Logger;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Set;
 
 public class PreviewArea extends StackPane {
 
@@ -70,11 +70,12 @@ public class PreviewArea extends StackPane {
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
 
-    private final SubScene subScene;
+    private final Group meshesPivot = new Group();
     private final PerspectiveCamera cam = new PerspectiveCamera(true);
-    private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final Group previewGroup = new Group();
-    private Group meshesPivot; // currently shown mesh view (set) is contained in this group
+    private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
+    private final SubScene subScene;
+
     private double mouseOldX, mouseOldY;
 
     // Flip around x-axis (otherwise many objects are upside-down initially)
@@ -220,15 +221,15 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.showMessage(message);
     }
 
-    public void displayMeshViews(Map<String, MeshView> meshViews) {
-        meshesPivot = new Group();
-        meshViews.values().forEach(meshView -> {
+    public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
+        meshesPivot.getChildren().clear();
+        meshViews.forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
             meshView.drawModeProperty().bind(drawMode);
             meshesPivot.getChildren().add(meshView);
         });
-        meshesPivot.getTransforms().addAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
         center(meshesPivot);
+        meshesPivot.getTransforms().setAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
         previewGroup.getChildren().setAll(meshesPivot);
         assignFocusToSubScene();
     }

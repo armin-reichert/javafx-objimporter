@@ -14,6 +14,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -38,7 +40,9 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -99,6 +103,7 @@ public class MeshViewerUI {
         if (newModel != null) {
             createMeshViews(newModel);
             navigationTreeView.populate(createTreeTitle(newModel), currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            navigationTreeView.clearSelection();
             selectAllGroupsNodeInNavigationTree();
             infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
         } else {
@@ -148,6 +153,7 @@ public class MeshViewerUI {
     private void showObjModel(File objFile) throws IOException {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
+        navigationTreeView.clearSelection();
         selectAllGroupsNodeInNavigationTree();
         currentModelDir = objFile.getParentFile();
         previewArea.reset();
@@ -157,6 +163,7 @@ public class MeshViewerUI {
     private void showObjModel(URL url) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
+        navigationTreeView.clearSelection();
         selectAllGroupsNodeInNavigationTree();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
@@ -214,22 +221,20 @@ public class MeshViewerUI {
 
     private void createSelectionArea() {
         navigationTreeView = new ObjModelNavigationTree(CSS_ID_OBJ_MODEL_TREE);
-        navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_, _, item) -> {
-            Logger.info("Selected item: {}", item);
-            if (item == null) return;
-            switch (item.getValue()) {
-                case MeshNode meshNode -> previewArea.displayMeshViews(Map.of(meshNode.meshName, meshNode.meshView));
-                case InnerTreeNode innerNode -> {
-                    switch (innerNode.nodeCategory) {
-                        case Model    -> {}
-                        case Objects -> previewArea.displayMeshViews(currentObjectMeshViews);
-                        case Groups -> previewArea.displayMeshViews(currentGroupMeshViews);
-                        case Materials -> previewArea.displayMeshViews(currentMaterialMeshViews);
-                    }
-                }
-                default -> {}
-            }
-        });
+
+        for (InnerTreeNode.NodeCategory category : InnerTreeNode.NodeCategory.values()) {
+            final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
+            navigationTreeView.selection().put(category, selectedNodes);
+            selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
+                final var newSelection = navigationTreeView.selection().get(category);
+                Logger.info("Selection changed for caregory {}: {}", category, change);
+                Logger.info("New selection for category: {} {}", category, newSelection);
+                previewArea.setDisplayedMeshViewSet(newSelection.stream()
+                    .filter(MeshNode.class::isInstance).map(MeshNode.class::cast)
+                    .map(meshNode -> meshNode.meshView)
+                    .collect(Collectors.toSet()));
+            });
+        }
 
         selectionArea = new VBox(navigationTreeView);
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
@@ -240,8 +245,9 @@ public class MeshViewerUI {
     private void selectAllGroupsNodeInNavigationTree() {
         final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
         if (root.getChildren().size() >= 2) {
-            final TreeItem<NavigationTreeNode> allGroups = root.getChildren().get(1);
-            navigationTreeView.getSelectionModel().select(allGroups);
+            final CheckBoxTreeItem<NavigationTreeNode> groupsItem = (CheckBoxTreeItem<NavigationTreeNode>) root.getChildren().get(1);
+            navigationTreeView.getSelectionModel().select(groupsItem);
+            groupsItem.setSelected(true);
         }
     }
 

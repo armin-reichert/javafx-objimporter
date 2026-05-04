@@ -4,7 +4,6 @@ import de.amr.meshviewer.InnerTreeNode.NodeCategory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -37,16 +36,16 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         //setFocusTraversable(false);
         setRoot(root);
         setShowRoot(true);
-
         setCellFactory(CheckBoxTreeCell.forTreeView());
-        //showLabelInTreeNode();
 
         for (NodeCategory category : NodeCategory.values()) {
-            final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
-            selection.put(category, selectedNodes);
-            selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
-                Logger.info("Selection for {} category changed: {}", category, change);
-            });
+            selection.put(category, FXCollections.observableSet());
+        }
+    }
+
+    public void clearSelection() {
+        for (NodeCategory category : NodeCategory.values()) {
+            selection.get(category).clear();
         }
     }
 

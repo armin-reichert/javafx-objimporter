@@ -4,10 +4,6 @@
 
 package de.amr.meshviewer;
 
-import java.util.regex.Matcher;
-
-import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
-
 public final class InnerTreeNode extends NavigationTreeNode {
 
     public enum NodeCategory {Model, Objects, Groups, Materials}
