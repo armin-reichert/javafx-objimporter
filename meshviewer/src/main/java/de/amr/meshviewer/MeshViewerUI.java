@@ -73,12 +73,14 @@ public class MeshViewerUI {
 
     // UI
     private final Stage stage;
+    private final Scene scene;
     private MenuBar menuBar;
     private Menu samplesMenu;
     private FileChooser fileChooser;
 
     // Layout
-    private BorderPane rootPane;
+    private final BorderPane rootPane = new BorderPane();
+
     private final SplitPane splitLayout = new SplitPane();
 
     // Selection Area
@@ -96,6 +98,7 @@ public class MeshViewerUI {
 
     public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
+        scene = new Scene(rootPane);
         createUI(width, height);
         objModel.addListener(this::onObjModelChange);
     }
@@ -170,15 +173,16 @@ public class MeshViewerUI {
     }
 
     private void createUI(double width, double height) {
-        createLayout();
 
-        final Scene scene = new Scene(rootPane);
         final URL cssURL = getClass().getResource("/app.css");
         if (cssURL != null) {
             scene.getStylesheets().add(cssURL.toExternalForm());
         } else {
             Logger.error("Cannot load app.css");
         }
+
+        createLayout();
+
         addFileDragNDropSupport(scene);
         createObjFileChooser();
 
@@ -196,7 +200,6 @@ public class MeshViewerUI {
 
         splitLayout.setOrientation(Orientation.HORIZONTAL);
 
-        rootPane = new BorderPane();
         rootPane.setTop(menuBar);
         rootPane.setCenter(splitLayout);
 
@@ -386,5 +389,4 @@ public class MeshViewerUI {
             }
         });
     }
-
 }
