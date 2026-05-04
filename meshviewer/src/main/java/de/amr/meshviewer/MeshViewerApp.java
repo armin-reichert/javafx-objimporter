@@ -14,7 +14,7 @@ public class MeshViewerApp extends Application {
         new SampleModel(
             "Teapot",
             getClass().getResource("/newell_teaset/teapot.obj"),
-            new SampleState(0, 0, 0, 0)),
+            new SampleState(-10, 0, 0, 0)),
 
         new SampleModel(
             "Scooter",

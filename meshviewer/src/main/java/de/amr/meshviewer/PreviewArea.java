@@ -241,10 +241,14 @@ public class PreviewArea extends StackPane {
     }
 
     private void configureBackground() {
+        setBackground(Background.fill(SKY_GRADIENT));
+        /*
         backgroundProperty().bind(subScene.focusedProperty()
             .map(focussed -> focussed? SKY_GRADIENT : DARK_GRADIENT)
             .map(Background::fill)
         );
+
+         */
     }
 
     private void configureCamera() {
