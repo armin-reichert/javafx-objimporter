@@ -54,7 +54,7 @@ public class MeshViewerUI {
 
     public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
-    public static final String CSS_ID_OBJ_MODEL_TREE = "_objModelTree";
+    public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
     public static final String CSS_ID_OBJ_MODEL_INFO_PANEL = "objModelInfo";
 
     public static final int SELECTION_AREA_WIDTH = 300;
