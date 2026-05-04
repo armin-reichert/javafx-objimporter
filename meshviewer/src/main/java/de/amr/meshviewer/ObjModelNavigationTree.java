@@ -7,11 +7,10 @@ import javafx.scene.shape.MeshView;
 
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
 
 public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
-
-    public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
     public ObjModelNavigationTree(String cssID) {
         setId(cssID);

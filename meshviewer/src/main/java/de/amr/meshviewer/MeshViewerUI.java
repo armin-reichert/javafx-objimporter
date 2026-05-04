@@ -38,6 +38,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 
@@ -45,6 +46,8 @@ public class MeshViewerUI {
 
     public static final String STAGE_TITLE = "JavaFX OBJ Mesh Viewer";
     public static final String NO_OBJ_MODEL_TITLE = "No OBJ model";
+
+    public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
     public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
     public static final String CSS_ID_OBJ_MODEL_INFO_PANEL = "objModelInfo";
