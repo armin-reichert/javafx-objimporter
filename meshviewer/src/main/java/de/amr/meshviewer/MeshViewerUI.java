@@ -236,13 +236,6 @@ public class MeshViewerUI {
                 Logger.info("Selection changed for category {}: {}", category, change);
                 Logger.info("New selection: {} {}", newSelection);
                 updateDisplayedMeshViewSet(navigationTreeView.getSelectionModel().getSelectedItem());
-                /*
-                previewArea.setDisplayedMeshViewSet(newSelection.stream()
-                    .filter(MeshNode.class::isInstance).map(MeshNode.class::cast)
-                    .map(meshNode -> meshNode.meshView)
-                    .collect(Collectors.toSet()));
-
-                 */
             });
         }
 
