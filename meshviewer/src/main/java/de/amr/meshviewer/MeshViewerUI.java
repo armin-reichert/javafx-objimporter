@@ -208,15 +208,16 @@ public class MeshViewerUI {
 
     private void createSelectionArea() {
         createNavigationTree();
+
         selectionArea = new VBox(navigationTreeView);
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
-        //selectionArea.setMaxWidth(SELECTION_AREA_WIDTH);
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
     }
 
     private void createInfoArea() {
         infoPane = new ObjModelInfoPane("objModelInfo");
         infoArea = new VBox(infoPane);
+
         infoArea.setBackground(Background.fill(Color.BLACK));
         infoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);
         infoArea.setMaxWidth(MODEL_INFO_AREA_WIDTH);
@@ -228,6 +229,7 @@ public class MeshViewerUI {
         } else {
             splitLayout.getItems().setAll(selectionArea, previewArea);
         }
+        infoArea.setVisible(visible); // Triggers recomputation of preview subscene width!
     }
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
