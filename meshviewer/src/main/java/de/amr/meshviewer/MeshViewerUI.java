@@ -92,6 +92,8 @@ public class MeshViewerUI {
     private Pane infoArea;
     private ObjModelInfoPane infoPane;
 
+    private final AboutDialog aboutDialog = new AboutDialog();
+
     public MeshViewerUI(Stage stage, double width, double height) {
         this.stage = requireNonNull(stage);
         createUI(width, height);
@@ -342,7 +344,7 @@ public class MeshViewerUI {
         final var helpMenu = new Menu("?");
 
         final MenuItem miAbout = new MenuItem("About Mesh Viewer");
-        miAbout.setOnAction(_ -> showAboutDialog());
+        miAbout.setOnAction(_ -> aboutDialog.showAndWait());
 
         helpMenu.getItems().setAll(miAbout);
 
@@ -388,44 +390,4 @@ public class MeshViewerUI {
         });
     }
 
-    private void showAboutDialog() {
-        Dialog<Void> about = new Dialog<>();
-        about.setTitle("About");
-
-        DialogPane pane = about.getDialogPane();
-        pane.getButtonTypes().add(ButtonType.CLOSE);
-
-        pane.setStyle(
-"""
-    -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
-    -fx-padding: 20;
-    -fx-font-size: 14px;
-    -fx-text-fill: #e0e0e0;
-    -fx-border-color: #3a6ea5;
-    -fx-border-width: 1;
-    -fx-border-radius: 4;
-""");
-
-        final var content = new Label(
-"""
-MeshViewer — 3D Preview for JavaFX
-
-Explore JavaFX mesh views with geometry and materials defined in OBJ models.
-
-
-DISCLAIMER:
-
-OBJ parser development supported by Copilot AI.
-(Do *not* tell this on Reddit or you will get censured!)
-
-Written by an "unvaxxed", "climate change denying" old white man
-who hates wokeness and gender bullshit.
-
-© 2026 Armin Reichert
-""");
-
-        content.setStyle("-fx-text-fill: #d0d0d0;");
-        pane.setContent(content);
-        about.showAndWait();
-    }
 }
