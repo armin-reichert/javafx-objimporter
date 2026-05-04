@@ -62,6 +62,9 @@ public class PreviewArea extends StackPane {
     public static final double ZOOM_RATE_NORMAL = 0.5;
     public static final double ZOOM_RATE_LARGE  = 2.0;
 
+    // Flip around x-axis (otherwise many objects are upside-down initially)
+    private static final Rotate FLIP_Y_DIRECTION = new Rotate(180, Rotate.X_AXIS);
+
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
 
     private final Group meshesPivot = new Group();
@@ -72,8 +75,6 @@ public class PreviewArea extends StackPane {
 
     private double mouseOldX, mouseOldY;
 
-    // Flip around x-axis (otherwise many objects are upside-down initially)
-    private final Rotate flipYDirection = new Rotate(180, Rotate.X_AXIS);
     private final Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
 
@@ -109,7 +110,7 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.setPickOnBounds(false);
         subScene.setPickOnBounds(true);
 
-        previewGroup.getTransforms().add(flipYDirection);
+        previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
     }
 
     public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
@@ -242,13 +243,13 @@ public class PreviewArea extends StackPane {
 
     private void configureBackground() {
         setBackground(Background.fill(SKY_GRADIENT));
-        /*
+        //TODO ensure focus always stays on subscene while navigating in tree
+/*
         backgroundProperty().bind(subScene.focusedProperty()
             .map(focussed -> focussed? SKY_GRADIENT : DARK_GRADIENT)
             .map(Background::fill)
         );
-
-         */
+ */
     }
 
     private void configureCamera() {
