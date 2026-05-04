@@ -1,8 +1,7 @@
 package de.amr.meshviewer;
 
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.shape.MeshView;
 
 import java.util.Map;
@@ -22,6 +21,11 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         setRoot(root);
         setShowRoot(true);
 
+        showLabelInTreeNode();
+        //showCheckBoxAndLabelInTreeNode();
+    }
+
+    private void showLabelInTreeNode() {
         setCellFactory(_ -> new TreeCell<>() {
             @Override
             protected void updateItem(NavigationTreeNode value, boolean empty) {
@@ -38,6 +42,34 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
                     default -> "Unknown tree node";
                 };
                 setText(label);
+            }
+        });
+    }
+
+    private void showCheckBoxAndLabelInTreeNode() {
+        setCellFactory(tv -> new TreeCell<>() {
+            private final CheckBox checkBox = new CheckBox();
+            private final Label label = new Label();
+            private final HBox box = new HBox(6, checkBox, label);
+
+            @Override
+            protected void updateItem(NavigationTreeNode value, boolean empty) {
+                super.updateItem(value, empty);
+
+                final String labelText = switch (value) {
+                    case null -> "";
+                    case InnerTreeNode innerTreeNode -> innerTreeNode.label;
+                    case MeshNode meshNode -> removeAnonObjectPrefix(meshNode.meshName);
+                    default -> "Unknown tree node";
+                };
+                if (empty || value == null) {
+                    setText(null);
+                    setGraphic(null);
+                } else {
+                    setText(null);      // important: don't use default text rendering
+                    setGraphic(box);    // your custom UI
+                    label.setText(labelText);
+                }
             }
         });
     }
