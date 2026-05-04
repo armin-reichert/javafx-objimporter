@@ -5,6 +5,7 @@
 package de.amr.meshviewer;
 
 import de.amr.meshbuilder.MeshBuilder;
+import de.amr.meshviewer.InnerTreeNode.NodeCategory;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
 import javafx.application.Platform;
@@ -39,7 +40,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -225,24 +228,67 @@ public class MeshViewerUI {
     private void createSelectionArea() {
         navigationTreeView = new ObjModelNavigationTree(CSS_ID_OBJ_MODEL_TREE);
 
-        for (InnerTreeNode.NodeCategory category : InnerTreeNode.NodeCategory.values()) {
+        for (NodeCategory category : NodeCategory.values()) {
             final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
             navigationTreeView.selection().put(category, selectedNodes);
             selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
                 final var newSelection = navigationTreeView.selection().get(category);
                 Logger.info("Selection changed for category {}: {}", category, change);
                 Logger.info("New selection: {} {}", newSelection);
+                updateDisplayedMeshViewSet(navigationTreeView.getSelectionModel().getSelectedItem());
+                /*
                 previewArea.setDisplayedMeshViewSet(newSelection.stream()
                     .filter(MeshNode.class::isInstance).map(MeshNode.class::cast)
                     .map(meshNode -> meshNode.meshView)
                     .collect(Collectors.toSet()));
+
+                 */
             });
         }
+
+        navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_,_,selectedItem) -> {
+            Logger.info("Selected item: {}", selectedItem);
+            updateDisplayedMeshViewSet(selectedItem);
+        });
 
         selectionArea = new VBox(navigationTreeView);
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
+    }
+
+    private Set<MeshView> collectMeshViewsForSelectedTreeNode(TreeItem<NavigationTreeNode> selectedTreeItem) {
+        return selectedTreeItem.getChildren().stream()
+            .map(TreeItem::getValue)
+            .filter(node -> node.checked.get())
+            .filter(MeshNode.class::isInstance)
+            .map(MeshNode.class::cast)
+            .map(meshNode -> meshNode.meshView)
+            .collect(Collectors.toSet());
+    }
+
+    private void updateDisplayedMeshViewSet(TreeItem<NavigationTreeNode> selectedTreeItem) {
+        Set<MeshView> meshViewSet = Set.of();
+        if (selectedTreeItem == null) {
+            Logger.info("Nothing selected");
+        }
+        else if (selectedTreeItem.getValue() instanceof InnerTreeNode innerTreeNode) {
+            Logger.info("Inner node selected: {}", innerTreeNode);
+            switch (innerTreeNode.nodeCategory) {
+                case Model -> {}
+                case Objects, Groups, Materials -> meshViewSet = collectMeshViewsForSelectedTreeNode(selectedTreeItem);
+            }
+        }
+        else if (selectedTreeItem.getValue() instanceof MeshNode) {
+            final TreeItem<NavigationTreeNode> parent = selectedTreeItem.getParent();
+            if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
+                switch (innerTreeNode.nodeCategory) {
+                    case Model -> Logger.warn("That should not happen, parent of mesh node is model node?");
+                    case Objects, Groups, Materials -> meshViewSet = collectMeshViewsForSelectedTreeNode(parent);
+                }
+            }
+        }
+        previewArea.setDisplayedMeshViewSet(meshViewSet);
     }
 
     private void createInfoArea() {
