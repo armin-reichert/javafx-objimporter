@@ -32,12 +32,6 @@ public class PreviewArea extends StackPane {
         new Stop(1, Color.web("#555"))
     );
 
-    public static final Paint BRIGHT_GRADIENT = new LinearGradient(
-        0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-        new Stop(0, Color.web("#64A5DC").darker()),
-        new Stop(1, Color.web("#64A5DC").brighter())
-    );
-
     public static final Paint SKY_GRADIENT = new LinearGradient(
         0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
         new Stop(0.0, Color.web("#3A8DFF")),  // deep zenith blue
@@ -114,7 +108,52 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.setMouseTransparent(true);
         flashMessageOverlay.setPickOnBounds(false);
         subScene.setPickOnBounds(true);
+
+        previewGroup.getTransforms().add(flipYDirection);
     }
+
+    public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
+        meshViews.forEach(meshView -> {
+            meshView.setCullFace(CullFace.NONE); //TODO needed?
+            meshView.drawModeProperty().bind(drawMode);
+        });
+        meshesPivot.getChildren().setAll(meshViews);
+
+        previewGroup.getChildren().setAll(meshesPivot);
+
+        final Bounds meshViewsBounds = meshesPivot.getBoundsInLocal();
+        final Translate center =
+            //new Translate(0,0,0);
+            new Translate(-meshViewsBounds.getCenterX(), -meshViewsBounds.getCenterY(), -meshViewsBounds.getCenterZ());
+
+        meshesPivot.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
+
+        assignFocusToSubScene();
+    }
+
+    public void reset() {
+        rotateX.setAngle(DEFAULT_ANGLE_X);
+        rotateY.setAngle(DEFAULT_ANGLE_Y);
+        autoRotateX.setAngle(DEFAULT_ANGLE_X);
+        autoRotateY.setAngle(DEFAULT_ANGLE_Y);
+        camZoom.setZ(DEFAULT_ZOOM);
+    }
+
+    public void assignFocusToSubScene() {
+        Logger.info("Trying to assign focus to preview subscene");
+        Platform.runLater(subScene::requestFocus);
+    }
+
+    public SubScene subScene() {
+        return subScene;
+    }
+
+    public void flash(String message) {
+        flashMessageOverlay.showMessage(message);
+    }
+
+
+    // private
 
     private void setKeyboardAndMouseHandlers() {
         subScene.setOnKeyPressed(e -> {
@@ -206,42 +245,6 @@ public class PreviewArea extends StackPane {
             .map(focussed -> focussed? SKY_GRADIENT : DARK_GRADIENT)
             .map(Background::fill)
         );
-    }
-
-    public void assignFocusToSubScene() {
-        Logger.info("Trying to assign focus to preview subscene");
-        Platform.runLater(subScene::requestFocus);
-    }
-
-    public SubScene subScene() {
-        return subScene;
-    }
-
-    public void flash(String message) {
-        flashMessageOverlay.showMessage(message);
-    }
-
-    public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
-        meshViews.forEach(meshView -> {
-            meshView.setCullFace(CullFace.NONE);
-            meshView.drawModeProperty().bind(drawMode);
-        });
-        meshesPivot.getChildren().setAll(meshViews);
-
-        final Bounds b = meshesPivot.getBoundsInLocal();
-        final Translate center = new Translate(-b.getCenterX(), -b.getCenterY(), -b.getCenterZ());
-        meshesPivot.getTransforms().setAll(center, flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
-
-        previewGroup.getChildren().setAll(meshesPivot);
-        assignFocusToSubScene();
-    }
-
-    public void reset() {
-        rotateX.setAngle(DEFAULT_ANGLE_X);
-        rotateY.setAngle(DEFAULT_ANGLE_Y);
-        autoRotateX.setAngle(DEFAULT_ANGLE_X);
-        autoRotateY.setAngle(DEFAULT_ANGLE_Y);
-        camZoom.setZ(DEFAULT_ZOOM);
     }
 
     private void configureCamera() {
