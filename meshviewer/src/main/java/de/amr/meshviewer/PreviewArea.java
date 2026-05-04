@@ -222,21 +222,18 @@ public class PreviewArea extends StackPane {
     }
 
     public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
-        meshesPivot.getChildren().clear();
         meshViews.forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
             meshView.drawModeProperty().bind(drawMode);
-            meshesPivot.getChildren().add(meshView);
         });
-        center(meshesPivot);
-        meshesPivot.getTransforms().setAll(flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
+        meshesPivot.getChildren().setAll(meshViews);
+
+        final Bounds b = meshesPivot.getBoundsInLocal();
+        final Translate center = new Translate(-b.getCenterX(), -b.getCenterY(), -b.getCenterZ());
+        meshesPivot.getTransforms().setAll(center, flipYDirection, rotateX, rotateY, autoRotateX, autoRotateY);
+
         previewGroup.getChildren().setAll(meshesPivot);
         assignFocusToSubScene();
-    }
-
-    private void center(Node node) {
-        final Bounds b = node.getBoundsInLocal();
-        node.getTransforms().add(new Translate(-b.getCenterX(), -b.getCenterY(), -b.getCenterZ()));
     }
 
     public void reset() {

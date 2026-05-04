@@ -40,7 +40,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -104,7 +103,6 @@ public class MeshViewerUI {
             createMeshViews(newModel);
             navigationTreeView.populate(createTreeTitle(newModel), currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
             navigationTreeView.clearSelection();
-            selectAllGroupsNodeInNavigationTree();
             infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
         } else {
             currentObjectMeshViews = Map.of();
@@ -154,7 +152,6 @@ public class MeshViewerUI {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
         navigationTreeView.clearSelection();
-        selectAllGroupsNodeInNavigationTree();
         currentModelDir = objFile.getParentFile();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
@@ -164,7 +161,6 @@ public class MeshViewerUI {
         requireNonNull(url);
         loadModelFromURL(url);
         navigationTreeView.clearSelection();
-        selectAllGroupsNodeInNavigationTree();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
     }
@@ -240,15 +236,6 @@ public class MeshViewerUI {
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
-    }
-
-    private void selectAllGroupsNodeInNavigationTree() {
-        final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
-        if (root.getChildren().size() >= 2) {
-            final CheckBoxTreeItem<NavigationTreeNode> groupsItem = (CheckBoxTreeItem<NavigationTreeNode>) root.getChildren().get(1);
-            navigationTreeView.getSelectionModel().select(groupsItem);
-            groupsItem.setSelected(true);
-        }
     }
 
     private String createTreeTitle(ObjModel objModel) {
