@@ -71,7 +71,7 @@ public class PreviewArea extends StackPane {
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
 
     private final SubScene subScene;
-    private final PerspectiveCamera cam;
+    private final PerspectiveCamera cam = new PerspectiveCamera(true);
     private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final Group previewGroup = new Group();
     private Group meshesPivot; // currently shown mesh view (set) is contained in this group
@@ -92,8 +92,6 @@ public class PreviewArea extends StackPane {
 
     public PreviewArea() {
         setId("preview");
-
-        cam = new PerspectiveCamera(true);
 
         subScene = new SubScene(previewGroup, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);

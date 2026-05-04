@@ -13,7 +13,9 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
 
     public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
-    public ObjModelNavigationTree() {
+    public ObjModelNavigationTree(String cssID) {
+        setId(cssID);
+
         final var root = new TreeItem<NavigationTreeNode>(new InnerTreeNode(InnerTreeNode.Type.Model, "No OBJ model loaded"));
         root.setExpanded(true);
 

@@ -46,6 +46,9 @@ public class MeshViewerUI {
     public static final String STAGE_TITLE = "JavaFX OBJ Mesh Viewer";
     public static final String NO_OBJ_MODEL_TITLE = "No OBJ model";
 
+    public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
+    public static final String CSS_ID_OBJ_MODEL_INFO_PANEL = "objModelInfo";
+
     public static final int SELECTION_AREA_WIDTH = 300;
     public static final int MODEL_INFO_AREA_WIDTH = 200;
 
@@ -207,15 +210,45 @@ public class MeshViewerUI {
     }
 
     private void createSelectionArea() {
-        createNavigationTree();
+        navigationTreeView = new ObjModelNavigationTree(CSS_ID_OBJ_MODEL_TREE);
+        navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_, _, item) -> {
+            Logger.info("Selected item: {}", item);
+            if (item == null) return;
+            switch (item.getValue()) {
+                case MeshNode meshNode -> previewArea.displayMeshViews(Map.of(meshNode.meshName, meshNode.meshView));
+                case InnerTreeNode innerNode -> {
+                    switch (innerNode.type) {
+                        case Model    -> {}
+                        case Object   -> previewArea.displayMeshViews(currentObjectMeshViews);
+                        case Group    -> previewArea.displayMeshViews(currentGroupMeshViews);
+                        case Material -> previewArea.displayMeshViews(currentMaterialMeshViews);
+                    }
+                }
+                default -> {}
+            }
+        });
 
         selectionArea = new VBox(navigationTreeView);
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
+
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
     }
 
+    private void selectAllGroupsNodeInNavigationTree() {
+        final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
+        if (root.getChildren().size() >= 2) {
+            final TreeItem<NavigationTreeNode> allGroups = root.getChildren().get(1);
+            navigationTreeView.getSelectionModel().select(allGroups);
+        }
+    }
+
+    private String createTreeTitle(ObjModel objModel) {
+        final String url = objModel.url();
+        return URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
+    }
+
     private void createInfoArea() {
-        infoPane = new ObjModelInfoPane("objModelInfo");
+        infoPane = new ObjModelInfoPane(CSS_ID_OBJ_MODEL_INFO_PANEL);
         infoArea = new VBox(infoPane);
 
         infoArea.setBackground(Background.fill(Color.BLACK));
@@ -318,39 +351,6 @@ public class MeshViewerUI {
         helpMenu.getItems().setAll(miAbout);
 
         menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu, helpMenu);
-    }
-
-    private void createNavigationTree() {
-        navigationTreeView = new ObjModelNavigationTree();
-        navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_, _, item) -> {
-            Logger.info("Selected item: {}", item);
-            if (item == null) return;
-            switch (item.getValue()) {
-                case MeshNode meshNode -> previewArea.displayMeshViews(Map.of(meshNode.meshName, meshNode.meshView));
-                case InnerTreeNode innerNode -> {
-                    switch (innerNode.type) {
-                        case Model    -> {}
-                        case Object   -> previewArea.displayMeshViews(currentObjectMeshViews);
-                        case Group    -> previewArea.displayMeshViews(currentGroupMeshViews);
-                        case Material -> previewArea.displayMeshViews(currentMaterialMeshViews);
-                    }
-                }
-                default -> {}
-            }
-        });
-    }
-
-    private void selectAllGroupsNodeInNavigationTree() {
-        final TreeItem<NavigationTreeNode> root = navigationTreeView.getRoot();
-        if (root.getChildren().size() >= 2) {
-            final TreeItem<NavigationTreeNode> allGroups = root.getChildren().get(1);
-            navigationTreeView.getSelectionModel().select(allGroups);
-        }
-    }
-
-    private String createTreeTitle(ObjModel objModel) {
-        final String url = objModel.url();
-        return URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
     }
 
     private void addFileDragNDropSupport(Scene scene) {
