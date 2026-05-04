@@ -45,14 +45,14 @@ public class ObjModelInfoPane extends GridPane {
         addRow(9, new Label("Mesh Creation:"), lblMeshCreationTime);
     }
 
-    public void update(ObjModel model, Duration parsingTime, Duration meshCreationTime) {
+    public void update(ObjModel model, int numMeshViews, Duration parsingTime, Duration meshCreationTime) {
         if (parsingTime != null) {
-            lblParsingTime.setText("%.3f sec".formatted(parsingTime.toSeconds()));
+            lblParsingTime.setText("%.3f s".formatted(parsingTime.toSeconds()));
         } else {
             lblParsingTime.setText(NA);
         }
         if (meshCreationTime != null) {
-            lblMeshCreationTime.setText("%.3f sec".formatted(meshCreationTime.toSeconds()));
+            lblMeshCreationTime.setText("%.3f s (%d meshes)".formatted(meshCreationTime.toSeconds(), numMeshViews));
         } else {
             lblMeshCreationTime.setText(NA);
         }

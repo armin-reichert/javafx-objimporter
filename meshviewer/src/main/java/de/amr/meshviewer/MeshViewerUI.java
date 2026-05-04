@@ -40,6 +40,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -58,7 +59,7 @@ public class MeshViewerUI {
     public static final String CSS_ID_OBJ_MODEL_INFO_PANEL = "objModelInfo";
 
     public static final int SELECTION_AREA_WIDTH = 300;
-    public static final int MODEL_INFO_AREA_WIDTH = 200;
+    public static final int MODEL_INFO_AREA_WIDTH = 260;
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
     private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
@@ -112,14 +113,19 @@ public class MeshViewerUI {
             createMeshViews(newModel);
             navigationTreeView.populate(title, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
             navigationTreeView.clearSelectedNodeSets();
+            final Set<MeshView> allMeshViews = new HashSet<>();
+            allMeshViews.addAll(currentObjectMeshViews.values());
+            allMeshViews.addAll(currentGroupMeshViews.values());
+            allMeshViews.addAll(currentMaterialMeshViews.values());
+            int numMeshViews = allMeshViews.size();
+            infoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
             setInitialTreeSelection();
-            infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
         } else {
             currentObjectMeshViews = Map.of();
             currentGroupMeshViews = Map.of();
             currentMaterialMeshViews = Map.of();
             navigationTreeView.populate(NO_OBJ_MODEL_TITLE, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
-            infoPane.update(null, null, null);
+            infoPane.update(null, 0, null, null);
         }
     }
 
