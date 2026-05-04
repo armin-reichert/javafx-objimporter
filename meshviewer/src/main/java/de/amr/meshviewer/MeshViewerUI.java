@@ -40,7 +40,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -112,7 +111,8 @@ public class MeshViewerUI {
             final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
             createMeshViews(newModel);
             navigationTreeView.populate(title, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
-            navigationTreeView.clearSelection();
+            navigationTreeView.clearSelectedNodeSets();
+            setInitialTreeSelection();
             infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
         } else {
             currentObjectMeshViews = Map.of();
@@ -161,7 +161,7 @@ public class MeshViewerUI {
     private void showObjModel(File objFile) throws IOException {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
-        navigationTreeView.clearSelection();
+        navigationTreeView.clearSelectedNodeSets();
         currentModelDir = objFile.getParentFile();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
@@ -170,7 +170,7 @@ public class MeshViewerUI {
     private void showObjModel(URL url) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
-        navigationTreeView.clearSelection();
+        navigationTreeView.clearSelectedNodeSets();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
     }
@@ -255,6 +255,18 @@ public class MeshViewerUI {
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
+    }
+
+    private void setInitialTreeSelection() {
+        var groupsTreeItem = (CheckBoxTreeItem<NavigationTreeNode>) navigationTreeView.getRoot().getChildren().get(1);
+        navigationTreeView.getSelectionModel().clearSelection();
+        navigationTreeView.getSelectionModel().select(groupsTreeItem);
+
+        // Select checkboxes for groups category and groups mesh nodes
+        groupsTreeItem.setSelected(true);
+        groupsTreeItem.getChildren().stream()
+            .filter(CheckBoxTreeItem.class::isInstance).map(CheckBoxTreeItem.class::cast)
+            .forEach(node -> node.setSelected(true));
     }
 
     private Set<MeshView> collectMeshViewsForSelectedTreeNode(TreeItem<NavigationTreeNode> selectedTreeItem) {

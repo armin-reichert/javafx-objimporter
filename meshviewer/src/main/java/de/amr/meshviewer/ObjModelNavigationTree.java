@@ -43,7 +43,7 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         }
     }
 
-    public void clearSelection() {
+    public void clearSelectedNodeSets() {
         for (NodeCategory category : NodeCategory.values()) {
             selection.get(category).clear();
         }
