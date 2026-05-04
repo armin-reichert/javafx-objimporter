@@ -220,11 +220,11 @@ public class MeshViewerUI {
             switch (item.getValue()) {
                 case MeshNode meshNode -> previewArea.displayMeshViews(Map.of(meshNode.meshName, meshNode.meshView));
                 case InnerTreeNode innerNode -> {
-                    switch (innerNode.type) {
+                    switch (innerNode.nodeCategory) {
                         case Model    -> {}
-                        case Object   -> previewArea.displayMeshViews(currentObjectMeshViews);
-                        case Group    -> previewArea.displayMeshViews(currentGroupMeshViews);
-                        case Material -> previewArea.displayMeshViews(currentMaterialMeshViews);
+                        case Objects -> previewArea.displayMeshViews(currentObjectMeshViews);
+                        case Groups -> previewArea.displayMeshViews(currentGroupMeshViews);
+                        case Materials -> previewArea.displayMeshViews(currentMaterialMeshViews);
                     }
                 }
                 default -> {}

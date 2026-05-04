@@ -4,14 +4,24 @@
 
 package de.amr.meshviewer;
 
+import java.util.regex.Matcher;
+
+import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
+
 public final class InnerTreeNode extends NavigationTreeNode {
-    public enum Type {Model, Object, Group, Material }
+
+    public enum NodeCategory {Model, Objects, Groups, Materials}
 
     public final String label;
-    public final Type type;
+    public final NodeCategory nodeCategory;
 
-    public InnerTreeNode(Type type, String label) {
-        this.type = type;
+    public InnerTreeNode(NodeCategory nodeCategory, String label) {
+        this.nodeCategory = nodeCategory;
         this.label = label;
+    }
+
+    @Override
+    public String toString() {
+        return label;
     }
 }
