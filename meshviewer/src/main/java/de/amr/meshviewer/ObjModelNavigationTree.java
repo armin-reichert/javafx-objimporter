@@ -80,6 +80,11 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
             rootItem.getChildren().forEach(child -> {
                 final CheckBoxTreeItem<NavigationTreeNode> childItem = (CheckBoxTreeItem<NavigationTreeNode>) child;
                 childItem.setSelected(selected);
+                if (selected) {
+                    selection.get(category).add(childItem.getValue());
+                } else {
+                    selection.get(category).remove(childItem.getValue());
+                }
             });
         });
 
@@ -92,12 +97,14 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
             //TODO consider "independent" property etc.
             childItem.selectedProperty().addListener((_, _, selected) -> {
                 Logger.info("Tree node {}, selected={}", childNode, selected);
+                Logger.info("Selection before: {}", selection.get(category));
                 if (selected) {
                     selection.get(category).add(childNode);
                 }
                 else {
                     selection.get(category).remove(childNode);
                 }
+                Logger.info("Selection after: {}", selection.get(category));
             });
         });
         getRoot().getChildren().add(rootItem);

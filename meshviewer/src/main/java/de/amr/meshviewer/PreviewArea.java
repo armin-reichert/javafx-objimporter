@@ -140,7 +140,7 @@ public class PreviewArea extends StackPane {
     }
 
     public void assignFocusToSubScene() {
-        Logger.info("Trying to assign focus to preview subscene");
+        Logger.trace("Trying to assign focus to preview subscene");
         Platform.runLater(subScene::requestFocus);
     }
 

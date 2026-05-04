@@ -161,7 +161,6 @@ public class MeshViewerUI {
     private void showObjModel(File objFile) throws IOException {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
-        navigationTreeView.clearSelectedNodeSets();
         currentModelDir = objFile.getParentFile();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
@@ -170,7 +169,6 @@ public class MeshViewerUI {
     private void showObjModel(URL url) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
-        navigationTreeView.clearSelectedNodeSets();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
     }
@@ -232,9 +230,7 @@ public class MeshViewerUI {
             final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
             navigationTreeView.selection().put(category, selectedNodes);
             selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
-                final var newSelection = navigationTreeView.selection().get(category);
                 Logger.info("Selection changed for category {}: {}", category, change);
-                Logger.info("New selection: {} {}", newSelection);
                 updateDisplayedMeshViewSet(navigationTreeView.getSelectionModel().getSelectedItem());
             });
         }
