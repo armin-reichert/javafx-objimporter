@@ -102,8 +102,10 @@ public class MeshViewerUI {
 
     private void onObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
         if (newModel != null) {
+            final String url = newModel.url();
+            final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
             createMeshViews(newModel);
-            navigationTreeView.populate(createTreeTitle(newModel), currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            navigationTreeView.populate(title, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
             navigationTreeView.clearSelection();
             infoPane.update(newModel, parsingTime.get(), meshCreationTime.get());
         } else {
@@ -225,8 +227,8 @@ public class MeshViewerUI {
             navigationTreeView.selection().put(category, selectedNodes);
             selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
                 final var newSelection = navigationTreeView.selection().get(category);
-                Logger.info("Selection changed for caregory {}: {}", category, change);
-                Logger.info("New selection for category: {} {}", category, newSelection);
+                Logger.info("Selection changed for category {}: {}", category, change);
+                Logger.info("New selection: {} {}", newSelection);
                 previewArea.setDisplayedMeshViewSet(newSelection.stream()
                     .filter(MeshNode.class::isInstance).map(MeshNode.class::cast)
                     .map(meshNode -> meshNode.meshView)
@@ -238,11 +240,6 @@ public class MeshViewerUI {
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
         navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
-    }
-
-    private String createTreeTitle(ObjModel objModel) {
-        final String url = objModel.url();
-        return URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
     }
 
     private void createInfoArea() {
