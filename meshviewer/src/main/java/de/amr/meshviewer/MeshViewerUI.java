@@ -42,6 +42,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -71,9 +72,9 @@ public class MeshViewerUI {
 
     private final ObservableList<SampleModel> sampleModels = FXCollections.observableArrayList();
 
-    private Map<String, MeshView> currentObjectMeshViews;
-    private Map<String, MeshView> currentGroupMeshViews;
-    private Map<String, MeshView> currentMaterialMeshViews;
+    private Map<String, MeshView> objectMeshViews;
+    private Map<String, MeshView> groupMeshViews;
+    private Map<String, MeshView> materialMeshViews;
     private File currentModelDir;
 
     // UI
@@ -113,20 +114,20 @@ public class MeshViewerUI {
             final String url = newModel.url();
             final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
             createMeshViews(newModel);
-            navigationTreeView.populate(title, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            navigationTreeView.populate(title, objectMeshViews, groupMeshViews, materialMeshViews);
             navigationTreeView.clearSelectedNodeSets();
             final Set<MeshView> allMeshViews = new HashSet<>();
-            allMeshViews.addAll(currentObjectMeshViews.values());
-            allMeshViews.addAll(currentGroupMeshViews.values());
-            allMeshViews.addAll(currentMaterialMeshViews.values());
+            allMeshViews.addAll(objectMeshViews.values());
+            allMeshViews.addAll(groupMeshViews.values());
+            allMeshViews.addAll(materialMeshViews.values());
             int numMeshViews = allMeshViews.size();
             infoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
             setInitialTreeSelection();
         } else {
-            currentObjectMeshViews = Map.of();
-            currentGroupMeshViews = Map.of();
-            currentMaterialMeshViews = Map.of();
-            navigationTreeView.populate(NO_OBJ_MODEL_TITLE, currentObjectMeshViews, currentGroupMeshViews, currentMaterialMeshViews);
+            objectMeshViews = Map.of();
+            groupMeshViews = Map.of();
+            materialMeshViews = Map.of();
+            navigationTreeView.populate(NO_OBJ_MODEL_TITLE, objectMeshViews, groupMeshViews, materialMeshViews);
             infoPane.update(null, 0, null, null);
         }
     }
@@ -266,7 +267,55 @@ public class MeshViewerUI {
             .forEach(node -> node.setSelected(true));
     }
 
-    private Set<MeshView> collectMeshViewsForSelectedTreeNode(TreeItem<NavigationTreeNode> selectedTreeItem) {
+    private void updateDisplayedMeshViewSet(TreeItem<NavigationTreeNode> selectedTreeItem) {
+        if (selectedTreeItem == null) {
+            Logger.info("Nothing selected");
+            return;
+        }
+        Collection<MeshView> all = Set.of();
+        final Set<MeshView> displayed = new HashSet<>();
+
+        if (selectedTreeItem.getValue() instanceof InnerTreeNode innerTreeNode) {
+            switch (innerTreeNode.nodeCategory) {
+                case Model -> {}
+                case Objects -> {
+                    all = objectMeshViews.values();
+                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                }
+                case Groups -> {
+                    all = groupMeshViews.values();
+                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                }
+                case Materials -> {
+                    all = materialMeshViews.values();
+                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                }
+            }
+        }
+        else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
+            final TreeItem<NavigationTreeNode> parent = selectedTreeItem.getParent();
+            if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
+                switch (innerTreeNode.nodeCategory) {
+                    case Model -> {}
+                    case Objects -> {
+                        all = objectMeshViews.values();
+                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                    }
+                    case Groups -> {
+                        all = groupMeshViews.values();
+                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                    }
+                    case Materials -> {
+                        all = materialMeshViews.values();
+                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                    }
+                }
+            }
+        }
+        previewArea.selectDisplayedMeshViews(all, displayed);
+    }
+
+    private Set<MeshView> collectMeshViews(TreeItem<NavigationTreeNode> selectedTreeItem) {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
@@ -275,31 +324,6 @@ public class MeshViewerUI {
             .map(meshTreeNode -> meshTreeNode.meshView)
             .collect(Collectors.toSet());
     }
-
-    private void updateDisplayedMeshViewSet(TreeItem<NavigationTreeNode> selectedTreeItem) {
-        Set<MeshView> meshViewSet = Set.of();
-        if (selectedTreeItem == null) {
-            Logger.info("Nothing selected");
-        }
-        else if (selectedTreeItem.getValue() instanceof InnerTreeNode innerTreeNode) {
-            Logger.info("Inner node selected: {}", innerTreeNode);
-            switch (innerTreeNode.nodeCategory) {
-                case Model -> {}
-                case Objects, Groups, Materials -> meshViewSet = collectMeshViewsForSelectedTreeNode(selectedTreeItem);
-            }
-        }
-        else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
-            final TreeItem<NavigationTreeNode> parent = selectedTreeItem.getParent();
-            if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
-                switch (innerTreeNode.nodeCategory) {
-                    case Model -> Logger.warn("That should not happen, parent of mesh node is model node?");
-                    case Objects, Groups, Materials -> meshViewSet = collectMeshViewsForSelectedTreeNode(parent);
-                }
-            }
-        }
-        previewArea.setDisplayedMeshViewSet(meshViewSet);
-    }
-
     private void createInfoArea() {
         infoPane = new ObjModelInfoPane(CSS_ID_OBJ_MODEL_INFO_PANEL);
         infoArea = new VBox(infoPane);
@@ -333,9 +357,9 @@ public class MeshViewerUI {
 
     private void createMeshViews(ObjModel objModel) {
         final Instant start = Instant.now();
-        currentObjectMeshViews   = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT);
-        currentGroupMeshViews    = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
-        currentMaterialMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL);
+        objectMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT);
+        groupMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
+        materialMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL);
         final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
         meshCreationTime.set(Duration.millis(duration.toMillis()));
     }

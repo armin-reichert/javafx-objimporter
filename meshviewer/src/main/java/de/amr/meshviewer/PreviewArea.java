@@ -22,6 +22,7 @@ import javafx.util.Duration;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Set;
 
 public class PreviewArea extends StackPane {
@@ -113,22 +114,25 @@ public class PreviewArea extends StackPane {
         previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
     }
 
-    public void setDisplayedMeshViewSet(Set<MeshView> meshViews) {
-        meshViews.forEach(meshView -> {
-            meshView.setCullFace(CullFace.NONE); //TODO needed?
-            meshView.drawModeProperty().bind(drawMode);
+    public void selectDisplayedMeshViews(Collection<MeshView> all, Set<MeshView> displayed) {
+
+        all.forEach(meshView -> {
+            meshView.setCullFace(CullFace.NONE);
+            meshView.setVisible(true); // such that bounds computation takes it into account
         });
-        meshesPivot.getChildren().setAll(meshViews);
+        meshesPivot.getChildren().setAll(all);
 
-        previewGroup.getChildren().setAll(meshesPivot);
-
-        final Bounds meshViewsBounds = meshesPivot.getBoundsInLocal();
-        final Translate center =
-            //new Translate(0,0,0);
-            new Translate(-meshViewsBounds.getCenterX(), -meshViewsBounds.getCenterY(), -meshViewsBounds.getCenterZ());
+        final Bounds bounds = meshesPivot.getBoundsInLocal();
+        final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
 
         meshesPivot.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
 
+        all.forEach(meshView -> {
+            meshView.drawModeProperty().bind(drawMode);
+            meshView.setVisible(displayed.contains(meshView));
+        });
+
+        previewGroup.getChildren().setAll(meshesPivot);
         assignFocusToSubScene();
     }
 
