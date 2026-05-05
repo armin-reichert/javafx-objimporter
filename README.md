@@ -36,4 +36,17 @@ requires de.amr.meshbuilder;
 exports whatever.your.app.module.is.named;
 ```
 
-TODO: I am planning to use Cloudsmith as Maven repository
+
+### Retrieving the Maven artifacts from Cloudsmith
+
+Add the following to your build.gradle file(s) to download the Maven artifacts from my Cloudsmith repository:
+
+```
+repositories {
+    maven {
+        url = "https://dl.cloudsmith.io/public/armin-reichert-qt4o/javafx-objimporter/maven/"
+    }
+    mavenCentral()
+}
+```
+
