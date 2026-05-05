@@ -53,6 +53,10 @@ subprojects {
         repositories {
             mavenLocal()
 
+            /*
+
+            Would have been too good if Cloudsmith had some free offer for open-source, but it hasn't.
+
             maven {
                 name = "cloudsmith"
                 url = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
@@ -61,6 +65,8 @@ subprojects {
                     password = prop("CLOUDSMITH_API_KEY")
                 }
             }
+
+             */
         }
     }
 
