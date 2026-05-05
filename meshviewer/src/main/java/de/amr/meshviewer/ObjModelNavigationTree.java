@@ -61,6 +61,38 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
             });
             refresh();
         });
+
+        // To be able to e.g. hide the check box for the root, we need an explicit cell factory
+        setCellFactory(_ -> new CheckBoxTreeCell<NavigationTreeNode>() {
+            @Override
+            public void updateItem(NavigationTreeNode node, boolean empty) {
+                super.updateItem(node, empty);
+
+                if (empty || node == null) {
+                    return;
+                }
+
+                TreeItem<NavigationTreeNode> item = getTreeItem();
+
+                // Hide checkbox for the root
+                if (item.getParent() == null) {
+                    // Option A: hide the checkbox completely
+                    setGraphic(null);
+                }
+
+                // Set the text for all nodes
+                setText(node.toString());
+            }
+        });
+
+        // Disable root selection
+        getSelectionModel().selectedItemProperty().addListener((_, oldItem, newItem) -> {
+            if (newItem == getRoot()) {
+                // Revert selection
+                getSelectionModel().select(oldItem);
+            }
+        });
+
     }
 
     public void clearSelectedNodeSets() {
