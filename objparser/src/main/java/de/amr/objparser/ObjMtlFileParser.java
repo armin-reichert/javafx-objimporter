@@ -99,9 +99,13 @@ public class ObjMtlFileParser {
                 line = line.strip();
                 if (line.isEmpty()) continue;
 
-                String[] parts = line.split("\\s+", 2);
-                String keyword = parts[0];
-                String args = parts.length > 1 ? parts[1].strip() : "";
+                int len = line.length();
+                int i = 0;
+                while (i < len && !Character.isWhitespace(line.charAt(i))) i++;
+                String keyword = line.substring(0, i);
+
+                while (i < len && Character.isWhitespace(line.charAt(i))) i++;
+                String args = i < len ? line.substring(i) : "";
 
                 return new Token(keyword, args, lineNo);
             }
@@ -111,12 +115,18 @@ public class ObjMtlFileParser {
     }
 
     /* -------------------------------------------------------------
+     *  FAST TOKENIZERS
+     * ------------------------------------------------------------- */
+
+    private final FastSpaceTokenizer spaceTok = new FastSpaceTokenizer();
+
+
+    /* -------------------------------------------------------------
      *  STATE
      * ------------------------------------------------------------- */
 
     private final Map<String, ObjMaterial> materialMap = new LinkedHashMap<>();
     private ObjMaterial currentObjMaterial;
-    private Tokenizer tokenizer;
 
     public Map<String, ObjMaterial> materialMap() {
         return Collections.unmodifiableMap(materialMap);
@@ -128,7 +138,7 @@ public class ObjMtlFileParser {
 
     public void parse(InputStream stream, Charset charset) throws IOException {
         final var reader = new BufferedReader(new InputStreamReader(stream, charset));
-        tokenizer = new Tokenizer(reader);
+        Tokenizer tokenizer = new Tokenizer(reader);
 
         Token token;
         while ((token = tokenizer.next()) != null) {
@@ -180,6 +190,7 @@ public class ObjMtlFileParser {
      * ------------------------------------------------------------- */
 
     private void parseTextureMap(ObjMaterial mat, String mapName, String args) {
+        //TODO replace split by fast tokenizer
         String[] parts = args.split("\\s+");
         int i = 0;
 
@@ -284,6 +295,7 @@ public class ObjMtlFileParser {
     }
 
     private static ObjColor parseColorRGB(String s, ObjColor def) {
+        //TODO replace split by fast tokenizer
         String[] c = s.split("\\s+");
         if (c.length != 3) return def;
 

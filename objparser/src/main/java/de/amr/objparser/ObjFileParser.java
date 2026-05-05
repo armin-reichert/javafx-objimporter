@@ -26,6 +26,28 @@ import static java.util.Objects.requireNonNull;
  */
 public class ObjFileParser {
 
+    public enum ObjKeyword {
+        OBJECT("o"),
+        GROUP("g"),
+        MATERIAL_LIB("mtllib"),
+        MATERIAL_USAGE("usemtl"),
+        SMOOTHING_GROUP("s"),
+        VERTEX("v"),
+        VERTEX_NORMAL("vn"),
+        TEX_COORD("vt"),
+        FACE("f"),
+        UNKNOWN("");
+
+        private final String text;
+
+        ObjKeyword(String text) { this.text = text; }
+
+        static ObjKeyword fromText(String text) {
+            for (ObjKeyword k : values()) if (k.text.equals(text)) return k;
+            return UNKNOWN;
+        }
+    }
+
     /* -------------------------------------------------------------
      *  SIZE INFO
      * ------------------------------------------------------------- */
@@ -85,38 +107,8 @@ public class ObjFileParser {
     }
 
     /* -------------------------------------------------------------
-     *  FAST TOKENIZERS
-     * ------------------------------------------------------------- */
-
-    private final FastSpaceTokenizer spaceTok = new FastSpaceTokenizer();
-    private final FastFaceRefTokenizer faceTok = new FastFaceRefTokenizer();
-    private final int[] faceRef = new int[3];
-
-    /* -------------------------------------------------------------
      *  TOKENIZER (line → keyword + args)
      * ------------------------------------------------------------- */
-
-    public enum ObjKeyword {
-        OBJECT("o"),
-        GROUP("g"),
-        MATERIAL_LIB("mtllib"),
-        MATERIAL_USAGE("usemtl"),
-        SMOOTHING_GROUP("s"),
-        VERTEX("v"),
-        VERTEX_NORMAL("vn"),
-        TEX_COORD("vt"),
-        FACE("f"),
-        UNKNOWN("");
-
-        private final String text;
-
-        ObjKeyword(String text) { this.text = text; }
-
-        static ObjKeyword fromText(String text) {
-            for (ObjKeyword k : values()) if (k.text.equals(text)) return k;
-            return UNKNOWN;
-        }
-    }
 
     public record Token(ObjKeyword keyword, String args, int lineNo) {}
 
@@ -152,6 +144,14 @@ public class ObjFileParser {
             return null;
         }
     }
+
+    /* -------------------------------------------------------------
+     *  FAST TOKENIZERS
+     * ------------------------------------------------------------- */
+
+    private final FastSpaceTokenizer spaceTok = new FastSpaceTokenizer();
+    private final FastFaceRefTokenizer faceTok = new FastFaceRefTokenizer();
+    private final int[] faceRef = new int[3];
 
     /* -------------------------------------------------------------
      *  PARSER
