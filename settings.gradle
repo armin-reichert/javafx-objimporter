@@ -4,8 +4,8 @@ pluginManagement {
         mavenCentral()
     }
     plugins {
+        // Note: In configuration phase we cannot yet use aliases!
         id("java").apply(false)
-        // Note: In configuration phase we cannot yet use alias!
         id("org.openjfx.javafxplugin").version("0.1.0").apply(false)
     }
 }

@@ -23,8 +23,8 @@ Map<String, MeshView> meshes = MeshBuilder.build(objModel, MeshBuilder.BuildMode
 
 ```
 dependencies {
-    implementation("de.amr:objparser:0.0.1")
-    implementation("de.amr:meshbuilder:0.0.1")
+    implementation("de.amr66:objparser:0.0.1")
+    implementation("de.amr66:meshbuilder:0.0.1")
 }
 
 ```

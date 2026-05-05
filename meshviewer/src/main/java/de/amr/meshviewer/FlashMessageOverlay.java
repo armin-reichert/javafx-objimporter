@@ -14,13 +14,16 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 /**
- * Create by Copilot AI.
+ * Layer where flash messages are displayed.
  */
 public class FlashMessageOverlay extends StackPane {
 
     private final Text messageText = new Text();
     private SequentialTransition currentAnimation;
 
+    /**
+     * Creates the flash messages layer.
+     */
     public FlashMessageOverlay() {
         setMouseTransparent(true);
         setPickOnBounds(false);

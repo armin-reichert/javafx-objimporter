@@ -9,9 +9,12 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 
+/**
+ * Tells about this app.
+ */
 public class AboutDialog extends Dialog<Void> {
 
-    public static final String STYLE = """
+    private static final String STYLE = """
             -fx-background-color: linear-gradient(to bottom, #1a1a1a, #0f0f0f);
             -fx-padding: 20;
             -fx-font-size: 14px;
@@ -21,7 +24,7 @@ public class AboutDialog extends Dialog<Void> {
             -fx-border-radius: 4;
         """;
 
-    public static final String TEXT = """
+    private static final String TEXT = """
         MeshViewer — 3D Preview for JavaFX
         
         Explore JavaFX mesh views with geometry and materials defined in OBJ models.
@@ -38,6 +41,9 @@ public class AboutDialog extends Dialog<Void> {
         © 2026 Armin Reichert
         """;
 
+    /**
+     * Creates the about dialog.
+     */
     public AboutDialog() {
         setTitle("About");
         final DialogPane pane = getDialogPane();
