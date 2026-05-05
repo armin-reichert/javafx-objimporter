@@ -1,6 +1,8 @@
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.InnerTreeNode.NodeCategory;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.collections.ObservableSet;
@@ -12,6 +14,7 @@ import javafx.scene.shape.MeshView;
 import org.tinylog.Logger;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
 
@@ -25,7 +28,15 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         };
     }
 
+    private static <T> void traverse(TreeItem<T> item, Consumer<TreeItem<T>> visitor) {
+        visitor.accept(item);
+        for (TreeItem<T> child : item.getChildren()) {
+            traverse(child, visitor);
+        }
+    }
+
     private final ObservableMap<NodeCategory, ObservableSet<NavigationTreeNode>> selection = FXCollections.observableHashMap();
+    public final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
 
     public ObjModelNavigationTree(String cssID) {
         setId(cssID);
@@ -41,6 +52,15 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
         for (NodeCategory category : NodeCategory.values()) {
             selection.put(category, FXCollections.observableSet());
         }
+
+        shortMeshViewNames.addListener((_,_,shortName) -> {
+            traverse(getRoot(), item -> {
+                if (item.getValue() instanceof MeshTreeNode meshTreeNode) {
+                    meshTreeNode.setShortName(shortName);
+                }
+            });
+            refresh();
+        });
     }
 
     public void clearSelectedNodeSets() {
@@ -90,21 +110,20 @@ public class ObjModelNavigationTree extends TreeView<NavigationTreeNode> {
 
         // Children of subtree root
         meshViews.keySet().stream().sorted().forEach(meshName -> {
-            final var childNode = new MeshNode(meshName, meshViews.get(meshName));
+            final var childNode = new MeshTreeNode(meshName, meshViews.get(meshName), shortMeshViewNames.get());
             final CheckBoxTreeItem<NavigationTreeNode> childItem = new CheckBoxTreeItem<>(childNode);
             rootItem.getChildren().add(childItem);
             childItem.selectedProperty().bindBidirectional(childNode.checked);
-            //TODO consider "independent" property etc.
             childItem.selectedProperty().addListener((_, _, selected) -> {
-                Logger.info("Tree node {}, selected={}", childNode, selected);
-                Logger.info("Selection before: {}", selection.get(category));
+                Logger.debug("Tree node {}, selected={}", childNode, selected);
+                Logger.debug("Selection before: {}", selection.get(category));
                 if (selected) {
                     selection.get(category).add(childNode);
                 }
                 else {
                     selection.get(category).remove(childNode);
                 }
-                Logger.info("Selection after: {}", selection.get(category));
+                Logger.debug("Selection after: {}", selection.get(category));
             });
         });
         getRoot().getChildren().add(rootItem);

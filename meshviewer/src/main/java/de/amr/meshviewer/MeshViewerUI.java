@@ -10,7 +10,9 @@ import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -63,7 +65,7 @@ public class MeshViewerUI {
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
     private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-
+    private final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
     private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
     private final ObjectProperty<Duration> meshCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
@@ -231,7 +233,7 @@ public class MeshViewerUI {
 
     private void createSelectionArea() {
         navigationTreeView = new ObjModelNavigationTree(CSS_ID_OBJ_MODEL_TREE);
-
+        navigationTreeView.shortMeshViewNames.bind(shortMeshViewNames);
         for (NodeCategory category : NodeCategory.values()) {
             final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
             navigationTreeView.selection().put(category, selectedNodes);
@@ -268,9 +270,9 @@ public class MeshViewerUI {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
-            .filter(MeshNode.class::isInstance)
-            .map(MeshNode.class::cast)
-            .map(meshNode -> meshNode.meshView)
+            .filter(MeshTreeNode.class::isInstance)
+            .map(MeshTreeNode.class::cast)
+            .map(meshTreeNode -> meshTreeNode.meshView)
             .collect(Collectors.toSet());
     }
 
@@ -286,7 +288,7 @@ public class MeshViewerUI {
                 case Objects, Groups, Materials -> meshViewSet = collectMeshViewsForSelectedTreeNode(selectedTreeItem);
             }
         }
-        else if (selectedTreeItem.getValue() instanceof MeshNode) {
+        else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
             final TreeItem<NavigationTreeNode> parent = selectedTreeItem.getParent();
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
@@ -374,6 +376,9 @@ public class MeshViewerUI {
 
         final Menu viewMenu = new Menu("View");
 
+        final CheckMenuItem miShortMeshViewNames = new CheckMenuItem("Short Mesh Names");
+        miShortMeshViewNames.selectedProperty().bindBidirectional(shortMeshViewNames);
+
         final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Statistics");
         miModelInfoVisible.setOnAction(_ -> showModelInfo(miModelInfoVisible.isSelected()));
 
@@ -381,7 +386,7 @@ public class MeshViewerUI {
         miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
         drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
 
-        viewMenu.getItems().addAll(miWireframe, miModelInfoVisible);
+        viewMenu.getItems().addAll(miShortMeshViewNames, miWireframe, miModelInfoVisible);
 
         // -----------------------------
         // Samples menu
