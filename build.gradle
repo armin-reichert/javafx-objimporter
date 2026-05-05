@@ -3,6 +3,10 @@ plugins {
     alias(libs.plugins.javafx) apply false
 }
 
+String prop(String name) {
+    return findProperty(name) ?: System.getenv(name);
+}
+
 // Repositories and coordinates for ALL modules
 allprojects {
     group = "de.amr"
@@ -53,8 +57,8 @@ subprojects {
                 name = "cloudsmith"
                 url = "https://maven.cloudsmith.io/armin-reichert-qt4o/javafx-objimporter/"
                 credentials {
-                    username = System.getenv("CLOUDSMITH_USERNAME")
-                    password = System.getenv("CLOUDSMITH_API_KEY")
+                    username = prop("CLOUDSMITH_USERNAME")
+                    password = prop("CLOUDSMITH_API_KEY")
                 }
             }
         }
