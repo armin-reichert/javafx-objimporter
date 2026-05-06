@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 
 import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
 
-public final class MeshTreeNode extends ModelTreeNode {
+public final class TreeNode extends ModelTreeNode {
 
     private static String removeAnonObjectPrefix(String text) {
         if (text != null) {
@@ -26,7 +26,7 @@ public final class MeshTreeNode extends ModelTreeNode {
     public final MeshView meshView;
     public boolean shortName;
 
-    public MeshTreeNode(String meshName, MeshView meshView, boolean shortName) {
+    public TreeNode(String meshName, MeshView meshView, boolean shortName) {
         this.meshName = meshName;
         this.meshView = meshView;
         this.shortName = shortName;

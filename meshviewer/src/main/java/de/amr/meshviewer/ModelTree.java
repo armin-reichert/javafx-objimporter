@@ -55,8 +55,8 @@ public class ModelTree extends TreeView<ModelTreeNode> {
 
         shortMeshViewNames.addListener((_,_,shortName) -> {
             traverse(getRoot(), item -> {
-                if (item.getValue() instanceof MeshTreeNode meshTreeNode) {
-                    meshTreeNode.setShortName(shortName);
+                if (item.getValue() instanceof TreeNode treeNode) {
+                    treeNode.setShortName(shortName);
                 }
             });
             refresh();
@@ -142,7 +142,7 @@ public class ModelTree extends TreeView<ModelTreeNode> {
 
         // Children of subtree root
         meshViews.keySet().stream().sorted().forEach(meshName -> {
-            final var childNode = new MeshTreeNode(meshName, meshViews.get(meshName), shortMeshViewNames.get());
+            final var childNode = new TreeNode(meshName, meshViews.get(meshName), shortMeshViewNames.get());
             final CheckBoxTreeItem<ModelTreeNode> childItem = new CheckBoxTreeItem<>(childNode);
             rootItem.getChildren().add(childItem);
             childItem.selectedProperty().bindBidirectional(childNode.checked);

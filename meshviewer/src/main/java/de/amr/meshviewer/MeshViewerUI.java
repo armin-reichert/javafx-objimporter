@@ -293,7 +293,7 @@ public class MeshViewerUI {
                 }
             }
         }
-        else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
+        else if (selectedTreeItem.getValue() instanceof TreeNode) {
             final TreeItem<ModelTreeNode> parent = selectedTreeItem.getParent();
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
@@ -320,9 +320,9 @@ public class MeshViewerUI {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
-            .filter(MeshTreeNode.class::isInstance)
-            .map(MeshTreeNode.class::cast)
-            .map(meshTreeNode -> meshTreeNode.meshView)
+            .filter(TreeNode.class::isInstance)
+            .map(TreeNode.class::cast)
+            .map(treeNode -> treeNode.meshView)
             .collect(Collectors.toSet());
     }
     private void createInfoArea() {
