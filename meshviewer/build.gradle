@@ -31,22 +31,30 @@ jlink {
         additive = true
         mergedModuleName = "de.amrsixtysix.objimporter.merged"
     }
+
     options = [
         "--compress", "zip-9",
         "--strip-debug",
         "--no-header-files",
         "--no-man-pages"
     ]
+
     launcher {
         name = "MeshViewer FX"
     }
+
     jpackage {
         appVersion = "1.0"
         vendor = "Armin Reichert"
         installerOptions = []
         installerType = installerPkg
         if (osdetector.os == "windows") {
-            installerOptions += ["--win-dir-chooser", "--win-menu", "--win-menu-group", "Meshviewer FX", "--win-shortcut"]
+            installerOptions += [
+                "--win-dir-chooser",
+                "--win-menu",
+                "--win-menu-group", "Meshviewer FX",
+                "--win-shortcut"
+            ]
         }
     }
 }

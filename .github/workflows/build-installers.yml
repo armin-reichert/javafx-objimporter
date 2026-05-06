@@ -32,7 +32,6 @@ jobs:
           name: meshviewer-linux
           path: |
             **/build/jpackage/*.deb
-            **/build/jpackage/*.rpm
 
   build-windows:
     name: Build Windows Installer
