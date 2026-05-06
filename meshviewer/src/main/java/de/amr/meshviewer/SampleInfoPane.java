@@ -1,8 +1,10 @@
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.app.MeshViewerApp;
+import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.tinylog.Logger;
@@ -13,14 +15,23 @@ public class SampleInfoPane extends GridPane {
 
     private static final String NA = "No info available";
 
+    private static Hyperlink createHyperlink() {
+        final Hyperlink link = new Hyperlink();
+        link.setFocusTraversable(false);
+        link.addEventFilter(KeyEvent.ANY, Event::consume);
+        return link;
+    }
+
     private final Label lblTitle = new Label();
     private final Label lblAuthor = new Label();
-    private final Hyperlink lnkFile = new Hyperlink();
-    private final Hyperlink lnkHomepage = new Hyperlink();
-    private final Hyperlink lnkLicenseURL = new Hyperlink();
+    private final Hyperlink lnkFile = createHyperlink();
+    private final Hyperlink lnkHomepage = createHyperlink();
+    private final Hyperlink lnkLicenseURL = createHyperlink();
 
     public SampleInfoPane(String cssID) {
         setId(cssID);
+
+        setFocusTraversable(false); // Only mouse clicks allowed
 
         final var constraints = new ColumnConstraints(INFO_PANE_LABEL_COLUMN_WIDTH, INFO_PANE_LABEL_COLUMN_WIDTH, INFO_PANE_LABEL_COLUMN_WIDTH);
         getColumnConstraints().add(constraints);
@@ -29,7 +40,7 @@ public class SampleInfoPane extends GridPane {
         addRow(++row, new Label("Title:"), lblTitle);
         addRow(++row, new Label("Author:"), lblAuthor);
         addRow(++row, new Label("File:"), lnkFile);
-        addRow(++row, new Label("Homepage"), lnkHomepage);
+        addRow(++row, new Label("Internet"), lnkHomepage);
         addRow(++row, new Label("License"), lnkLicenseURL);
     }
 
@@ -57,7 +68,7 @@ public class SampleInfoPane extends GridPane {
             }
 
             if (sample.homepage() != null) {
-                lnkHomepage.setText("To Homepage");
+                lnkHomepage.setText("Visit Homepage");
                 setLinkAction(lnkHomepage, sample.homepage());
             } else {
                 lnkHomepage.setText(NA);
