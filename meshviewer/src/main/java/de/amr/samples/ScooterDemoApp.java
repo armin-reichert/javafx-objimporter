@@ -29,6 +29,8 @@ import java.nio.charset.StandardCharsets;
  */
 public class ScooterDemoApp extends Application {
 
+    public static final String SCOOTER_OBJ = "/models/scooter/Scooter-smgrps.obj";
+
     public static final double AUTO_ROTATE_SPEED = 0.1;
 
     public static final String DRAW_MODE_TOGGLE = "d";
@@ -61,7 +63,7 @@ public class ScooterDemoApp extends Application {
 
     private void createScooter3D() throws IOException {
         scooter3D = new Group();
-        final URL url = getClass().getResource("/scooter/Scooter-smgrps.obj");
+        final URL url = getClass().getResource(SCOOTER_OBJ);
         if (url != null) {
             final ObjModel objModel = new ObjFileParser(url, StandardCharsets.UTF_8).parse();
             for (MeshView part : MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP).values()) {
