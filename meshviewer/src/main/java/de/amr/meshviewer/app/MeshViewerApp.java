@@ -2,8 +2,11 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.app;
 
+import de.amr.meshviewer.MeshViewerUI;
+import de.amr.meshviewer.SampleModel;
+import de.amr.meshviewer.SampleState;
 import javafx.application.Application;
 import javafx.stage.Screen;
 import javafx.stage.Stage;

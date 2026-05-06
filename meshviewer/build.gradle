@@ -23,7 +23,7 @@ javafx {
 
 application {
     mainModule = "de.amr.meshviewer"
-    mainClass  = "de.amr.meshviewer.Main"
+    mainClass  = "de.amr.meshviewer.app.Main"
 }
 
 jlink {

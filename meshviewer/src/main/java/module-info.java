@@ -6,5 +6,6 @@ module de.amr.meshviewer {
     requires de.amr.meshbuilder;
 
     exports de.amr.meshviewer;
+    exports de.amr.meshviewer.app;
     exports de.amr.samples;
 }

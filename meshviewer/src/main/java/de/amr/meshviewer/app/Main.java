@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.app;
 
 import javafx.application.Application;
 
