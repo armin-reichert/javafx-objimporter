@@ -4,7 +4,7 @@
 
 package de.amr.meshviewer;
 
-public final class InnerTreeNode extends NavigationTreeNode {
+public final class InnerTreeNode extends ModelTreeNode {
 
     public enum NodeCategory {Model, Objects, Groups, Materials}
 

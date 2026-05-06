@@ -14,7 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class ObjModelInfoPane extends GridPane {
+public class ModelInfoPane extends GridPane {
 
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.GERMANY);
     private static final String NA = "-";
@@ -30,7 +30,7 @@ public class ObjModelInfoPane extends GridPane {
     private final Label lblParsingTime = new Label();
     private final Label lblMeshCreationTime = new Label();
 
-    public ObjModelInfoPane(String id) {
+    public ModelInfoPane(String id) {
         setId(id); // for CSS
 
         addRow(0, new Label("Vertices:"), lblVertices);

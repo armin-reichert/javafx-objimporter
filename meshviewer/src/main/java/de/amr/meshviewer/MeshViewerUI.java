@@ -70,7 +70,7 @@ public class MeshViewerUI {
     private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
     private final ObjectProperty<Duration> meshCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
-    private final ObservableList<SampleInfo> sampleModels = FXCollections.observableArrayList();
+    private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
 
     private Map<String, MeshView> objectMeshViews;
     private Map<String, MeshView> groupMeshViews;
@@ -86,19 +86,18 @@ public class MeshViewerUI {
 
     // Layout
     private final BorderPane rootPane = new BorderPane();
-
     private final SplitPane splitLayout = new SplitPane();
 
     // Selection Area
     private Pane selectionArea;
-    private ObjModelNavigationTree navigationTreeView;
+    private ModelTree modelTree;
 
     // Preview Area
     private PreviewArea previewArea;
 
     // Model Info Area
     private Pane infoArea;
-    private ObjModelInfoPane infoPane;
+    private ModelInfoPane infoPane;
 
     private final AboutDialog aboutDialog = new AboutDialog();
 
@@ -114,8 +113,8 @@ public class MeshViewerUI {
             final String url = newModel.url();
             final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
             createMeshViews(newModel);
-            navigationTreeView.populate(title, objectMeshViews, groupMeshViews, materialMeshViews);
-            navigationTreeView.clearSelectedNodeSets();
+            modelTree.populate(title, objectMeshViews, groupMeshViews, materialMeshViews);
+            modelTree.clearSelectedNodeSets();
             final Set<MeshView> allMeshViews = new HashSet<>();
             allMeshViews.addAll(objectMeshViews.values());
             allMeshViews.addAll(groupMeshViews.values());
@@ -127,7 +126,7 @@ public class MeshViewerUI {
             objectMeshViews = Map.of();
             groupMeshViews = Map.of();
             materialMeshViews = Map.of();
-            navigationTreeView.populate(NO_OBJ_MODEL_TITLE, objectMeshViews, groupMeshViews, materialMeshViews);
+            modelTree.populate(NO_OBJ_MODEL_TITLE, objectMeshViews, groupMeshViews, materialMeshViews);
             infoPane.update(null, 0, null, null);
         }
     }
@@ -136,9 +135,9 @@ public class MeshViewerUI {
 
     public void show() {
         stage.show();
-        if (!sampleModels.isEmpty()) {
+        if (!samples.isEmpty()) {
             try {
-                showSampleModel(sampleModels.getFirst());
+                showSampleModel(samples.getFirst());
             } catch (IOException x){
                 Logger.error(x, "Cannot show first sample model");
                 previewArea.flash("Cannot show sample model");
@@ -147,18 +146,11 @@ public class MeshViewerUI {
         showModelInfo(false);
     }
 
-    private void showSampleModel(SampleInfo modelInfo) throws IOException {
-        final URL url = getClass().getResource(modelInfo.path() + modelInfo.fileName());
-        showObjModel(url);
-        previewArea.initSampleModel(modelInfo);
-    }
-
     public void addSampleModel(SampleInfo sample) {
         requireNonNull(sample);
-        sampleModels.add(sample);
-
-        final var item = new MenuItem(sample.title());
-        item.setOnAction(_ -> {
+        samples.add(sample);
+        final var menuItem = new MenuItem(sample.title());
+        menuItem.setOnAction(_ -> {
             try {
                 showSampleModel(sample);
             } catch (IOException x) {
@@ -166,10 +158,16 @@ public class MeshViewerUI {
                 previewArea.flash("Cannot show sample model");
             }
         });
-        samplesMenu.getItems().add(item);
+        samplesMenu.getItems().add(menuItem);
     }
 
     // Private
+
+    private void showSampleModel(SampleInfo sample) throws IOException {
+        final URL url = getClass().getResource(sample.path() + sample.fileName());
+        showObjModel(url);
+        previewArea.initSampleModel(sample);
+    }
 
     private void showObjModel(File objFile) throws IOException {
         requireNonNull(objFile);
@@ -187,7 +185,6 @@ public class MeshViewerUI {
     }
 
     private void createUI(double width, double height) {
-
         final URL cssURL = getClass().getResource("/app.css");
         if (cssURL != null) {
             scene.getStylesheets().add(cssURL.toExternalForm());
@@ -196,14 +193,14 @@ public class MeshViewerUI {
         }
 
         createLayout();
-
-        addFileDragNDropSupport(scene);
-        createObjFileChooser();
+        createFileChooser();
 
         stage.setScene(scene);
         stage.setTitle(STAGE_TITLE);
         stage.setWidth(width);
         stage.setHeight(height);
+
+        addDragNDropSupport();
     }
 
     private void createLayout() {
@@ -225,7 +222,7 @@ public class MeshViewerUI {
         previewArea.subScene().heightProperty().bind(previewArea.heightProperty());
     }
 
-    private void createObjFileChooser() {
+    private void createFileChooser() {
         fileChooser = new FileChooser();
         fileChooser.setTitle("Open OBJ File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("OBJ Files", "*.obj"));
@@ -237,32 +234,32 @@ public class MeshViewerUI {
     }
 
     private void createSelectionArea() {
-        navigationTreeView = new ObjModelNavigationTree(CSS_ID_OBJ_MODEL_TREE);
-        navigationTreeView.shortMeshViewNames.bind(shortMeshViewNames);
+        modelTree = new ModelTree(CSS_ID_OBJ_MODEL_TREE);
+        modelTree.shortMeshViewNames.bind(shortMeshViewNames);
         for (NodeCategory category : NodeCategory.values()) {
-            final ObservableSet<NavigationTreeNode> selectedNodes = FXCollections.observableSet();
-            navigationTreeView.selection().put(category, selectedNodes);
-            selectedNodes.addListener((SetChangeListener<NavigationTreeNode>) change -> {
+            final ObservableSet<ModelTreeNode> selectedNodes = FXCollections.observableSet();
+            modelTree.selection().put(category, selectedNodes);
+            selectedNodes.addListener((SetChangeListener<ModelTreeNode>) change -> {
                 Logger.info("Selection changed for category {}: {}", category, change);
-                updateDisplayedMeshViewSet(navigationTreeView.getSelectionModel().getSelectedItem());
+                updateDisplayedMeshViewSet(modelTree.getSelectionModel().getSelectedItem());
             });
         }
 
-        navigationTreeView.getSelectionModel().selectedItemProperty().addListener((_,_,selectedItem) -> {
+        modelTree.getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
             Logger.info("Selected item: {}", selectedItem);
             updateDisplayedMeshViewSet(selectedItem);
         });
 
-        selectionArea = new VBox(navigationTreeView);
+        selectionArea = new VBox(modelTree);
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
-        navigationTreeView.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
+        modelTree.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
     }
 
     private void setInitialTreeSelection() {
-        var groupsTreeItem = (CheckBoxTreeItem<NavigationTreeNode>) navigationTreeView.getRoot().getChildren().get(1);
-        navigationTreeView.getSelectionModel().clearSelection();
-        navigationTreeView.getSelectionModel().select(groupsTreeItem);
+        var groupsTreeItem = (CheckBoxTreeItem<ModelTreeNode>) modelTree.getRoot().getChildren().get(1);
+        modelTree.getSelectionModel().clearSelection();
+        modelTree.getSelectionModel().select(groupsTreeItem);
 
         // Select checkboxes for groups category and groups mesh nodes
         groupsTreeItem.setSelected(true);
@@ -271,7 +268,7 @@ public class MeshViewerUI {
             .forEach(node -> node.setSelected(true));
     }
 
-    private void updateDisplayedMeshViewSet(TreeItem<NavigationTreeNode> selectedTreeItem) {
+    private void updateDisplayedMeshViewSet(TreeItem<ModelTreeNode> selectedTreeItem) {
         if (selectedTreeItem == null) {
             Logger.info("Nothing selected");
             return;
@@ -297,7 +294,7 @@ public class MeshViewerUI {
             }
         }
         else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
-            final TreeItem<NavigationTreeNode> parent = selectedTreeItem.getParent();
+            final TreeItem<ModelTreeNode> parent = selectedTreeItem.getParent();
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
@@ -319,7 +316,7 @@ public class MeshViewerUI {
         previewArea.selectDisplayedMeshViews(all, displayed);
     }
 
-    private Set<MeshView> collectMeshViews(TreeItem<NavigationTreeNode> selectedTreeItem) {
+    private Set<MeshView> collectMeshViews(TreeItem<ModelTreeNode> selectedTreeItem) {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
@@ -329,7 +326,7 @@ public class MeshViewerUI {
             .collect(Collectors.toSet());
     }
     private void createInfoArea() {
-        infoPane = new ObjModelInfoPane(CSS_ID_OBJ_MODEL_INFO_PANEL);
+        infoPane = new ModelInfoPane(CSS_ID_OBJ_MODEL_INFO_PANEL);
         infoArea = new VBox(infoPane);
 
         infoArea.setBackground(Background.fill(Color.BLACK));
@@ -421,7 +418,7 @@ public class MeshViewerUI {
         // -----------------------------
 
         samplesMenu = new Menu("Samples");
-        samplesMenu.disableProperty().bind(Bindings.isEmpty(sampleModels));
+        samplesMenu.disableProperty().bind(Bindings.isEmpty(samples));
 
         // -----------------------------
         // About menu
@@ -437,7 +434,7 @@ public class MeshViewerUI {
         menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu, helpMenu);
     }
 
-    private void addFileDragNDropSupport(Scene scene) {
+    private void addDragNDropSupport() {
         // Accept file drag-over
         scene.setOnDragOver(e -> {
             if (e.getGestureSource() != scene && e.getDragboard().hasFiles()) {
