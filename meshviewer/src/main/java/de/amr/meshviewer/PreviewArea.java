@@ -293,10 +293,20 @@ public class PreviewArea extends StackPane {
             meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateZ(), Rotate.Z_AXIS));
         }
 
+        tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
         switch (sample.initialMeshSelection()) {
-            case MeshSelection.ALL_OBJECTS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
-            case MeshSelection.ALL_GROUPS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Groups);
-            case MeshSelection.ALL_MATERIALS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+            case MeshSelection.ALL_OBJECTS -> {
+                tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
+                tree.getRoot().getChildren().getFirst().setExpanded(true);
+            }
+            case MeshSelection.ALL_GROUPS -> {
+                tree.selectAllFrom(InnerTreeNode.NodeCategory.Groups);
+                tree.getRoot().getChildren().get(1).setExpanded(true);
+            }
+            case MeshSelection.ALL_MATERIALS -> {
+                tree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+                tree.getRoot().getChildren().getLast().setExpanded(true);
+            }
         }
     }
 
