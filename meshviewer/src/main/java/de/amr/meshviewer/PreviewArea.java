@@ -21,7 +21,6 @@ import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import org.tinylog.Logger;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
