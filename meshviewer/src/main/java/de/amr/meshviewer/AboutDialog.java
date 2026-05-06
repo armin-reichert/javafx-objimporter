@@ -32,8 +32,8 @@ public class AboutDialog extends Dialog<Void> {
         
         DISCLAIMER:
         
-        OBJ parser development supported by Copilot AI.
-        (Do *not* tell this on Reddit or you will get censured!)
+        Parser development supported by Copilot AI.
+        (Do *not* tell this on Reddit or you will get censored!)
         
         Written by an "unvaxxed", "climate change denying" old white man
         who hates wokeness and gender bullshit.
