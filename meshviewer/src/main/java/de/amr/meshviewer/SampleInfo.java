@@ -9,6 +9,7 @@ public record SampleInfo(
     String author,
     String fileName,
     String path,
+    String downloadURL,
     String homepage,
     String licenseType,
     String licenseURL,

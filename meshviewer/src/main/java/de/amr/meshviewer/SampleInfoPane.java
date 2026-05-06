@@ -15,7 +15,7 @@ public class SampleInfoPane extends GridPane {
 
     private final Label lblTitle = new Label();
     private final Label lblAuthor = new Label();
-    private final Label lblFileName = new Label();
+    private final Hyperlink lnkFile = new Hyperlink();
     private final Hyperlink lnkHomepage = new Hyperlink();
     private final Hyperlink lnkLicenseURL = new Hyperlink();
 
@@ -28,40 +28,45 @@ public class SampleInfoPane extends GridPane {
         int row = -1;
         addRow(++row, new Label("Title:"), lblTitle);
         addRow(++row, new Label("Author:"), lblAuthor);
-        addRow(++row, new Label("File:"), lblFileName);
+        addRow(++row, new Label("File:"), lnkFile);
         addRow(++row, new Label("Homepage"), lnkHomepage);
         addRow(++row, new Label("License"), lnkLicenseURL);
+    }
+
+    private void setLinkAction(Hyperlink link, String url) {
+        link.setOnAction(_ -> {
+            try {
+                MeshViewerApp.HOST_SERVICES.showDocument(url);
+            } catch (Exception x) {
+                Logger.error(x, "Could not open URL {}", url);
+            }
+        });
+        link.setDisable(false);
     }
 
     public void update(SampleInfo sample) {
         if (sample != null) {
             lblTitle.setText(sample.title());
             lblAuthor.setText(sample.author());
-            lblFileName.setText(sample.fileName());
+
+            lnkFile.setText(sample.fileName());
+            if (sample.downloadURL() != null) {
+                setLinkAction(lnkFile, sample.downloadURL());
+            } else {
+                lnkFile.setDisable(true);
+            }
+
             if (sample.homepage() != null) {
                 lnkHomepage.setText("To Homepage");
-                lnkHomepage.setDisable(false);
-                lnkHomepage.setOnAction(_ -> {
-                    try {
-                        MeshViewerApp.HOST_SERVICES.showDocument(sample.homepage());
-                    } catch (Exception x) {
-                        Logger.error(x, "Could not open URL {}", sample.homepage());
-                    }
-                });
+                setLinkAction(lnkHomepage, sample.homepage());
             } else {
                 lnkHomepage.setText(NA);
                 lnkHomepage.setDisable(true);
             }
+
             if (sample.licenseURL() != null) {
                 lnkLicenseURL.setText("View License file");
-                lnkLicenseURL.setDisable(false);
-                lnkLicenseURL.setOnAction(_ -> {
-                    try {
-                        MeshViewerApp.HOST_SERVICES.showDocument(sample.licenseURL());
-                    } catch (Exception x) {
-                        Logger.error(x, "Could not open URL {}", sample.licenseURL());
-                    }
-                });
+                setLinkAction(lnkLicenseURL, sample.licenseURL());
             } else {
                 lnkLicenseURL.setText(NA);
                 lnkLicenseURL.setDisable(true);
