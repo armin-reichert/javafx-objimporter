@@ -26,17 +26,11 @@ import java.util.Set;
 
 public class PreviewArea extends StackPane {
 
-    public static final Paint DARK_GRADIENT = new LinearGradient(
-        0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-        new Stop(0, Color.web("#222")),
-        new Stop(1, Color.web("#555"))
-    );
-
     public static final Paint SKY_GRADIENT = new LinearGradient(
         0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-        new Stop(0.0, Color.web("#3A8DFF")),  // deep zenith blue
+        new Stop(0.0, Color.web("#A7D8FF")),   // pale horizon blue
         new Stop(0.5, Color.web("#6BB6FF")),  // mid-sky
-        new Stop(1.0, Color.web("#A7D8FF"))   // pale horizon blue
+        new Stop(1.0, Color.web("#3A8DFF"))  // deep zenith blue
     );
 
     public static final String KEY_AUTO_ROTATE_HORIZONTALLY = "h";
