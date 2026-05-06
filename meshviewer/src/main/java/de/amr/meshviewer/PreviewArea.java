@@ -278,8 +278,8 @@ public class PreviewArea extends StackPane {
         previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
     }
 
-    public void initSampleModel(SampleModel sample) throws IOException {
-        final SampleState initial = sample.initialState();
+    public void initSampleModel(SampleInfo sample) throws IOException {
+        final TransformSettings initial = sample.initialState();
 
         camZoom.setZ(initial.zoom());
 

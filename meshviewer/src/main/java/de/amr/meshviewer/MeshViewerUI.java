@@ -70,7 +70,7 @@ public class MeshViewerUI {
     private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
     private final ObjectProperty<Duration> meshCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
-    private final ObservableList<SampleModel> sampleModels = FXCollections.observableArrayList();
+    private final ObservableList<SampleInfo> sampleModels = FXCollections.observableArrayList();
 
     private Map<String, MeshView> objectMeshViews;
     private Map<String, MeshView> groupMeshViews;
@@ -138,8 +138,7 @@ public class MeshViewerUI {
         stage.show();
         if (!sampleModels.isEmpty()) {
             try {
-                showObjModel(sampleModels.getFirst().url());
-                previewArea.initSampleModel(sampleModels.getFirst());
+                showSampleModel(sampleModels.getFirst());
             } catch (IOException x){
                 Logger.error(x, "Cannot show first sample model");
                 previewArea.flash("Cannot show sample model");
@@ -148,15 +147,20 @@ public class MeshViewerUI {
         showModelInfo(false);
     }
 
-    public void addSampleModel(SampleModel sample) {
+    private void showSampleModel(SampleInfo modelInfo) throws IOException {
+        final URL url = getClass().getResource(modelInfo.path() + modelInfo.fileName());
+        showObjModel(url);
+        previewArea.initSampleModel(modelInfo);
+    }
+
+    public void addSampleModel(SampleInfo sample) {
         requireNonNull(sample);
         sampleModels.add(sample);
 
         final var item = new MenuItem(sample.title());
         item.setOnAction(_ -> {
             try {
-                showObjModel(sample.url());
-                previewArea.initSampleModel(sample);
+                showSampleModel(sample);
             } catch (IOException x) {
                 Logger.error(x, "Cannot show sample model");
                 previewArea.flash("Cannot show sample model");

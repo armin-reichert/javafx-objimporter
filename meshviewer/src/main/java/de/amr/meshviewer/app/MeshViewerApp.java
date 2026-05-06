@@ -5,50 +5,85 @@
 package de.amr.meshviewer.app;
 
 import de.amr.meshviewer.MeshViewerUI;
-import de.amr.meshviewer.SampleModel;
-import de.amr.meshviewer.SampleState;
+import de.amr.meshviewer.SampleInfo;
+import de.amr.meshviewer.TransformSettings;
 import javafx.application.Application;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 public class MeshViewerApp extends Application {
 
-    private final SampleModel[] SAMPLES = {
-        new SampleModel(
+    private static final SampleInfo[] SAMPLES = {
+        new SampleInfo(
             "Teapot",
-            getClass().getResource("/models/newell_teaset/teapot.obj"),
-            new SampleState(-10, 0, 0, 0)),
+            "Newell et al.",
+            "teapot.obj",
+            "/models/newell_teaset/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-10, 0, 0, 0)),
 
-        new SampleModel(
+        new SampleInfo(
             "Scooter",
-            getClass().getResource("/models/scooter/Scooter-normals.obj"),
-            new SampleState(-2, 0, 0, 0)),
+            "AUTHOR TODO",
+            "Scooter-normals.obj",
+            "/models/scooter/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-2, 0, 0, 0)),
 
-        new SampleModel(
+        new SampleInfo(
             "Scooter (Smooth)",
-            getClass().getResource("/models/scooter/Scooter-smgrps.obj"),
-            new SampleState(-2, 0, 0, 0)),
+            "AUTHOR TODO",
+            "Scooter-smgrps.obj",
+            "/models/scooter/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-2, 0, 0, 0)),
 
-        new SampleModel(
+        new SampleInfo(
             "Alien Animal",
-            getClass().getResource("/models/alien_animal/Alien Animal.obj"),
-            new SampleState(-50, 0, 0, 0)),
+            "AUTHOR TODO",
+            "Alien Animal.obj",
+            "/models/alien_animal/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-50, 0, 0, 0)),
 
-        new SampleModel("Beagle",
-            getClass().getResource("/models/beagle/13041_Beagle_v1_L1.obj"),
-            new SampleState(-150, 0, 0, 0)),
+        new SampleInfo(
+            "Beagle",
+            "AUTHOR TODO",
+            "13041_Beagle_v1_L1.obj",
+            "/models/beagle/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-150, 0, 0, 0)),
 
-        new SampleModel("Aya",
-            getClass().getResource("/models/aya_japanese_girl/091_W_Aya_100K.obj"),
-            new SampleState(-2800, 0, 0, 0)),
+        new SampleInfo(
+            "Aya",
+            "AUTHOR TODO",
+            "091_W_Aya_100K.obj",
+            "/models/aya_japanese_girl/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-2800, 0, 0, 0)),
 
-        new SampleModel("Datsun 280Z",
-            getClass().getResource("/models/datsun_280Z/Datsun_280Z.obj"),
-            new SampleState(-4, 0, 0, 0)),
+        new SampleInfo(
+            "Datsun 280Z",
+            "AUTHOR TODO",
+            "Datsun_280Z.obj",
+            "/models/datsun_280Z/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-4, 0, 0, 0)),
 
-        new SampleModel("Pac-Man (by Gianmarco Cavallaccio)",
-            getClass().getResource("/models/pacman/pacman.obj"),
-            new SampleState(-42, 30, 0, 0))
+        new SampleInfo("Pac-Man",
+            "Gianmarco Cavallaccio",
+            "pacman.obj",
+            "/models/pacman/",
+            "LICENSE?",
+            null, // TODO
+            new TransformSettings(-42, 30, 0, 0))
     };
 
     @Override
@@ -59,7 +94,7 @@ public class MeshViewerApp extends Application {
         final double height = Math.min(0.90 * screenHeight, 800);
         final double width = aspect * height;
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height);
-        for (SampleModel sample : SAMPLES) {
+        for (SampleInfo sample : SAMPLES) {
             ui.addSampleModel(sample);
         }
         ui.show();
