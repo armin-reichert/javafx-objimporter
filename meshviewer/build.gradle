@@ -27,6 +27,10 @@ application {
 }
 
 jlink {
+    mergedModule {
+        additive = true
+        mergedModuleName = "de.amrsixtysix.objimporter.merged"
+    }
     options = [
         "--compress", "zip-9",
         "--strip-debug",
