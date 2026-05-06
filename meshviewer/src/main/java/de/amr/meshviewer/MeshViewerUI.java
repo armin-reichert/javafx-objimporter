@@ -59,10 +59,12 @@ public class MeshViewerUI {
     public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
     public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
-    public static final String CSS_ID_OBJ_MODEL_INFO_PANEL = "objModelInfo";
+    public static final String CSS_ID_MODEL_INFO_PANE = "objModelInfo";
+    public static final String CSS_ID_SAMPLE_INFO_PANE = "sampleInfo";
 
     public static final int SELECTION_AREA_WIDTH = 300;
     public static final int MODEL_INFO_AREA_WIDTH = 260;
+    public static final int INFO_PANE_LABEL_COLUMN_WIDTH = 100;
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
     private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
@@ -97,7 +99,8 @@ public class MeshViewerUI {
 
     // Model Info Area
     private Pane infoArea;
-    private ModelInfoPane infoPane;
+    private ModelInfoPane modelInfoPane;
+    private SampleInfoPane sampleInfoPane;
 
     private final AboutDialog aboutDialog = new AboutDialog();
 
@@ -120,14 +123,14 @@ public class MeshViewerUI {
             allMeshViews.addAll(groupMeshViews.values());
             allMeshViews.addAll(materialMeshViews.values());
             int numMeshViews = allMeshViews.size();
-            infoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
+            modelInfoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
             setInitialTreeSelection();
         } else {
             objectMeshViews = Map.of();
             groupMeshViews = Map.of();
             materialMeshViews = Map.of();
             modelTree.populate(NO_OBJ_MODEL_TITLE, objectMeshViews, groupMeshViews, materialMeshViews);
-            infoPane.update(null, 0, null, null);
+            modelInfoPane.update(null, 0, null, null);
         }
     }
 
@@ -167,6 +170,8 @@ public class MeshViewerUI {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
         previewArea.initSampleModel(sample);
+        sampleInfoPane.update(sample);
+        sampleInfoPane.setVisible(true);
     }
 
     private void showObjModel(File objFile) throws IOException {
@@ -175,6 +180,7 @@ public class MeshViewerUI {
         currentModelDir = objFile.getParentFile();
         previewArea.reset();
         previewArea.assignFocusToSubScene();
+        sampleInfoPane.setVisible(false);
     }
 
     private void showObjModel(URL url) throws IOException {
@@ -182,6 +188,7 @@ public class MeshViewerUI {
         loadModelFromURL(url);
         previewArea.reset();
         previewArea.assignFocusToSubScene();
+        sampleInfoPane.setVisible(false);
     }
 
     private void createUI(double width, double height) {
@@ -325,9 +332,12 @@ public class MeshViewerUI {
             .map(meshTreeNode -> meshTreeNode.meshView)
             .collect(Collectors.toSet());
     }
+
     private void createInfoArea() {
-        infoPane = new ModelInfoPane(CSS_ID_OBJ_MODEL_INFO_PANEL);
-        infoArea = new VBox(infoPane);
+        modelInfoPane = new ModelInfoPane(CSS_ID_MODEL_INFO_PANE);
+        sampleInfoPane = new SampleInfoPane(CSS_ID_SAMPLE_INFO_PANE);
+
+        infoArea = new VBox(modelInfoPane, sampleInfoPane);
 
         infoArea.setBackground(Background.fill(Color.BLACK));
         infoArea.setMinWidth(MODEL_INFO_AREA_WIDTH);

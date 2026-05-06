@@ -6,6 +6,7 @@ package de.amr.meshviewer;
 
 import de.amr.objparser.ObjModel;
 import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
@@ -30,19 +31,23 @@ public class ModelInfoPane extends GridPane {
     private final Label lblParsingTime = new Label();
     private final Label lblMeshCreationTime = new Label();
 
-    public ModelInfoPane(String id) {
-        setId(id); // for CSS
+    public ModelInfoPane(String cssID) {
+        setId(cssID); // for CSS
 
-        addRow(0, new Label("Vertices:"), lblVertices);
-        addRow(1, new Label("TexCoords:"), lblTexCoords);
-        addRow(2, new Label("Normals:"), lblNormals);
-        addRow(3, new Label("Objects:"), lblObjects);
-        addRow(4, new Label("Groups:"), lblGroups);
-        addRow(5, new Label("Faces:"), lblFaces);
-        addRow(6, new Label("Smoothing Groups:"), lblSmoothingGroups);
-        addRow(7, new Label("Materials:"), lblMaterials);
-        addRow(8, new Label("Parsing:"), lblParsingTime);
-        addRow(9, new Label("Mesh Creation:"), lblMeshCreationTime);
+        final var constraints = new ColumnConstraints(MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH);
+        getColumnConstraints().add(constraints);
+
+        int row = -1;
+        addRow(++row, new Label("Vertices:"), lblVertices);
+        addRow(++row, new Label("TexCoords:"), lblTexCoords);
+        addRow(++row, new Label("Normals:"), lblNormals);
+        addRow(++row, new Label("Objects:"), lblObjects);
+        addRow(++row, new Label("Groups:"), lblGroups);
+        addRow(++row, new Label("Faces:"), lblFaces);
+        addRow(++row, new Label("Smoothing Groups:"), lblSmoothingGroups);
+        addRow(++row, new Label("Materials:"), lblMaterials);
+        addRow(++row, new Label("Parsing:"), lblParsingTime);
+        addRow(++row, new Label("Mesh Creation:"), lblMeshCreationTime);
     }
 
     public void update(ObjModel model, int numMeshViews, Duration parsingTime, Duration meshCreationTime) {
