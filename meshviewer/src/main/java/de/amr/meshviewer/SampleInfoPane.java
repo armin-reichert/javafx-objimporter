@@ -1,15 +1,11 @@
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.app.MeshViewerApp;
-import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.tinylog.Logger;
-
-import java.net.URI;
-import java.net.URL;
 
 import static de.amr.meshviewer.MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH;
 

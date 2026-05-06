@@ -4,8 +4,6 @@
 
 package de.amr.meshviewer;
 
-import java.net.URL;
-
 public record SampleInfo(
     String title,
     String author,
