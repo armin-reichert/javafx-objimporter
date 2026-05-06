@@ -13,6 +13,5 @@ public record SampleInfo(
     String homepage,
     String licenseType,
     String licenseURL,
-    TransformSettings initialTransformSettings,
-    MeshSelection initialMeshSelection)
+    SampleInitSettings initSettings)
 {}

@@ -278,23 +278,23 @@ public class PreviewArea extends StackPane {
         previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
     }
 
-    public void initSampleModel(ModelTree tree, SampleInfo sample) throws IOException {
-        final TransformSettings transformSettings = sample.initialTransformSettings();
+    public void initSampleModel(ModelTree tree, SampleInfo sample) {
+        final SampleInitSettings sampleInitSettings = sample.initSettings();
 
-        camZoom.setZ(transformSettings.zoom());
+        camZoom.setZ(sampleInitSettings.zoom());
 
-        if (transformSettings.rotateX() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateX(), Rotate.X_AXIS));
+        if (sampleInitSettings.rotateX() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateX(), Rotate.X_AXIS));
         }
-        if (transformSettings.rotateY() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateY(), Rotate.Y_AXIS));
+        if (sampleInitSettings.rotateY() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateY(), Rotate.Y_AXIS));
         }
-        if (transformSettings.rotateZ() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateZ(), Rotate.Z_AXIS));
+        if (sampleInitSettings.rotateZ() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateZ(), Rotate.Z_AXIS));
         }
 
         tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        switch (sample.initialMeshSelection()) {
+        switch (sample.initSettings().initialMeshSelection()) {
             case MeshSelection.ALL_OBJECTS -> {
                 tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
                 tree.getRoot().getChildren().getFirst().setExpanded(true);

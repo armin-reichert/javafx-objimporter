@@ -2,7 +2,7 @@ package de.amr.meshviewer.app;
 
 import de.amr.meshviewer.MeshSelection;
 import de.amr.meshviewer.SampleInfo;
-import de.amr.meshviewer.TransformSettings;
+import de.amr.meshviewer.SampleInitSettings;
 
 public interface SamplesCollection {
 
@@ -16,9 +16,8 @@ public interface SamplesCollection {
             "https://graphics.cs.utah.edu/teapot/",
             "LICENSE?",
             null, // TODO
-            new TransformSettings(-10, 0, 0, 0),
-            MeshSelection.ALL_GROUPS
-            ),
+            new SampleInitSettings(-10, 0, 0, 0, MeshSelection.ALL_GROUPS)
+        ),
 
         new SampleInfo(
             "Scooter",
@@ -29,8 +28,7 @@ public interface SamplesCollection {
             "https://www.sweethome3d.com/free-3d-models",
             "CCA 3.0",
             "https://github.com/AlmasB/javafx3d-samples/blob/master/LICENSE-Scooter.txt",
-            new TransformSettings(-2, 0, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            new SampleInitSettings(-2, 0, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
 
         new SampleInfo(
@@ -42,8 +40,7 @@ public interface SamplesCollection {
             "https://free3d.com/3d-model/alien-animal-218186.html",
             "LICENSE?",
             null, // TODO
-            new TransformSettings(-50, 0, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            new SampleInitSettings(-50, 0, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
 
         new SampleInfo(
@@ -55,8 +52,7 @@ public interface SamplesCollection {
             null, // TODO
             "LICENSE?",
             null, // TODO
-            new TransformSettings(-150, 0, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            new SampleInitSettings(-150, 0, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
 
         new SampleInfo(
@@ -68,8 +64,7 @@ public interface SamplesCollection {
             null, // TODO
             "LICENSE?",
             null, // TODO
-            new TransformSettings(-2800, 0, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            new SampleInitSettings(-2800, 0, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
 
         new SampleInfo(
@@ -80,9 +75,8 @@ public interface SamplesCollection {
             "https://sketchfab.com/3d-models/free-datsun-280z-0789ab2ece9442de94b3c41595e0ecbd",
             "https://sketchfab.com/TinoD2",
             "CC Attribution",
-            "http://creativecommons.org/licenses/by/4.0/",
-            new TransformSettings(-4, 0, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            "https://creativecommons.org/licenses/by/4.0/",
+            new SampleInitSettings(-4, 0, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
 
         new SampleInfo("Pac-Man",
@@ -92,9 +86,8 @@ public interface SamplesCollection {
             "https://sketchfab.com/3d-models/pac-man-9b2fd5bc82ba4212895fd0b753a4df09",
             "https://sketchfab.com/GianmArt",
             "CC Attribution",
-            "http://creativecommons.org/licenses/by/4.0/",
-            new TransformSettings(-42, 30, 0, 0),
-            MeshSelection.ALL_MATERIALS
+            "https://creativecommons.org/licenses/by/4.0/",
+            new SampleInitSettings(-42, 30, 0, 0, MeshSelection.ALL_MATERIALS)
         ),
     };
 }
