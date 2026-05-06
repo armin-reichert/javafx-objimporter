@@ -278,19 +278,25 @@ public class PreviewArea extends StackPane {
         previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
     }
 
-    public void initSampleModel(SampleInfo sample) throws IOException {
-        final TransformSettings initial = sample.initialState();
+    public void initSampleModel(ModelTree tree, SampleInfo sample) throws IOException {
+        final TransformSettings transformSettings = sample.initialTransformSettings();
 
-        camZoom.setZ(initial.zoom());
+        camZoom.setZ(transformSettings.zoom());
 
-        if (initial.rotateX() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateX(), Rotate.X_AXIS));
+        if (transformSettings.rotateX() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateX(), Rotate.X_AXIS));
         }
-        if (initial.rotateY() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateY(), Rotate.Y_AXIS));
+        if (transformSettings.rotateY() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateY(), Rotate.Y_AXIS));
         }
-        if (initial.rotateZ() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(initial.rotateZ(), Rotate.Z_AXIS));
+        if (transformSettings.rotateZ() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(transformSettings.rotateZ(), Rotate.Z_AXIS));
+        }
+
+        switch (sample.initialMeshSelection()) {
+            case MeshSelection.ALL_OBJECTS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
+            case MeshSelection.ALL_GROUPS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Groups);
+            case MeshSelection.ALL_MATERIALS -> tree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
         }
     }
 

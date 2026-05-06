@@ -101,6 +101,24 @@ public class ModelTree extends TreeView<TreeNode> {
         }
     }
 
+    public void selectAllFrom(NodeCategory category) {
+        final int childIndex = switch (category) {
+            case Model -> throw new IllegalArgumentException("Model category not allowed here");
+            case Objects -> 0;
+            case Groups -> 1;
+            case Materials -> 2;
+        };
+        final CheckBoxTreeItem<TreeNode> categoryItem = (CheckBoxTreeItem<TreeNode>) getRoot().getChildren().get(childIndex);
+        getSelectionModel().clearSelection();
+        getSelectionModel().select(categoryItem);
+
+        // Select checkboxes for groups category and groups mesh nodes
+        categoryItem.setSelected(true);
+        categoryItem.getChildren().stream()
+            .filter(CheckBoxTreeItem.class::isInstance).map(CheckBoxTreeItem.class::cast)
+            .forEach(node -> node.setSelected(true));
+    }
+
     public ObservableMap<NodeCategory, ObservableSet<TreeNode>> selection() {
         return selection;
     }

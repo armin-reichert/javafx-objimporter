@@ -124,7 +124,6 @@ public class MeshViewerUI {
             allMeshViews.addAll(materialMeshViews.values());
             int numMeshViews = allMeshViews.size();
             modelInfoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
-            setInitialTreeSelection();
         } else {
             objectMeshViews = Map.of();
             groupMeshViews = Map.of();
@@ -169,7 +168,7 @@ public class MeshViewerUI {
     private void showSampleModel(SampleInfo sample) throws IOException {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
-        previewArea.initSampleModel(sample);
+        previewArea.initSampleModel(modelTree, sample);
         sampleInfoPane.update(sample);
         sampleInfoPane.setVisible(true);
     }
@@ -261,18 +260,6 @@ public class MeshViewerUI {
         selectionArea.setMinWidth(SELECTION_AREA_WIDTH);
 
         modelTree.prefHeightProperty().bind(selectionArea.heightProperty().subtract(1));
-    }
-
-    private void setInitialTreeSelection() {
-        var groupsTreeItem = (CheckBoxTreeItem<TreeNode>) modelTree.getRoot().getChildren().get(1);
-        modelTree.getSelectionModel().clearSelection();
-        modelTree.getSelectionModel().select(groupsTreeItem);
-
-        // Select checkboxes for groups category and groups mesh nodes
-        groupsTreeItem.setSelected(true);
-        groupsTreeItem.getChildren().stream()
-            .filter(CheckBoxTreeItem.class::isInstance).map(CheckBoxTreeItem.class::cast)
-            .forEach(node -> node.setSelected(true));
     }
 
     private void updateDisplayedMeshViewSet(TreeItem<TreeNode> selectedTreeItem) {

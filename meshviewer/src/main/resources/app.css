@@ -64,3 +64,13 @@
     -fx-background-color: #222;
     -fx-text-fill: white;
 }
+
+.hyperlink,
+.hyperlink:visited,
+.hyperlink:armed,
+.hyperlink:hover,
+.hyperlink:disabled {
+    -fx-text-fill: -fx-accent;   /* or your custom color */
+    -fx-underline: false;
+    -fx-opacity: 1.0;
+}
