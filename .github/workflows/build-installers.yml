@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Grant execute permission for Gradle
         run: chmod +x gradlew
@@ -47,7 +47,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 25
 
       - name: Build Windows installer
         run: .\gradlew.bat clean jpackage
