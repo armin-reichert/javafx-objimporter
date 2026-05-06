@@ -414,14 +414,14 @@ public class MeshViewerUI {
         final CheckMenuItem miShortMeshViewNames = new CheckMenuItem("Short Mesh Names");
         miShortMeshViewNames.selectedProperty().bindBidirectional(shortMeshViewNames);
 
-        final CheckMenuItem miModelInfoVisible = new CheckMenuItem("Statistics");
-        miModelInfoVisible.setOnAction(_ -> showModelInfo(miModelInfoVisible.isSelected()));
+        final CheckMenuItem miInfoVisible = new CheckMenuItem("Info");
+        miInfoVisible.setOnAction(_ -> showModelInfo(miInfoVisible.isSelected()));
 
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
         miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
         drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
 
-        viewMenu.getItems().addAll(miShortMeshViewNames, miWireframe, miModelInfoVisible);
+        viewMenu.getItems().addAll(miShortMeshViewNames, miWireframe, miInfoVisible);
 
         // -----------------------------
         // Samples menu

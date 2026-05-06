@@ -11,7 +11,8 @@ public record SampleInfo(
     String author,
     String fileName,
     String path,
+    String homepage,
     String licenseType,
-    URL licenseURL,
+    String licenseURL,
     TransformSettings initialState) {
 }
