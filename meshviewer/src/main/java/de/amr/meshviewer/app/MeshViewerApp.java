@@ -29,12 +29,12 @@ public class MeshViewerApp extends Application {
 
         new SampleInfo(
             "Scooter",
-            "AUTHOR TODO",
+            "Andrew Kator, Jennifer Legaz",
             "Scooter-normals.obj",
             "/models/scooter/",
-            null, // TODO
-            "LICENSE?",
-            null, // TODO
+            "https://www.sweethome3d.com/free-3d-models",
+            "CCA 3.0",
+            "https://github.com/AlmasB/javafx3d-samples/blob/master/LICENSE-Scooter.txt",
             new TransformSettings(-2, 0, 0, 0)),
 
         new SampleInfo(
@@ -91,9 +91,9 @@ public class MeshViewerApp extends Application {
             "Gianmarco Cavallaccio",
             "pacman.obj",
             "/models/pacman/",
-            "https://gianmart.artstation.com/",
-            "LICENSE?",
-            null, // TODO
+            "https://sketchfab.com/3d-models/pac-man-9b2fd5bc82ba4212895fd0b753a4df09",
+            "CC Attribution",
+            "http://creativecommons.org/licenses/by/4.0/",
             new TransformSettings(-42, 30, 0, 0))
     };
 
