@@ -63,7 +63,7 @@ public class ModelTree extends TreeView<TreeNode> {
         });
 
         // To be able to e.g. hide the check box for the root, we need an explicit cell factory
-        setCellFactory(_ -> new CheckBoxTreeCell<TreeNode>() {
+        setCellFactory(_ -> new CheckBoxTreeCell<>() {
             @Override
             public void updateItem(TreeNode node, boolean empty) {
                 super.updateItem(node, empty);
@@ -94,7 +94,7 @@ public class ModelTree extends TreeView<TreeNode> {
                 // Revert selection
                 getSelectionModel().select(oldItem);
             }
-            else if (newItem.getValue() instanceof MeshTreeNode meshTreeNode) {
+            else if (newItem.getValue() instanceof MeshTreeNode) {
                 // When a mesh node is selected, select its category node
                 getSelectionModel().select(newItem.getParent());
             }
@@ -153,17 +153,15 @@ public class ModelTree extends TreeView<TreeNode> {
         rootItem.setExpanded(true);
 
         // Select/deselect all children when root is selected/deselected
-        rootItem.selectedProperty().addListener((_, _, selected) -> {
-            rootItem.getChildren().forEach(child -> {
-                final CheckBoxTreeItem<TreeNode> childItem = (CheckBoxTreeItem<TreeNode>) child;
-                childItem.setSelected(selected);
-                if (selected) {
-                    selection.get(category).add(childItem.getValue());
-                } else {
-                    selection.get(category).remove(childItem.getValue());
-                }
-            });
-        });
+        rootItem.selectedProperty().addListener((_, _, selected) -> rootItem.getChildren().forEach(child -> {
+            final CheckBoxTreeItem<TreeNode> childItem = (CheckBoxTreeItem<TreeNode>) child;
+            childItem.setSelected(selected);
+            if (selected) {
+                selection.get(category).add(childItem.getValue());
+            } else {
+                selection.get(category).remove(childItem.getValue());
+            }
+        }));
 
         // Children of subtree root
         meshViews.keySet().stream().sorted().forEach(meshName -> {
