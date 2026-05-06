@@ -169,8 +169,8 @@ public class MeshViewerUI {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
         previewArea.initSampleModel(modelTree, sample);
-        sampleInfoPane.update(sample);
         sampleInfoPane.setVisible(true);
+        sampleInfoPane.update(sample);
     }
 
     private void showObjModel(File objFile) throws IOException {
@@ -180,6 +180,10 @@ public class MeshViewerUI {
         previewArea.reset();
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
+        // initial selection: all material meshes
+        modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
+        modelTree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+        modelTree.getRoot().getChildren().getLast().setExpanded(true);
     }
 
     private void showObjModel(URL url) throws IOException {
@@ -188,6 +192,10 @@ public class MeshViewerUI {
         previewArea.reset();
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
+        // initial selection: all material meshes
+        modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
+        modelTree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+        modelTree.getRoot().getChildren().getLast().setExpanded(true);
     }
 
     private void createUI(double width, double height) {
