@@ -87,9 +87,16 @@ public class ModelTree extends TreeView<TreeNode> {
 
         // Disable root selection
         getSelectionModel().selectedItemProperty().addListener((_, oldItem, newItem) -> {
+            if (newItem == null) {
+                return;
+            }
             if (newItem == getRoot()) {
                 // Revert selection
                 getSelectionModel().select(oldItem);
+            }
+            else if (newItem.getValue() instanceof MeshTreeNode meshTreeNode) {
+                // When a mesh node is selected, select its category node
+                getSelectionModel().select(newItem.getParent());
             }
         });
 
