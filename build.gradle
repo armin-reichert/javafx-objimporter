@@ -12,7 +12,7 @@ String prop(String name) {
 
 // Repositories and coordinates for ALL modules
 allprojects {
-    group = "de.amr66"
+    group = "de.amr66.objimporter"
     version = "0.0.1"
 
     repositories {
