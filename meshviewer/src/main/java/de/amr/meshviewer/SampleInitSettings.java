@@ -9,4 +9,6 @@ public record SampleInitSettings(
     double rotateX,
     double rotateY,
     double rotateZ,
-    MeshSelection initialMeshSelection) {}
+    MeshSelection initialMeshSelection,
+    boolean wireframe,
+    boolean autorotate) {}

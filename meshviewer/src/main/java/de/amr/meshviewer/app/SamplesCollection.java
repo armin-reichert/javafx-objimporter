@@ -16,7 +16,7 @@ public interface SamplesCollection {
             "https://graphics.cs.utah.edu/teapot/",
             "LICENSE?",
             null, // TODO
-            new SampleInitSettings(-10, 0, 0, 0, MeshSelection.ALL_GROUPS)
+            new SampleInitSettings(-10, 0, 0, 0, MeshSelection.ALL_GROUPS, false, true)
         ),
 
         new SampleInfo(
@@ -28,7 +28,7 @@ public interface SamplesCollection {
             "https://www.sweethome3d.com/free-3d-models",
             "CCA 3.0",
             "https://github.com/AlmasB/javafx3d-samples/blob/master/LICENSE-Scooter.txt",
-            new SampleInitSettings(-2, 0, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-2, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, true)
         ),
 
         new SampleInfo(
@@ -40,7 +40,7 @@ public interface SamplesCollection {
             "https://free3d.com/3d-model/alien-animal-218186.html",
             "LICENSE?",
             null, // TODO
-            new SampleInitSettings(-50, 0, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-50, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, true)
         ),
 
         new SampleInfo(
@@ -52,7 +52,7 @@ public interface SamplesCollection {
             null, // TODO
             "LICENSE?",
             null, // TODO
-            new SampleInitSettings(-150, 0, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-150, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, false)
         ),
 
         new SampleInfo(
@@ -64,7 +64,7 @@ public interface SamplesCollection {
             null, // TODO
             "LICENSE?",
             null, // TODO
-            new SampleInitSettings(-2800, 0, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-2800, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, true)
         ),
 
         new SampleInfo(
@@ -76,7 +76,7 @@ public interface SamplesCollection {
             "https://sketchfab.com/TinoD2",
             "CC Attribution",
             "https://creativecommons.org/licenses/by/4.0/",
-            new SampleInitSettings(-4, 0, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-4, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, true)
         ),
 
         new SampleInfo("Pac-Man",
@@ -87,7 +87,7 @@ public interface SamplesCollection {
             "https://sketchfab.com/GianmArt",
             "CC Attribution",
             "https://creativecommons.org/licenses/by/4.0/",
-            new SampleInitSettings(-42, 30, 0, 0, MeshSelection.ALL_MATERIALS)
+            new SampleInitSettings(-42, 0, 0, 0, MeshSelection.ALL_MATERIALS, true, true)
         ),
     };
 }

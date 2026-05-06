@@ -156,7 +156,6 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.showMessage(message);
     }
 
-
     // private
 
     private void setKeyboardAndMouseHandlers() {
@@ -278,22 +277,22 @@ public class PreviewArea extends StackPane {
     }
 
     public void initSampleModel(ModelTree tree, SampleInfo sample) {
-        final SampleInitSettings sampleInitSettings = sample.initSettings();
+        final SampleInitSettings settings = sample.initSettings();
 
-        camZoom.setZ(sampleInitSettings.zoom());
+        camZoom.setZ(settings.zoom());
 
-        if (sampleInitSettings.rotateX() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateX(), Rotate.X_AXIS));
+        if (settings.rotateX() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
         }
-        if (sampleInitSettings.rotateY() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateY(), Rotate.Y_AXIS));
+        if (settings.rotateY() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateY(), Rotate.Y_AXIS));
         }
-        if (sampleInitSettings.rotateZ() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(sampleInitSettings.rotateZ(), Rotate.Z_AXIS));
+        if (settings.rotateZ() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateZ(), Rotate.Z_AXIS));
         }
 
         tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        switch (sample.initSettings().initialMeshSelection()) {
+        switch (settings.initialMeshSelection()) {
             case MeshSelection.ALL_OBJECTS -> {
                 tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
                 tree.getRoot().getChildren().getFirst().setExpanded(true);
@@ -306,6 +305,13 @@ public class PreviewArea extends StackPane {
                 tree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
                 tree.getRoot().getChildren().getLast().setExpanded(true);
             }
+        }
+
+        drawMode.set(settings.wireframe() ? DrawMode.LINE : DrawMode.FILL);
+        if (settings.autorotate()) {
+            autoRotateAnimation().playFromStart();
+        } else {
+            autoRotateAnimation().stop();
         }
     }
 
