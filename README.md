@@ -37,3 +37,4 @@ requires de.amr.meshbuilder;
 exports whatever.your.app.module.is.named;
 ```
 
+(Download from Maven Central not yet available)
