@@ -4,40 +4,9 @@
 
 package de.amr.meshviewer;
 
-import javafx.scene.shape.MeshView;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
-import java.util.regex.Matcher;
-
-import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
-
-public final class TreeNode extends ModelTreeNode {
-
-    private static String removeAnonObjectPrefix(String text) {
-        if (text != null) {
-            final Matcher m = ANON_OBJECT_PATTERN.matcher(text);
-            if (m.matches()) {
-                return m.group(1); // the OBJ file group name part
-            }
-        }
-        return text;
-    }
-
-    public final String meshName;
-    public final MeshView meshView;
-    public boolean shortName;
-
-    public TreeNode(String meshName, MeshView meshView, boolean shortName) {
-        this.meshName = meshName;
-        this.meshView = meshView;
-        this.shortName = shortName;
-    }
-
-    public void setShortName(boolean shortName) {
-        this.shortName = shortName;
-    }
-
-    @Override
-    public String toString() {
-        return shortName ? removeAnonObjectPrefix(meshName) : meshName;
-    }
+public sealed class TreeNode permits InnerTreeNode, MeshTreeNode {
+    public final BooleanProperty checked = new SimpleBooleanProperty(false);
 }

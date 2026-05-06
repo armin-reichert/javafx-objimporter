@@ -237,9 +237,9 @@ public class MeshViewerUI {
         modelTree = new ModelTree(CSS_ID_OBJ_MODEL_TREE);
         modelTree.shortMeshViewNames.bind(shortMeshViewNames);
         for (NodeCategory category : NodeCategory.values()) {
-            final ObservableSet<ModelTreeNode> selectedNodes = FXCollections.observableSet();
+            final ObservableSet<TreeNode> selectedNodes = FXCollections.observableSet();
             modelTree.selection().put(category, selectedNodes);
-            selectedNodes.addListener((SetChangeListener<ModelTreeNode>) change -> {
+            selectedNodes.addListener((SetChangeListener<TreeNode>) change -> {
                 Logger.info("Selection changed for category {}: {}", category, change);
                 updateDisplayedMeshViewSet(modelTree.getSelectionModel().getSelectedItem());
             });
@@ -257,7 +257,7 @@ public class MeshViewerUI {
     }
 
     private void setInitialTreeSelection() {
-        var groupsTreeItem = (CheckBoxTreeItem<ModelTreeNode>) modelTree.getRoot().getChildren().get(1);
+        var groupsTreeItem = (CheckBoxTreeItem<TreeNode>) modelTree.getRoot().getChildren().get(1);
         modelTree.getSelectionModel().clearSelection();
         modelTree.getSelectionModel().select(groupsTreeItem);
 
@@ -268,7 +268,7 @@ public class MeshViewerUI {
             .forEach(node -> node.setSelected(true));
     }
 
-    private void updateDisplayedMeshViewSet(TreeItem<ModelTreeNode> selectedTreeItem) {
+    private void updateDisplayedMeshViewSet(TreeItem<TreeNode> selectedTreeItem) {
         if (selectedTreeItem == null) {
             Logger.info("Nothing selected");
             return;
@@ -293,8 +293,8 @@ public class MeshViewerUI {
                 }
             }
         }
-        else if (selectedTreeItem.getValue() instanceof TreeNode) {
-            final TreeItem<ModelTreeNode> parent = selectedTreeItem.getParent();
+        else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
+            final TreeItem<TreeNode> parent = selectedTreeItem.getParent();
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
@@ -316,13 +316,13 @@ public class MeshViewerUI {
         previewArea.selectDisplayedMeshViews(all, displayed);
     }
 
-    private Set<MeshView> collectMeshViews(TreeItem<ModelTreeNode> selectedTreeItem) {
+    private Set<MeshView> collectMeshViews(TreeItem<TreeNode> selectedTreeItem) {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
-            .filter(TreeNode.class::isInstance)
-            .map(TreeNode.class::cast)
-            .map(treeNode -> treeNode.meshView)
+            .filter(MeshTreeNode.class::isInstance)
+            .map(MeshTreeNode.class::cast)
+            .map(meshTreeNode -> meshTreeNode.meshView)
             .collect(Collectors.toSet());
     }
     private void createInfoArea() {
