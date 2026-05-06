@@ -33,7 +33,6 @@ jobs:
           path: |
             **/build/jpackage/*.deb
             **/build/jpackage/*.rpm
-            **/build/jpackage/*.tar.gz
 
   build-windows:
     name: Build Windows Installer
@@ -58,5 +57,3 @@ jobs:
           name: meshviewer-windows
           path: |
             **/build/jpackage/*.msi
-            **/build/jpackage/*.exe
-            **/build/jpackage/*.zip

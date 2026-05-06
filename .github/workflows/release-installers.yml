@@ -43,6 +43,9 @@ jobs:
       - name: Upload installers as release assets
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**
+          files: |
+            **/build/jpackage/*.msi
+            **/build/jpackage/*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
