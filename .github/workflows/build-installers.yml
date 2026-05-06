@@ -1,0 +1,62 @@
+name: Build Installers
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-linux:
+    name: Build Linux Installer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
+
+      - name: Build Linux installer
+        run: ./gradlew clean jpackage
+
+      - name: Upload Linux installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshviewer-linux
+          path: |
+            **/build/jpackage/*.deb
+            **/build/jpackage/*.rpm
+            **/build/jpackage/*.tar.gz
+
+  build-windows:
+    name: Build Windows Installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Build Windows installer
+        run: .\gradlew.bat clean jpackage
+
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: meshviewer-windows
+          path: |
+            **/build/jpackage/*.msi
+            **/build/jpackage/*.exe
+            **/build/jpackage/*.zip
