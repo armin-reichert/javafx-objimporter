@@ -8,6 +8,7 @@ import de.amr.meshbuilder.MeshBuilder;
 import de.amr.meshviewer.InnerTreeNode.NodeCategory;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -74,6 +75,8 @@ public class MeshViewerUI {
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
 
+    private final HostServices hostServices;
+
     private Map<String, MeshView> objectMeshViews;
     private Map<String, MeshView> groupMeshViews;
     private Map<String, MeshView> materialMeshViews;
@@ -104,8 +107,9 @@ public class MeshViewerUI {
 
     private final AboutDialog aboutDialog = new AboutDialog();
 
-    public MeshViewerUI(Stage stage, double width, double height) {
+    public MeshViewerUI(Stage stage, double width, double height, HostServices hostServices) {
         this.stage = requireNonNull(stage);
+        this.hostServices = requireNonNull(hostServices);
         scene = new Scene(rootPane);
         createUI(width, height);
         objModel.addListener(this::onObjModelChange);
@@ -330,7 +334,7 @@ public class MeshViewerUI {
 
     private void createInfoArea() {
         modelInfoPane = new ModelInfoPane(CSS_ID_MODEL_INFO_PANE);
-        sampleInfoPane = new SampleInfoPane(CSS_ID_SAMPLE_INFO_PANE);
+        sampleInfoPane = new SampleInfoPane(CSS_ID_SAMPLE_INFO_PANE, hostServices);
 
         infoArea = new VBox(modelInfoPane, sampleInfoPane);
 

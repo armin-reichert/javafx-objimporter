@@ -5,6 +5,7 @@
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.app.MeshViewerApp;
+import javafx.application.HostServices;
 import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
@@ -26,14 +27,17 @@ public class SampleInfoPane extends GridPane {
         return link;
     }
 
+    private final HostServices hostServices;
+
     private final Label lblTitle = new Label();
     private final Label lblAuthor = new Label();
     private final Hyperlink lnkFile = createHyperlink();
     private final Hyperlink lnkHomepage = createHyperlink();
     private final Hyperlink lnkLicenseURL = createHyperlink();
 
-    public SampleInfoPane(String cssID) {
+    public SampleInfoPane(String cssID, HostServices hostServices) {
         setId(cssID);
+        this.hostServices = hostServices;
 
         setFocusTraversable(false); // Only mouse clicks allowed
 
@@ -78,10 +82,10 @@ public class SampleInfoPane extends GridPane {
         }
     }
 
-    private static void setLinkAction(Hyperlink link, String url) {
+    private void setLinkAction(Hyperlink link, String url) {
         link.setOnAction(_ -> {
             try {
-                MeshViewerApp.HOST_SERVICES.showDocument(url);
+                hostServices.showDocument(url);
             } catch (Exception x) {
                 Logger.error(x, "Could not open URL {}", url);
             }
