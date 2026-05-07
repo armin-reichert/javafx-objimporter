@@ -36,7 +36,7 @@ public class ModelInfoPane extends GridPane {
     public ModelInfoPane(String cssID) {
         setId(cssID); // for CSS
 
-        final var constraints = new ColumnConstraints(MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH);
+        final var constraints = new ColumnConstraints(MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH);
         getColumnConstraints().add(constraints);
 
         int row = -1;

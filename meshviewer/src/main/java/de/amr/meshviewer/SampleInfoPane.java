@@ -13,7 +13,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import org.tinylog.Logger;
 
-import static de.amr.meshviewer.MeshViewerUI.INFO_PANE_LABEL_COLUMN_WIDTH;
+import static de.amr.meshviewer.MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH;
 
 public class SampleInfoPane extends GridPane {
 
@@ -40,7 +40,7 @@ public class SampleInfoPane extends GridPane {
 
         setFocusTraversable(false); // Only mouse clicks allowed
 
-        final var constraints = new ColumnConstraints(INFO_PANE_LABEL_COLUMN_WIDTH, INFO_PANE_LABEL_COLUMN_WIDTH, INFO_PANE_LABEL_COLUMN_WIDTH);
+        final var constraints = new ColumnConstraints(INFO_AREA_LABEL_COLUMN_WIDTH, INFO_AREA_LABEL_COLUMN_WIDTH, INFO_AREA_LABEL_COLUMN_WIDTH);
         getColumnConstraints().add(constraints);
 
         int row = -1;
