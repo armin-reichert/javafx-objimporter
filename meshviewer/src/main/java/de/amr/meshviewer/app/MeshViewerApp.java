@@ -25,17 +25,7 @@ public class MeshViewerApp extends Application {
 
     @Override
     public void init() {
-        final Gson gson = new Gson();
-        try (final InputStream in = getClass().getResourceAsStream("/models/toc.json")) {
-            if (in != null) {
-                samples = gson.fromJson(
-                    new InputStreamReader(in, StandardCharsets.UTF_8),
-                    new TypeToken<List<SampleInfo>>() {}.getType());
-            }
-        } catch (IOException x) {
-            Logger.error(x, "Could not load models/toc.json");
-        }
-        Logger.info("Found {} sample models", samples.size());
+        loadSampleModels();
     }
 
     @Override
@@ -50,5 +40,19 @@ public class MeshViewerApp extends Application {
             ui.addSampleModel(sample);
         }
         ui.show();
+    }
+
+    private void loadSampleModels() {
+        final Gson gson = new Gson();
+        try (final InputStream in = getClass().getResourceAsStream("/models/toc.json")) {
+            if (in != null) {
+                samples = gson.fromJson(
+                    new InputStreamReader(in, StandardCharsets.UTF_8),
+                    new TypeToken<List<SampleInfo>>() {}.getType());
+            }
+        } catch (IOException x) {
+            Logger.error(x, "Could not load models/toc.json");
+        }
+        Logger.info("Found {} sample models", samples.size());
     }
 }
