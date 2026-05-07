@@ -4,7 +4,6 @@
 
 package de.amr.meshviewer;
 
-import de.amr.meshviewer.app.MeshViewerApp;
 import javafx.application.HostServices;
 import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
