@@ -34,7 +34,7 @@ subprojects {
             languageVersion = JavaLanguageVersion.of(libs.versions.java.get())
         }
         withSourcesJar()
-        // withJavadocJar()
+        withJavadocJar()
     }
 
     // Compiler settings
@@ -98,17 +98,15 @@ subprojects {
         }
     }
 
-    /*
 
     signing {
-        useInMemoryPgpKeys(
-                System.getenv("GPG_PRIVATE_KEY"),
-                System.getenv("GPG_PRIVATE_KEY_PASSWORD")
-        )
-        sign publishing.publications.mavenJava
+        def signingKey = System.getenv("GPG_PRIVATE_KEY")
+        def signingPassword = System.getenv("GPG_PRIVATE_KEY_PASSWORD")
+        if (signingKey != null && signingPassword != null) {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+            sign publishing.publications.mavenJava
+        }
     }
-
-     */
 
 }
 
