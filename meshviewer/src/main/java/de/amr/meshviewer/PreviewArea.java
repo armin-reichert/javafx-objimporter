@@ -51,10 +51,11 @@ public class PreviewArea extends StackPane {
 
     public static final double DEFAULT_ZOOM = -30;
     public static final double ZOOM_MIN = -10_000;
-    public static final double ZOOM_MAX = -0.5;
+    public static final double ZOOM_MAX = -0.1;
 
-    public static final double ZOOM_RATE_NORMAL = 0.5;
-    public static final double ZOOM_RATE_LARGE  = 2.0;
+    public static final double ZOOM_RATE_NORMAL = 0.1;
+    public static final double ZOOM_RATE_LARGE  = 1.0;
+    public static final double ZOOM_RATE_HUGE   = 10.0;
 
     // Flip around x-axis (otherwise many objects are upside-down initially)
     private static final Rotate FLIP_Y_DIRECTION = new Rotate(180, Rotate.X_AXIS);
@@ -156,17 +157,17 @@ public class PreviewArea extends StackPane {
         subScene.setOnKeyPressed(e -> {
             boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
             switch (e.getCode()) {
-                case PLUS  -> {
-                    int delta = controlShift ? 100 : shift ? 10 : 1;
-                    zoomBy(delta);
+                case PLUS -> {
+                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+                    zoomBy(rate);
                     e.consume();
                 }
                 case MINUS -> {
-                    int delta = controlShift ? 100 : shift ? 10 : 1;
-                    zoomBy(-delta);
+                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+                    zoomBy(-rate);
                     e.consume();
                 }
-                case LEFT  -> {
+                case LEFT -> {
                     rotateYBy(-1);
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -174,11 +175,11 @@ public class PreviewArea extends StackPane {
                     rotateYBy(1);
                     e.consume(); // do not deliver event to tab pane
                 }
-                case UP    -> {
+                case UP -> {
                     rotateXBy(-1);
                     e.consume(); // do not deliver event to tab pane
                 }
-                case DOWN  -> {
+                case DOWN -> {
                     rotateXBy(1);
                     e.consume(); // do not deliver event to tab pane
                 }
