@@ -16,3 +16,5 @@ javafx {
     version = libs.versions.javafx.get()
     modules = ["javafx.base", "javafx.graphics" ]
 }
+
+ext.isRelease = true

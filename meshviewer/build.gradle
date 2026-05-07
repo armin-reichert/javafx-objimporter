@@ -59,3 +59,5 @@ jlink {
         }
     }
 }
+
+ext.isRelease = false

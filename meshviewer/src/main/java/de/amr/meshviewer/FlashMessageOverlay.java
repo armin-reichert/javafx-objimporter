@@ -38,6 +38,9 @@ public class FlashMessageOverlay extends StackPane {
         setOpacity(0);
     }
 
+    /**
+     * @param message the message to show
+     */
     public void showMessage(String message) {
         messageText.setText(message);
 

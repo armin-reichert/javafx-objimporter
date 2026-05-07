@@ -13,3 +13,5 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+ext.isRelease = true

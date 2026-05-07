@@ -443,11 +443,9 @@ public class MeshViewerUI {
 
         final CheckMenuItem miTreeVisible = new CheckMenuItem("Mesh Tree");
         miTreeVisible.selectedProperty().bindBidirectional(treeArea.visibleProperty());
-//        miTreeVisible.setSelected(treeArea.isVisible());
         miTreeVisible.setOnAction(_ -> showTreeArea(miTreeVisible.isSelected()));
 
         final CheckMenuItem miInfoVisible = new CheckMenuItem("Info");
-//        miInfoVisible.setSelected(infoArea.isVisible());
         miInfoVisible.selectedProperty().bindBidirectional(infoArea.visibleProperty());
         miInfoVisible.setOnAction(_ -> showInfoArea(miInfoVisible.isSelected()));
 

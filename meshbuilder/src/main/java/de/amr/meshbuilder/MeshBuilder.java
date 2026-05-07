@@ -16,17 +16,30 @@ import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Creates JavaFX mesh views and Phong materials from the parsed Wavefront file data.
+ */
 public class MeshBuilder {
 
+    /**
+     * Mesh builder mode to specify for which entities the mesh views should be created.
+     */
     public enum BuildMode {
+        /** Build mesh views for OBJ groups */
         BY_GROUP,
+        /** Build mesh views for OBJ objects */
         BY_OBJECT,
+        /** Build mesh views for OBJ material usages */
         BY_MATERIAL
     }
 
     private final ObjModel model;
     private final Map<String, PhongMaterial> materials;
 
+    /**
+     * Creates a mesh builder.
+     * @param model the OBJ data model
+     */
     public MeshBuilder(ObjModel model) {
         this.model = requireNonNull(model);
 
@@ -41,24 +54,29 @@ public class MeshBuilder {
      *  PUBLIC API
      * ------------------------------------------------------------- */
 
+    /**
+     * Builds all mesh views and materials for the specified category of entities from the Wavefront OBJ file.
+     *
+     * @param objModel the data model of the OBJ file
+     * @param mode the mesh creation mode (objects, groups or materials)
+     * @return a map of mesh views for the given category
+     */
     public static Map<String, MeshView> build(ObjModel objModel, BuildMode mode) {
         requireNonNull(objModel);
         requireNonNull(mode);
-        return new MeshBuilder(objModel).build(mode);
-    }
-
-    public Map<String, MeshView> build(BuildMode mode) {
-        requireNonNull(mode);
+        final var meshBuilder = new MeshBuilder(objModel);
         return switch (mode) {
-            case BY_GROUP -> buildMeshViewsByGroup();
-            case BY_OBJECT -> buildMeshViewsByObject();
-            case BY_MATERIAL -> buildMeshViewsByMaterial();
+            case BY_GROUP -> meshBuilder.buildMeshViewsByGroup();
+            case BY_OBJECT -> meshBuilder.buildMeshViewsByObject();
+            case BY_MATERIAL -> meshBuilder.buildMeshViewsByMaterial();
         };
     }
 
     /**
      * Builds one MeshView per OBJ group.
      * Key format: "objectName.groupName"
+     *
+     * @return map with mesh views for OBJ groups
      */
     public Map<String, MeshView> buildMeshViewsByGroup() {
         Map<String, MeshView> result = new LinkedHashMap<>();
@@ -82,6 +100,8 @@ public class MeshBuilder {
      * Builds one MeshView per OBJ object.
      * All groups inside the object are merged.
      * Key format: "objectName"
+     *
+     * @return map with mesh views for OBJ objects
      */
     public Map<String, MeshView> buildMeshViewsByObject() {
         Map<String, MeshView> result = new LinkedHashMap<>();
@@ -105,6 +125,8 @@ public class MeshBuilder {
     /**
      * Builds one MeshView per material.
      * Key format: "materialName"
+     *
+     * @return map with mesh views for OBJ materials
      */
     public Map<String, MeshView> buildMeshViewsByMaterial() {
         Map<String, List<ObjFace>> facesByMaterial = new LinkedHashMap<>();

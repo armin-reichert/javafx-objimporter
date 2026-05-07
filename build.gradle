@@ -23,10 +23,14 @@ allprojects {
 
 subprojects {
 
+    // No mandatory Javadoc for modules that are not pubslished
+    def isReleaseProject = hasProperty('isRelease') && property('isRelease') == true
+
     // Apply plugins
     apply plugin: "java"
     apply plugin: "maven-publish"
     apply plugin: 'signing'
+
 
     // Java toolchain
     java {
@@ -34,7 +38,9 @@ subprojects {
             languageVersion = JavaLanguageVersion.of(libs.versions.java.get())
         }
         withSourcesJar()
-        withJavadocJar()
+        if (isReleaseProject) {
+            withJavadocJar()
+        }
     }
 
     // Compiler settings

@@ -4,8 +4,12 @@
 
 package de.amr.meshviewer;
 
+/**
+ * Type of inner nodes in mesh views tree.
+ */
 public final class InnerTreeNode extends TreeNode {
 
+    /** The inner node categories. */
     public enum NodeCategory {Model, Objects, Groups, Materials}
 
     public final String label;
