@@ -254,13 +254,13 @@ public class MeshViewerUI {
             final ObservableSet<TreeNode> selectedNodes = FXCollections.observableSet();
             modelTree.selection().put(category, selectedNodes);
             selectedNodes.addListener((SetChangeListener<TreeNode>) change -> {
-                Logger.info("Selection changed for category {}: {}", category, change);
+                Logger.debug("Selection changed for category {}: {}", category, change);
                 updateDisplayedMeshViewSet(modelTree.getSelectionModel().getSelectedItem());
             });
         }
 
         modelTree.getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
-            Logger.info("Selected item: {}", selectedItem);
+            Logger.debug("Selected item: {}", selectedItem);
             updateDisplayedMeshViewSet(selectedItem);
         });
 
@@ -272,7 +272,7 @@ public class MeshViewerUI {
 
     private void updateDisplayedMeshViewSet(TreeItem<TreeNode> selectedTreeItem) {
         if (selectedTreeItem == null) {
-            Logger.info("Nothing selected");
+            Logger.debug("Nothing selected");
             return;
         }
         Collection<MeshView> all = Set.of();

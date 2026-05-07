@@ -29,7 +29,7 @@ public class MeshViewerApp extends Application {
         try (InputStream in = getClass().getResourceAsStream("/models/toc.json")) {
             samples = mapper.readValue(in, new TypeReference<>() {});
         }
-        Logger.info("Found {} sample models");
+        Logger.info("Found {} sample models", samples.size());
     }
 
     @Override
