@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Armin Reichert (MIT License)
+ */
+
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.app.MeshViewerApp;
@@ -44,17 +48,6 @@ public class SampleInfoPane extends GridPane {
         addRow(++row, new Label("License"), lnkLicenseURL);
     }
 
-    private void setLinkAction(Hyperlink link, String url) {
-        link.setOnAction(_ -> {
-            try {
-                MeshViewerApp.HOST_SERVICES.showDocument(url);
-            } catch (Exception x) {
-                Logger.error(x, "Could not open URL {}", url);
-            }
-        });
-        link.setDisable(false);
-    }
-
     public void update(SampleInfo sample) {
         if (sample != null) {
             lblTitle.setText(sample.title());
@@ -83,5 +76,16 @@ public class SampleInfoPane extends GridPane {
                 lnkLicenseURL.setDisable(true);
             }
         }
+    }
+
+    private static void setLinkAction(Hyperlink link, String url) {
+        link.setOnAction(_ -> {
+            try {
+                MeshViewerApp.HOST_SERVICES.showDocument(url);
+            } catch (Exception x) {
+                Logger.error(x, "Could not open URL {}", url);
+            }
+        });
+        link.setDisable(false);
     }
 }

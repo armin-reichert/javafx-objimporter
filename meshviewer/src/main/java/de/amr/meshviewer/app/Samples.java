@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2026 Armin Reichert (MIT License)
+ */
+
 package de.amr.meshviewer.app;
 
 import de.amr.meshviewer.MeshSelection;
 import de.amr.meshviewer.SampleInfo;
 import de.amr.meshviewer.SampleInitSettings;
 
-public interface SamplesCollection {
+public interface Samples {
 
     SampleInfo[] SAMPLES = {
         new SampleInfo(

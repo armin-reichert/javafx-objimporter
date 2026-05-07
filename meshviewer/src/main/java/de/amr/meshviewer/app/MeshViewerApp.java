@@ -24,7 +24,7 @@ public class MeshViewerApp extends Application {
         final double height = Math.min(0.90 * screenHeight, 800);
         final double width = aspect * height;
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height);
-        for (SampleInfo sample : SamplesCollection.SAMPLES) {
+        for (SampleInfo sample : Samples.SAMPLES) {
             ui.addSampleModel(sample);
         }
         ui.show();

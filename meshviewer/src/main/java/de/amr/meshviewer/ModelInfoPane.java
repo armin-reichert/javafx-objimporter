@@ -17,7 +17,9 @@ import java.util.Objects;
 
 public class ModelInfoPane extends GridPane {
 
+    // For dots between thousands
     private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.GERMANY);
+
     private static final String NA = "-";
 
     private final Label lblVertices = new Label();
@@ -81,27 +83,27 @@ public class ModelInfoPane extends GridPane {
 
             lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
 
-            int groupCount = model.objects.stream()
+            final int groupCount = model.objects.stream()
                 .mapToInt(o -> o.groups.size())
                 .sum();
             lblGroups.setText(NUMBER_FORMAT.format(groupCount));
 
-            int faceCount = model.objects.stream()
+            final int faceCount = model.objects.stream()
                 .flatMap(o -> o.groups.stream())
                 .mapToInt(g -> g.faces.size())
                 .sum();
             lblFaces.setText(NUMBER_FORMAT.format(faceCount));
 
-            long smoothingGroups = model.objects.stream()
+            final long smoothingGroupsCount = model.objects.stream()
                 .flatMap(o -> o.groups.stream())
                 .flatMap(g -> g.faces.stream())
                 .map(f -> f.smoothingGroup)
                 .filter(Objects::nonNull)
                 .distinct()
                 .count();
-            lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroups));
+            lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroupsCount));
 
-            int materialCount = model.materialLibsMap.values().stream()
+            final int materialCount = model.materialLibsMap.values().stream()
                 .mapToInt(Map::size)
                 .sum();
             lblMaterials.setText(NUMBER_FORMAT.format(materialCount));

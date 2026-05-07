@@ -42,7 +42,7 @@
     -fx-background-color: white;
 }
 
-/* Obj model info Panel */
+/* --- Info panels --- */
 
 #objModelInfo, #sampleInfo {
     -fx-background-color: black;
