@@ -10,7 +10,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.fastutil)
     implementation(libs.bundles.tinylog)
     implementation(libs.bundles.jackson)
     implementation(project(":objparser"))

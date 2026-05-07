@@ -196,21 +196,21 @@ public class MeshBuilder {
 
                 int newIndex = vertexMap.computeIfAbsent(key, k -> {
 
-                    // --- READ VERTEX FROM FASTUTIL FLOAT ARRAY ---
+                    // --- READ VERTEX FROM FLOAT ARRAY ---
                     int vIndex = k.v * 3;
-                    float vx = model.vertices.getFloat(vIndex);
-                    float vy = model.vertices.getFloat(vIndex + 1);
-                    float vz = model.vertices.getFloat(vIndex + 2);
+                    float vx = model.vertices.get(vIndex);
+                    float vy = model.vertices.get(vIndex + 1);
+                    float vz = model.vertices.get(vIndex + 2);
 
                     points.add(vx);
                     points.add(vy);
                     points.add(vz);
 
-                    // --- READ TEXCOORD FROM FASTUTIL FLOAT ARRAY ---
+                    // --- READ TEXCOORD FROM FLOAT ARRAY ---
                     if (k.vt >= 0) {
                         int tIndex = k.vt * 2;
-                        float u = model.texCoords.getFloat(tIndex);
-                        float v = model.texCoords.getFloat(tIndex + 1);
+                        float u = model.texCoords.get(tIndex);
+                        float v = model.texCoords.get(tIndex + 1);
 
                         texCoords.add(u);
                         texCoords.add(1 - v); // JavaFX UV flip

@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.fastutil)
     implementation(libs.bundles.tinylog)
     implementation(project(":objparser"))
 }

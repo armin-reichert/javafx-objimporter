@@ -4,8 +4,6 @@
 
 package de.amr.objparser;
 
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +12,9 @@ import java.util.Map;
 public class ObjModel {
 
     // Geometry stored in fastutil primitive lists
-    public final FloatArrayList vertices;   // x,y,z,x,y,z,...
-    public final FloatArrayList texCoords;  // u,v,u,v,...
-    public final FloatArrayList normals;    // nx,ny,nz,...
+    public final ArrayList<Float> vertices;   // x,y,z,x,y,z,...
+    public final ArrayList<Float> texCoords;  // u,v,u,v,...
+    public final ArrayList<Float> normals;    // nx,ny,nz,...
 
     // Object/group hierarchy (unchanged)
     public final List<ObjObject> objects = new ArrayList<>();
@@ -36,10 +34,9 @@ public class ObjModel {
 
     public ObjModel(ObjFileParser.ObjSizeInfo sizes) {
 
-        // Pre-allocate exact sizes (fastutil)
-        this.vertices  = new FloatArrayList((int) (sizes.vertexCount() * 3));
-        this.texCoords = new FloatArrayList((int) (sizes.texCoordCount() * 2));
-        this.normals   = new FloatArrayList((int) (sizes.normalCount() * 3));
+        this.vertices  = new ArrayList<Float>((int) (sizes.vertexCount() * 3));
+        this.texCoords = new ArrayList<Float>((int) (sizes.texCoordCount() * 2));
+        this.normals   = new ArrayList<Float>((int) (sizes.normalCount() * 3));
 
         // Objects and faces are created during parsing
         this.currentObject = null;
