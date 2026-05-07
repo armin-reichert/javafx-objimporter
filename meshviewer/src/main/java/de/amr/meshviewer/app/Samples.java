@@ -36,6 +36,18 @@ public interface Samples {
         ),
 
         new SampleInfo(
+            "Toy Train",
+            "RegusTtef",
+            "toyTrain.obj",
+            "/models/toy_train/",
+            null,
+            null,
+            "CC 3.0",
+            "https://creativecommons.org/licenses/by/3.0/",
+            new SampleInitSettings(-30, 0, 0, 0, MeshSelection.ALL_MATERIALS, false, true)
+        ),
+
+        new SampleInfo(
             "Alien Animal",
             "Dennis Haupt",
             "Alien Animal.obj",
