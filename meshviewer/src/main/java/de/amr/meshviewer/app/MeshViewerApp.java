@@ -4,8 +4,8 @@
 
 package de.amr.meshviewer.app;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import de.amr.meshviewer.MeshViewerUI;
 import de.amr.meshviewer.SampleInfo;
 import javafx.application.Application;
@@ -13,7 +13,10 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.tinylog.Logger;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class MeshViewerApp extends Application {
@@ -21,10 +24,16 @@ public class MeshViewerApp extends Application {
     private List<SampleInfo> samples = List.of();
 
     @Override
-    public void init() throws Exception {
-        final ObjectMapper mapper = new ObjectMapper();
+    public void init() {
+        final Gson gson = new Gson();
         try (final InputStream in = getClass().getResourceAsStream("/models/toc.json")) {
-            samples = mapper.readValue(in, new TypeReference<>() {});
+            if (in != null) {
+                samples = gson.fromJson(
+                    new InputStreamReader(in, StandardCharsets.UTF_8),
+                    new TypeToken<List<SampleInfo>>() {}.getType());
+            }
+        } catch (IOException x) {
+            Logger.error(x, "Could not load models/toc.json");
         }
         Logger.info("Found {} sample models", samples.size());
     }

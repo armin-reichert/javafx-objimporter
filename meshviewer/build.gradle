@@ -11,7 +11,7 @@ plugins {
 
 dependencies {
     implementation(libs.bundles.tinylog)
-    implementation(libs.bundles.jackson)
+    implementation(libs.gson)
     implementation(project(":objparser"))
     implementation(project(":meshbuilder"))
 }

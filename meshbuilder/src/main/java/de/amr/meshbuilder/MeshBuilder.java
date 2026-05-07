@@ -72,6 +72,10 @@ public class MeshBuilder {
         };
     }
 
+    public Map<String, PhongMaterial> materials() {
+        return materials;
+    }
+
     /**
      * Builds one MeshView per OBJ group.
      * Key format: "objectName.groupName"
