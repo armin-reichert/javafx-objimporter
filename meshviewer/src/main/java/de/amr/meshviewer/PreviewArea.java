@@ -92,7 +92,7 @@ public class PreviewArea extends StackPane {
         configureCamera();
         addLights();
         setKeyboardAndMouseHandlers();
-        configureBackground();
+        setBackground(Background.fill(SKY_GRADIENT));
         getChildren().setAll(subScene, flashMessageOverlay);
 
         // Make key events work as expected
@@ -236,17 +236,6 @@ public class PreviewArea extends StackPane {
             Logger.info("delta={}", dy);
             zoomBy(dy * rate);
         });
-    }
-
-    private void configureBackground() {
-        setBackground(Background.fill(SKY_GRADIENT));
-        //TODO ensure focus always stays on subscene while navigating in tree
-/*
-        backgroundProperty().bind(subScene.focusedProperty()
-            .map(focussed -> focussed? SKY_GRADIENT : DARK_GRADIENT)
-            .map(Background::fill)
-        );
- */
     }
 
     private void configureCamera() {
