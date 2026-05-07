@@ -20,7 +20,7 @@ osdetector = { id = "com.google.osdetector", version = "1.7.3" }
 #    implementation libs.bundles.xyz
 #    testImplementation libs.junit.jupiter.api
 [libraries]
-fastutil             = { module = "it.unimi.dsi:fastutil",                           version.ref = "fastutil" }
+fastutil             = { module = "it.unimi.dsi:fastutil-core",                      version.ref = "fastutil" }
 iconli-fontawesome   = { module = "org.kordamp.ikonli:ikonli-fontawesome5-pack",     version.ref = "iconli" }
 iconli-javafx        = { module = "org.kordamp.ikonli:ikonli-javafx",                version.ref = "iconli" }
 jackson-annotations  = { module = "com.fasterxml.jackson.core:jackson-annotations",  version.ref = "jackson" }

@@ -4,7 +4,7 @@
 
 module de.amr.objparser {
     requires org.tinylog.api;
-    requires it.unimi.dsi.fastutil;
+    requires it.unimi.dsi.fastutil.core;
 
     exports de.amr.objparser;
 }

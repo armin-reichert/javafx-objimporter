@@ -3,7 +3,7 @@
  */
 module de.amr.meshbuilder {
     requires javafx.graphics;
-    requires it.unimi.dsi.fastutil;
+    requires it.unimi.dsi.fastutil.core;
     requires org.tinylog.api;
     requires de.amr.objparser;
 
