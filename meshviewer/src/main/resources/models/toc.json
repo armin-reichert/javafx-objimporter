@@ -1,0 +1,154 @@
+[
+  {
+    "title": "Teapot",
+    "author": "Martin Newell, Jim Blinn",
+    "fileName": "teapot.obj",
+    "path": "/models/newell_teaset/",
+    "downloadURL": "https://www.cs.utah.edu/~natevm/newell_teaset/newell_teaset.zip",
+    "homepage": "https://graphics.cs.utah.edu/teapot/",
+    "licenseType": "LICENSE?",
+    "licenseURL": null,
+    "initSettings": {
+      "zoom": -10,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_GROUPS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Scooter",
+    "author": "A. Kator, J. Legaz",
+    "fileName": "Scooter-smgrps.obj",
+    "path": "/models/scooter/",
+    "downloadURL": "https://www.sweethome3d.com/wp-content/themes/sweet-home-3d/theme/assets/models/katorlegaz/scooter.zip",
+    "homepage": "https://www.sweethome3d.com/free-3d-models",
+    "licenseType": "CCA 3.0",
+    "licenseURL": "https://github.com/AlmasB/javafx3d-samples/blob/master/LICENSE-Scooter.txt",
+    "initSettings": {
+      "zoom": -2,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Toy Train",
+    "author": "RegusTtef",
+    "fileName": "toyTrain.obj",
+    "path": "/models/toy_train/",
+    "downloadURL": null,
+    "homepage": null,
+    "licenseType": "CC 3.0",
+    "licenseURL": "https://creativecommons.org/licenses/by/3.0/",
+    "initSettings": {
+      "zoom": -30,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Alien Animal",
+    "author": "Dennis Haupt",
+    "fileName": "Alien Animal.obj",
+    "path": "/models/alien_animal/",
+    "downloadURL": "https://free3d.com/3d-model/alien-animal-218186.html",
+    "homepage": "https://free3d.com/3d-model/alien-animal-218186.html",
+    "licenseType": "LICENSE?",
+    "licenseURL": null,
+    "initSettings": {
+      "zoom": -50,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Beagle",
+    "author": "AUTHOR TODO",
+    "fileName": "13041_Beagle_v1_L1.obj",
+    "path": "/models/beagle/",
+    "downloadURL": null,
+    "homepage": null,
+    "licenseType": "LICENSE?",
+    "licenseURL": null,
+    "initSettings": {
+      "zoom": -150,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": false
+    }
+  },
+  {
+    "title": "Aya",
+    "author": "AUTHOR TODO",
+    "fileName": "091_W_Aya_100K.obj",
+    "path": "/models/aya_japanese_girl/",
+    "downloadURL": null,
+    "homepage": null,
+    "licenseType": "LICENSE?",
+    "licenseURL": null,
+    "initSettings": {
+      "zoom": -2800,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Datsun 280Z",
+    "author": "Martin Trafas",
+    "fileName": "Datsun_280Z.obj",
+    "path": "/models/datsun_280Z/",
+    "downloadURL": "https://sketchfab.com/3d-models/free-datsun-280z-0789ab2ece9442de94b3c41595e0ecbd",
+    "homepage": "https://sketchfab.com/TinoD2",
+    "licenseType": "CC Attribution",
+    "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
+    "initSettings": {
+      "zoom": -4,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": false,
+      "autorotate": true
+    }
+  },
+  {
+    "title": "Pac-Man",
+    "author": "Gianmarco Cavallaccio",
+    "fileName": "pacman.obj",
+    "path": "/models/pacman/",
+    "downloadURL": "https://sketchfab.com/3d-models/pac-man-9b2fd5bc82ba4212895fd0b753a4df09",
+    "homepage": "https://sketchfab.com/GianmArt",
+    "licenseType": "CC Attribution",
+    "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
+    "initSettings": {
+      "zoom": -42,
+      "rotateX": 0,
+      "rotateY": 0,
+      "rotateZ": 0,
+      "initialMeshSelection": "ALL_MATERIALS",
+      "wireframe": true,
+      "autorotate": true
+    }
+  }
+]
