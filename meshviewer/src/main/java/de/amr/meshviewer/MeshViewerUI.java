@@ -133,7 +133,7 @@ public class MeshViewerUI {
             final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
             createMeshViews(newModel);
             modelTree.populate(title, objectMeshViews, groupMeshViews, materialMeshViews);
-            modelTree.clearSelectedNodeSets();
+            modelTree.clearMeshSelection();
             final Set<MeshView> allMeshViews = new HashSet<>();
             allMeshViews.addAll(objectMeshViews.values());
             allMeshViews.addAll(groupMeshViews.values());
@@ -198,7 +198,7 @@ public class MeshViewerUI {
         sampleInfoPane.setVisible(false);
         // initial selection: all material meshes
         modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        modelTree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+        modelTree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
         modelTree.getRoot().getChildren().getLast().setExpanded(true);
     }
 
@@ -208,10 +208,8 @@ public class MeshViewerUI {
         previewArea.reset();
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
-        // initial selection: all material meshes
+
         modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        modelTree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
-        modelTree.getRoot().getChildren().getLast().setExpanded(true);
     }
 
     private void createUI(double width, double height) {
@@ -272,7 +270,7 @@ public class MeshViewerUI {
 
     private void createSelectionArea() {
         modelTree = new ModelTree(CSS_ID_OBJ_MODEL_TREE);
-        modelTree.shortMeshViewNames.bind(shortMeshViewNames);
+        modelTree.showShortMeshNames.bind(shortMeshViewNames);
         for (NodeCategory category : NodeCategory.values()) {
             final ObservableSet<TreeNode> selectedNodes = FXCollections.observableSet();
             modelTree.selection().put(category, selectedNodes);
@@ -304,15 +302,15 @@ public class MeshViewerUI {
         if (selectedTreeItem.getValue() instanceof InnerTreeNode innerTreeNode) {
             switch (innerTreeNode.nodeCategory) {
                 case Model -> {}
-                case Objects -> {
+                case MeshesByObjects -> {
                     all = objectMeshViews.values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
-                case Groups -> {
+                case MeshesByGroups -> {
                     all = groupMeshViews.values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
-                case Materials -> {
+                case MeshesByMaterials -> {
                     all = materialMeshViews.values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
@@ -323,15 +321,15 @@ public class MeshViewerUI {
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
-                    case Objects -> {
+                    case MeshesByObjects -> {
                         all = objectMeshViews.values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }
-                    case Groups -> {
+                    case MeshesByGroups -> {
                         all = groupMeshViews.values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }
-                    case Materials -> {
+                    case MeshesByMaterials -> {
                         all = materialMeshViews.values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }

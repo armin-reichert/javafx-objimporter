@@ -282,15 +282,15 @@ public class PreviewArea extends StackPane {
         tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
         switch (settings.initialMeshSelection()) {
             case MeshSelection.ALL_OBJECTS -> {
-                tree.selectAllFrom(InnerTreeNode.NodeCategory.Objects);
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByObjects);
                 tree.getRoot().getChildren().getFirst().setExpanded(true);
             }
             case MeshSelection.ALL_GROUPS -> {
-                tree.selectAllFrom(InnerTreeNode.NodeCategory.Groups);
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByGroups);
                 tree.getRoot().getChildren().get(1).setExpanded(true);
             }
             case MeshSelection.ALL_MATERIALS -> {
-                tree.selectAllFrom(InnerTreeNode.NodeCategory.Materials);
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
                 tree.getRoot().getChildren().getLast().setExpanded(true);
             }
         }

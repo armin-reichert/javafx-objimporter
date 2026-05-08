@@ -10,7 +10,13 @@ package de.amr.meshviewer.tree;
 public final class InnerTreeNode extends TreeNode {
 
     /** The inner node categories. */
-    public enum NodeCategory {Model, Objects, Groups, Materials}
+    public enum NodeCategory {
+        Model,
+        MeshesByObjects,
+        MeshesByGroups,
+        MeshesByMaterials,
+        Materials
+    }
 
     public final String label;
     public final NodeCategory nodeCategory;
