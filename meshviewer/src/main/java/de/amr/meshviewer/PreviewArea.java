@@ -16,7 +16,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
+import javafx.geometry.Pos;
 import javafx.scene.*;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
@@ -113,7 +115,19 @@ public class PreviewArea extends StackPane {
         flashMessageOverlay.setPickOnBounds(false);
         subScene.setPickOnBounds(true);
 
+        addNoFocusWarningHint();
+
         previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
+    }
+
+    private void addNoFocusWarningHint() {
+        final Label noFocusWarning = new Label("Click to focus!");
+        noFocusWarning.setMouseTransparent(true);
+        noFocusWarning.setFocusTraversable(false);
+        noFocusWarning.setId("noFocusWarning");
+        noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
+        StackPane.setAlignment(noFocusWarning, Pos.CENTER);
+        getChildren().add(noFocusWarning);
     }
 
     public void selectDisplayedMeshViews(Collection<MeshView> all, Set<MeshView> displayed) {

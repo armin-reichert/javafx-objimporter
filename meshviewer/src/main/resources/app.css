@@ -74,3 +74,9 @@
     -fx-underline: false;
     -fx-opacity: 1.0;
 }
+
+#noFocusWarning {
+    -fx-background-color: #333;
+    -fx-text-fill: red;
+    -fx-padding: 10;
+}
