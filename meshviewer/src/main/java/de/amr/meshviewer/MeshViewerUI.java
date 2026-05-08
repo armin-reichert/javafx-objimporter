@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 
@@ -117,27 +118,31 @@ public class MeshViewerUI {
         this.hostServices = requireNonNull(hostServices);
         scene = new Scene(rootPane);
         createUI(width, height);
-        objModel.addListener(this::onObjModelChange);
+        objModel.addListener(this::handleObjModelChange);
         Platform.runLater(() -> {
             showTreeArea(true);
             showInfoArea(false);
         });
     }
 
-    private void onObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
+    private void handleObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
         if (newModel != null) {
             createMeshViewsAndPhongMaterials(newModel);
-            final Set<MeshView> allMeshViews = new HashSet<>();
-            allMeshViews.addAll(objectMeshViews.values());
-            allMeshViews.addAll(groupMeshViews.values());
-            allMeshViews.addAll(materialMeshViews.values());
             modelTreePane.update(newModel, objectMeshViews, groupMeshViews, materialMeshViews, materialsMap);
-            modelInfoPane.update(newModel, allMeshViews.size(), parsingTime.get(), meshCreationTime.get());
+            modelInfoPane.update(newModel, meshViewCount(), parsingTime.get(), meshCreationTime.get());
         } else {
             clearMeshViewsAndPhongMaterials();
             modelTreePane.clear();
-            modelInfoPane.update(null, 0, null, null);
+            modelInfoPane.update(null, 0, null, null); //TODO clear()
         }
+    }
+
+    private int meshViewCount() {
+        return (int) Stream.of(objectMeshViews, groupMeshViews, materialMeshViews)
+            .map(Map::values)
+            .flatMap(Collection::stream)
+            .distinct()
+            .count();
     }
 
     // Public
