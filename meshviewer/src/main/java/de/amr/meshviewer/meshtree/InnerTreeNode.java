@@ -2,12 +2,12 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer.modeltree;
+package de.amr.meshviewer.meshtree;
 
 /**
  * Type of inner nodes in mesh views modeltree.
  */
-public final class InnerTreeNode extends ModelTreeNode {
+public final class InnerTreeNode extends MeshTreeNode {
 
     /** The inner node categories. */
     public enum NodeCategory {

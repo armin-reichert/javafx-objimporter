@@ -5,9 +5,9 @@
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.info.SampleInfo;
-import de.amr.meshviewer.modeltree.InnerTreeNode;
-import de.amr.meshviewer.modeltree.MeshSelection;
-import de.amr.meshviewer.modeltree.ModelTreeView;
+import de.amr.meshviewer.meshtree.InnerTreeNode;
+import de.amr.meshviewer.meshtree.MeshSelection;
+import de.amr.meshviewer.meshtree.MeshTreeView;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -268,7 +268,7 @@ public class PreviewArea extends StackPane {
         previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
     }
 
-    public void initSampleModel(ModelTreeView tree, SampleInfo sample) {
+    public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
         final SampleInitSettings settings = sample.initSettings();
 
         camZoom.setZ(settings.zoom());
