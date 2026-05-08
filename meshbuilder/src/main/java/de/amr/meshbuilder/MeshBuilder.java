@@ -21,6 +21,11 @@ import static java.util.Objects.requireNonNull;
  */
 public class MeshBuilder {
 
+    private static String replaceSpace(String str) {
+        requireNonNull(str);
+        return str.replace(" ", "_");
+    }
+
     /**
      * Mesh builder mode to specify for which entities the mesh views should be created.
      */
@@ -46,7 +51,10 @@ public class MeshBuilder {
         // Flatten material libraries
         materials = new HashMap<>();
         for (Map<String, ObjMaterial> lib : model.materialLibsMap.values()) {
-            lib.forEach((name, material) -> materials.put(name, createPhongMaterial(material)));
+            lib.forEach((name, material) -> {
+                final String nameWithoutSpaces = replaceSpace(name);
+                materials.put(nameWithoutSpaces, createPhongMaterial(material));
+            });
         }
     }
 
@@ -83,17 +91,14 @@ public class MeshBuilder {
      * @return map with mesh views for OBJ groups
      */
     public Map<String, MeshView> buildMeshViewsByGroup() {
-        Map<String, MeshView> result = new LinkedHashMap<>();
+        final Map<String, MeshView> result = new LinkedHashMap<>();
 
         for (ObjObject obj : model.objects) {
             for (ObjGroup group : obj.groups) {
-
-                String key = obj.name + "." + group.name;
-
-                MeshView mv = buildMeshViewForFaces(group.faces);
-                mv.setId(key);
-
-                result.put(key, mv);
+                final String id = replaceSpace(obj.name) + "." + replaceSpace(group.name);
+                final MeshView meshView = buildMeshViewForFaces(group.faces);
+                meshView.setId(id);
+                result.put(id, meshView);
             }
         }
 
@@ -108,19 +113,20 @@ public class MeshBuilder {
      * @return map with mesh views for OBJ objects
      */
     public Map<String, MeshView> buildMeshViewsByObject() {
-        Map<String, MeshView> result = new LinkedHashMap<>();
+        final Map<String, MeshView> result = new LinkedHashMap<>();
 
         for (ObjObject obj : model.objects) {
 
-            List<ObjFace> allFaces = new ArrayList<>();
+            final List<ObjFace> allFaces = new ArrayList<>();
             for (ObjGroup group : obj.groups) {
                 allFaces.addAll(group.faces);
             }
 
-            MeshView mv = buildMeshViewForFaces(allFaces);
-            mv.setId(obj.name);
+            final MeshView meshView = buildMeshViewForFaces(allFaces);
+            final String id = replaceSpace(obj.name);
+            meshView.setId(id);
 
-            result.put(obj.name, mv);
+            result.put(id, meshView);
         }
 
         return result;
@@ -133,32 +139,31 @@ public class MeshBuilder {
      * @return map with mesh views for OBJ materials
      */
     public Map<String, MeshView> buildMeshViewsByMaterial() {
-        Map<String, List<ObjFace>> facesByMaterial = new LinkedHashMap<>();
+        final Map<String, List<ObjFace>> facesByMaterial = new LinkedHashMap<>();
 
         for (ObjObject obj : model.objects) {
             for (ObjGroup group : obj.groups) {
                 for (ObjFace face : group.faces) {
-                    facesByMaterial
-                        .computeIfAbsent(face.materialName, _ -> new ArrayList<>())
-                        .add(face);
+                    final String id = replaceSpace(face.materialName);
+                    facesByMaterial.computeIfAbsent(id, _ -> new ArrayList<>()).add(face);
                 }
             }
         }
 
-        Map<String, MeshView> result = new LinkedHashMap<>();
+        final Map<String, MeshView> result = new LinkedHashMap<>();
 
         for (var entry : facesByMaterial.entrySet()) {
-            String matName = entry.getKey();
-            List<ObjFace> faces = entry.getValue();
+            final String matName = entry.getKey();
+            final List<ObjFace> faces = entry.getValue();
 
-            MeshView mv = buildMeshViewForFaces(faces);
-            mv.setId(matName);
+            final MeshView meshView = buildMeshViewForFaces(faces);
+            meshView.setId(matName);
 
             if (materials.containsKey(matName)) {
-                mv.setMaterial(materials.get(matName));
+                meshView.setMaterial(materials.get(matName));
             }
 
-            result.put(matName, mv);
+            result.put(matName, meshView);
         }
 
         return result;
@@ -169,42 +174,42 @@ public class MeshBuilder {
      * ------------------------------------------------------------- */
 
     private MeshView buildMeshViewForFaces(List<ObjFace> faces) {
-        TriangleMesh mesh = buildMeshForFaces(faces);
-        MeshView mv = new MeshView(mesh);
+        final TriangleMesh mesh = buildMeshForFaces(faces);
+        MeshView meshView = new MeshView(mesh);
 
         if (!faces.isEmpty()) {
             // Assign material if all faces share one
-            String mat = faces.getFirst().materialName;
-            if (mat != null && materials.containsKey(mat)) {
-                mv.setMaterial(materials.get(mat));
+            final String matName = replaceSpace(faces.getFirst().materialName);
+            if (materials.containsKey(matName)) {
+                meshView.setMaterial(materials.get(matName));
             }
         }
 
-        return mv;
+        return meshView;
     }
 
     private TriangleMesh buildMeshForFaces(List<ObjFace> faces) {
-        TriangleMesh mesh = new TriangleMesh();
+        final TriangleMesh mesh = new TriangleMesh();
 
-        List<Float> points = new ArrayList<>();
-        List<Float> texCoords = new ArrayList<>();
-        List<Integer> facesIdx = new ArrayList<>();
-        List<Integer> smoothing = new ArrayList<>();
+        final List<Float> points = new ArrayList<>();
+        final List<Float> texCoords = new ArrayList<>();
+        final List<Integer> facesIdx = new ArrayList<>();
+        final List<Integer> smoothing = new ArrayList<>();
 
-        Map<VertexKey, Integer> vertexMap = new HashMap<>();
+        final Map<VertexKey, Integer> vertexMap = new HashMap<>();
 
         for (ObjFace face : faces) {
             for (ObjFaceVertex fv : face.vertices) {
 
-                VertexKey key = new VertexKey(fv.vIndex(), fv.vtIndex(), fv.vnIndex());
+                final VertexKey key = new VertexKey(fv.vIndex(), fv.vtIndex(), fv.vnIndex());
 
-                int newIndex = vertexMap.computeIfAbsent(key, k -> {
+                final int newIndex = vertexMap.computeIfAbsent(key, k -> {
 
                     // --- READ VERTEX FROM FLOAT ARRAY ---
-                    int vIndex = k.v * 3;
-                    float vx = model.vertices.get(vIndex);
-                    float vy = model.vertices.get(vIndex + 1);
-                    float vz = model.vertices.get(vIndex + 2);
+                    final int vIndex = k.v * 3;
+                    final float vx = model.vertices.get(vIndex);
+                    final float vy = model.vertices.get(vIndex + 1);
+                    final float vz = model.vertices.get(vIndex + 2);
 
                     points.add(vx);
                     points.add(vy);
@@ -212,9 +217,9 @@ public class MeshBuilder {
 
                     // --- READ TEXCOORD FROM FLOAT ARRAY ---
                     if (k.vt >= 0) {
-                        int tIndex = k.vt * 2;
-                        float u = model.texCoords.get(tIndex);
-                        float v = model.texCoords.get(tIndex + 1);
+                        final int tIndex = k.vt * 2;
+                        final float u = model.texCoords.get(tIndex);
+                        final float v = model.texCoords.get(tIndex + 1);
 
                         texCoords.add(u);
                         texCoords.add(1 - v); // JavaFX UV flip
@@ -230,7 +235,7 @@ public class MeshBuilder {
                 facesIdx.add(newIndex);
             }
 
-            int sg = face.smoothingGroup != null ? (1 << face.smoothingGroup) : 0;
+            final int sg = face.smoothingGroup != null ? (1 << face.smoothingGroup) : 0;
             smoothing.add(sg);
         }
 
