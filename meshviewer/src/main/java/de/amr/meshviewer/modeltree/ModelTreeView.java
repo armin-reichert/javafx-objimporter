@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2026 Armin Reichert (MIT License)
+ */
+
 package de.amr.meshviewer.modeltree;
 
+import de.amr.meshviewer.ObjModelFX;
 import de.amr.meshviewer.modeltree.InnerTreeNode.NodeCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -10,7 +15,6 @@ import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import org.tinylog.Logger;
 
@@ -127,19 +131,14 @@ public class ModelTreeView extends TreeView<ModelTreeNode> {
         return meshSelection;
     }
 
-    public void populate(
-        String title,
-        Map<String, MeshView> objectMeshViews,
-        Map<String, MeshView> groupMeshViews,
-        Map<String, MeshView> materialMeshViews,
-        Map<String, PhongMaterial> materials)
+    public void populate(String title, ObjModelFX fxModel)
     {
         getRoot().setValue(new InnerTreeNode(NodeCategory.Model, title));
         getRoot().getChildren().clear();
 
-        addMeshViewTreeNodes(NodeCategory.MeshesByObjects,   objectMeshViews);
-        addMeshViewTreeNodes(NodeCategory.MeshesByGroups,    groupMeshViews);
-        addMeshViewTreeNodes(NodeCategory.MeshesByMaterials, materialMeshViews);
+        addMeshViewTreeNodes(NodeCategory.MeshesByObjects,   fxModel.objectMeshViews());
+        addMeshViewTreeNodes(NodeCategory.MeshesByGroups,    fxModel.groupMeshViews());
+        addMeshViewTreeNodes(NodeCategory.MeshesByMaterials, fxModel.materialMeshViews());
     }
 
     private void addMeshViewTreeNodes(NodeCategory category, Map<String, MeshView> meshViews) {

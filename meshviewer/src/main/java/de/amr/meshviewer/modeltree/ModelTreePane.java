@@ -4,16 +4,14 @@
 
 package de.amr.meshviewer.modeltree;
 
+import de.amr.meshviewer.ObjModelFX;
 import de.amr.objparser.ObjModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.PhongMaterial;
-import javafx.scene.shape.MeshView;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 public class ModelTreePane extends VBox {
 
@@ -31,7 +29,6 @@ public class ModelTreePane extends VBox {
         modelTreeView = new ModelTreeView(CSS_ID_OBJ_MODEL_TREE);
         modelTreeView.showShortMeshNames.bind(shortMeshViewNames);
         modelTreeView.prefHeightProperty().bind(heightProperty().subtract(1));
-
         getChildren().add(modelTreeView);
     }
 
@@ -39,21 +36,16 @@ public class ModelTreePane extends VBox {
         return modelTreeView;
     }
 
-    public void update(
-        ObjModel objModel,
-        Map<String, MeshView> objectMeshViews,
-        Map<String, MeshView> groupMeshViews,
-        Map<String, MeshView> materialMeshViews,
-        Map<String, PhongMaterial> materialsMap)
+    public void update(ObjModel objModel, ObjModelFX fxModel)
     {
         final String url = objModel.url();
         final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
-        modelTreeView.populate(title, objectMeshViews, groupMeshViews, materialMeshViews, materialsMap);
+        modelTreeView.populate(title, fxModel);
         modelTreeView.clearMeshSelection();
     }
 
     public void clear() {
-        modelTreeView.populate(NO_OBJ_MODEL_TITLE, Map.of(), Map.of(), Map.of(), Map.of());
+        modelTreeView.populate(NO_OBJ_MODEL_TITLE, ObjModelFX.EMPTY);
     }
 
     public void setInitialSelection() {

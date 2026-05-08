@@ -36,7 +36,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
@@ -80,13 +79,10 @@ public class MeshViewerUI {
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
 
+    // FX artifacts created from OBJ model
+    private ObjModelFX fxModel;
+
     private final HostServices hostServices;
-
-    private Map<String, MeshView> objectMeshViews;
-    private Map<String, MeshView> groupMeshViews;
-    private Map<String, MeshView> materialMeshViews;
-    private Map<String, PhongMaterial> materialsMap;
-
     private File currentModelDir;
 
     // UI
@@ -125,20 +121,20 @@ public class MeshViewerUI {
         });
     }
 
-    private void handleObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
-        if (newModel != null) {
-            createMeshViewsAndPhongMaterials(newModel);
-            modelTreePane.update(newModel, objectMeshViews, groupMeshViews, materialMeshViews, materialsMap);
-            modelInfoPane.update(newModel, meshViewCount(), parsingTime.get(), meshCreationTime.get());
+    private void handleObjModelChange(ObservableValue<? extends ObjModel> py, ObjModel oldModel, ObjModel objModel) {
+        if (objModel != null) {
+            createFXModel(objModel);
+            modelTreePane.update(objModel, fxModel);
+            modelInfoPane.update(objModel, meshViewCount(), parsingTime.get(), meshCreationTime.get());
         } else {
-            clearMeshViewsAndPhongMaterials();
+            clearFXModel();
             modelTreePane.clear();
             modelInfoPane.update(null, 0, null, null); //TODO clear()
         }
     }
 
     private int meshViewCount() {
-        return (int) Stream.of(objectMeshViews, groupMeshViews, materialMeshViews)
+        return (int) Stream.of(fxModel.objectMeshViews(), fxModel.groupMeshViews(), fxModel.materialMeshViews())
             .map(Map::values)
             .flatMap(Collection::stream)
             .distinct()
@@ -294,15 +290,15 @@ public class MeshViewerUI {
             switch (innerTreeNode.nodeCategory) {
                 case Model -> {}
                 case MeshesByObjects -> {
-                    all = objectMeshViews.values();
+                    all = fxModel.objectMeshViews().values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
                 case MeshesByGroups -> {
-                    all = groupMeshViews.values();
+                    all = fxModel.groupMeshViews().values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
                 case MeshesByMaterials -> {
-                    all = materialMeshViews.values();
+                    all = fxModel.materialMeshViews().values();
                     displayed.addAll(collectMeshViews(selectedTreeItem));
                 }
             }
@@ -313,15 +309,15 @@ public class MeshViewerUI {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
                     case MeshesByObjects -> {
-                        all = objectMeshViews.values();
+                        all = fxModel.objectMeshViews().values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }
                     case MeshesByGroups -> {
-                        all = groupMeshViews.values();
+                        all = fxModel.groupMeshViews().values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }
                     case MeshesByMaterials -> {
-                        all = materialMeshViews.values();
+                        all = fxModel.materialMeshViews().values();
                         displayed.addAll(collectMeshViews(selectedTreeItem));
                     }
                 }
@@ -385,22 +381,21 @@ public class MeshViewerUI {
         return model;
     }
 
-    private void createMeshViewsAndPhongMaterials(ObjModel objModel) {
+    private void createFXModel(ObjModel objModel) {
         final Instant start = Instant.now();
         final MeshBuilder builder = new MeshBuilder(objModel);
-        objectMeshViews = builder.buildMeshViewsByObject();
-        groupMeshViews = builder.buildMeshViewsByGroup();
-        materialMeshViews = builder.buildMeshViewsByMaterial();
-        materialsMap = builder.materials();
+        fxModel = new ObjModelFX(
+            builder.buildMeshViewsByObject(),
+            builder.buildMeshViewsByGroup(),
+            builder.buildMeshViewsByMaterial(),
+            builder.materials()
+        );
         final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
         meshCreationTime.set(Duration.millis(duration.toMillis()));
     }
 
-    private void clearMeshViewsAndPhongMaterials() {
-        objectMeshViews = Map.of();
-        groupMeshViews = Map.of();
-        materialMeshViews = Map.of();
-        materialsMap = Map.of();
+    private void clearFXModel() {
+        fxModel = new ObjModelFX(Map.of(), Map.of(), Map.of(), Map.of());
     }
 
     private void createMenus(Stage stage) {

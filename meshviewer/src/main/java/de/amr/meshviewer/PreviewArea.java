@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026 Armin Reichert (MIT License)
+ */
+
 package de.amr.meshviewer;
 
 import de.amr.meshviewer.info.SampleInfo;
