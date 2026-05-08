@@ -11,4 +11,8 @@ public final class LabelNode extends MaterialTreeNode {
         this.label = label;
     }
 
+    @Override
+    public String toString() {
+        return label;
+    }
 }

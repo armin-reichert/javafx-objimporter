@@ -15,6 +15,7 @@ public class MaterialTreeView extends TreeView<MaterialTreeNode> {
     public MaterialTreeView() {
         final TreeItem<MaterialTreeNode> materialsNode = new TreeItem<>(new LabelNode("Materials"));
         setRoot(materialsNode);
+        materialsNode.setExpanded(true);
     }
 
     public void populate(Map<String, PhongMaterial> materials) {

@@ -8,6 +8,7 @@ import de.amr.meshbuilder.MeshBuilder;
 import de.amr.meshviewer.info.ModelInfoPane;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.info.SampleInfoPane;
+import de.amr.meshviewer.materialtree.MaterialInfoPane;
 import de.amr.meshviewer.meshtree.InnerTreeNode;
 import de.amr.meshviewer.meshtree.MeshTreeLeaf;
 import de.amr.meshviewer.meshtree.MeshTreeNode;
@@ -99,7 +100,7 @@ public class MeshViewerUI {
     // Selection Area
     private TabPane selectionTabPane = new TabPane();
     private MeshTreePane meshTreePane;
-    private BorderPane materialInfoPane;
+    private MaterialInfoPane materialInfoPane;
 
     // Preview Area
     private PreviewArea previewArea;
@@ -127,10 +128,12 @@ public class MeshViewerUI {
         if (objModel != null) {
             createFXModel(objModel);
             meshTreePane.update(objModel, fxModel);
+            materialInfoPane.update(fxModel);
             modelInfoPane.update(objModel, meshViewCount(), parsingTime.get(), fxModelCreationTime.get());
         } else {
             clearFXModel();
             meshTreePane.clear();
+            materialInfoPane.clear();
             modelInfoPane.update(null, 0, null, null); //TODO clear()
         }
     }
@@ -284,8 +287,7 @@ public class MeshViewerUI {
     private void createSelectionArea() {
         createMeshTreePane();
 
-        materialInfoPane = new BorderPane();
-        materialInfoPane.setCenter(new Label("Material Info"));
+        materialInfoPane = new MaterialInfoPane();
 
         final Tab meshTreeTab = new Tab("Mesh Tree", meshTreePane);
         meshTreeTab.setClosable(false);
