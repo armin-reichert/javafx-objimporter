@@ -18,25 +18,22 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Fully optimized OBJ parser:
- * - Pre-scan for exact sizes
- * - Zero-allocation tokenizers
- * - Fast float parser
- * - Fastutil-compatible model
+ * Parser for Wavefront OBJ files. Creates an in-memory representation of the parsed file that can be used e.g. to
+ * create JavaFX materials and mesh views.
  */
 public class ObjFileParser {
 
     public enum ObjKeyword {
-        OBJECT("o"),
-        GROUP("g"),
-        MATERIAL_LIB("mtllib"),
-        MATERIAL_USAGE("usemtl"),
-        SMOOTHING_GROUP("s"),
-        VERTEX("v"),
-        VERTEX_NORMAL("vn"),
-        TEX_COORD("vt"),
-        FACE("f"),
-        UNKNOWN("");
+        OBJECT           ("o"),
+        GROUP            ("g"),
+        MATERIAL_LIB     ("mtllib"),
+        MATERIAL_USAGE   ("usemtl"),
+        SMOOTHING_GROUP  ("s"),
+        VERTEX           ("v"),
+        VERTEX_NORMAL    ("vn"),
+        TEX_COORD        ("vt"),
+        FACE             ("f"),
+        UNKNOWN          ("");
 
         private final String text;
 
