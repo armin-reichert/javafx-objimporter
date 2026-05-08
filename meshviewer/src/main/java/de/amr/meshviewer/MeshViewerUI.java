@@ -8,11 +8,10 @@ import de.amr.meshbuilder.MeshBuilder;
 import de.amr.meshviewer.info.ModelInfoPane;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.info.SampleInfoPane;
-import de.amr.meshviewer.tree.InnerTreeNode;
-import de.amr.meshviewer.tree.InnerTreeNode.NodeCategory;
-import de.amr.meshviewer.tree.MeshTreeNode;
-import de.amr.meshviewer.tree.ModelTree;
-import de.amr.meshviewer.tree.TreeNode;
+import de.amr.meshviewer.modeltree.InnerTreeNode;
+import de.amr.meshviewer.modeltree.MeshTreeNode;
+import de.amr.meshviewer.modeltree.ModelTreeNode;
+import de.amr.meshviewer.modeltree.ModelTreePane;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
 import javafx.application.HostServices;
@@ -37,6 +36,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
@@ -47,7 +47,6 @@ import org.tinylog.Logger;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collection;
@@ -62,11 +61,9 @@ import static java.util.Objects.requireNonNull;
 public class MeshViewerUI {
 
     public static final String STAGE_TITLE = "JavaFX OBJ Mesh Viewer";
-    public static final String NO_OBJ_MODEL_TITLE = "No OBJ model";
 
     public static final Pattern ANON_OBJECT_PATTERN = Pattern.compile("^Object\\.anon_\\d+\\.(.+)$");
 
-    public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
     public static final String CSS_ID_MODEL_INFO_PANE = "objModelInfo";
     public static final String CSS_ID_SAMPLE_INFO_PANE = "sampleInfo";
 
@@ -87,6 +84,7 @@ public class MeshViewerUI {
     private Map<String, MeshView> objectMeshViews;
     private Map<String, MeshView> groupMeshViews;
     private Map<String, MeshView> materialMeshViews;
+    private Map<String, PhongMaterial> materialsMap;
 
     private File currentModelDir;
 
@@ -102,8 +100,7 @@ public class MeshViewerUI {
     private final SplitPane splitLayout = new SplitPane();
 
     // Selection Area
-    private Pane treeArea;
-    private ModelTree modelTree;
+    private ModelTreePane modelTreePane;
 
     // Preview Area
     private PreviewArea previewArea;
@@ -129,22 +126,16 @@ public class MeshViewerUI {
 
     private void onObjModelChange(ObservableValue<? extends ObjModel> ov, ObjModel oldModel, ObjModel newModel) {
         if (newModel != null) {
-            final String url = newModel.url();
-            final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
-            createMeshViews(newModel);
-            modelTree.populate(title, objectMeshViews, groupMeshViews, materialMeshViews);
-            modelTree.clearMeshSelection();
+            createMeshViewsAndPhongMaterials(newModel);
             final Set<MeshView> allMeshViews = new HashSet<>();
             allMeshViews.addAll(objectMeshViews.values());
             allMeshViews.addAll(groupMeshViews.values());
             allMeshViews.addAll(materialMeshViews.values());
-            int numMeshViews = allMeshViews.size();
-            modelInfoPane.update(newModel, numMeshViews, parsingTime.get(), meshCreationTime.get());
+            modelTreePane.update(newModel, objectMeshViews, groupMeshViews, materialMeshViews, materialsMap);
+            modelInfoPane.update(newModel, allMeshViews.size(), parsingTime.get(), meshCreationTime.get());
         } else {
-            objectMeshViews = Map.of();
-            groupMeshViews = Map.of();
-            materialMeshViews = Map.of();
-            modelTree.populate(NO_OBJ_MODEL_TITLE, objectMeshViews, groupMeshViews, materialMeshViews);
+            clearMeshViewsAndPhongMaterials();
+            modelTreePane.clear();
             modelInfoPane.update(null, 0, null, null);
         }
     }
@@ -184,7 +175,7 @@ public class MeshViewerUI {
     private void showSampleModel(SampleInfo sample) throws IOException {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
-        previewArea.initSampleModel(modelTree, sample);
+        previewArea.initSampleModel(modelTreePane.modelTreeView(), sample);
         sampleInfoPane.setVisible(true);
         sampleInfoPane.update(sample);
     }
@@ -196,10 +187,7 @@ public class MeshViewerUI {
         previewArea.reset();
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
-        // initial selection: all material meshes
-        modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        modelTree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
-        modelTree.getRoot().getChildren().getLast().setExpanded(true);
+        modelTreePane.setInitialSelection();
     }
 
     private void showObjModel(URL url) throws IOException {
@@ -208,8 +196,7 @@ public class MeshViewerUI {
         previewArea.reset();
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
-
-        modelTree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
+        modelTreePane.setInitialExpansionState();
     }
 
     private void createUI(double width, double height) {
@@ -233,7 +220,7 @@ public class MeshViewerUI {
 
     private void createLayout() {
         createPreviewArea();
-        createSelectionArea();
+        createModelTreePane();
         createInfoArea();
 
         splitLayout.setOrientation(Orientation.HORIZONTAL);
@@ -246,11 +233,11 @@ public class MeshViewerUI {
         final var previewClipping = Bindings.createDoubleBinding(
             () -> {
                 double w = 0;
-                if (treeArea.isVisible()) w += treeArea.getWidth();
+                if (modelTreePane.isVisible()) w += modelTreePane.getWidth();
                 if (infoArea.isVisible()) w += infoArea.getWidth();
                 return w;
             },
-            treeArea.visibleProperty(), treeArea.widthProperty(),
+            modelTreePane.visibleProperty(), modelTreePane.widthProperty(),
             infoArea.visibleProperty(), infoArea.widthProperty()
         );
         previewArea.subScene().widthProperty().bind(rootPane.widthProperty().subtract(previewClipping));
@@ -268,30 +255,29 @@ public class MeshViewerUI {
         previewArea.drawMode.bindBidirectional(drawMode);
     }
 
-    private void createSelectionArea() {
-        modelTree = new ModelTree(CSS_ID_OBJ_MODEL_TREE);
-        modelTree.showShortMeshNames.bind(shortMeshViewNames);
-        for (NodeCategory category : NodeCategory.values()) {
-            final ObservableSet<TreeNode> selectedNodes = FXCollections.observableSet();
-            modelTree.selection().put(category, selectedNodes);
-            selectedNodes.addListener((SetChangeListener<TreeNode>) change -> {
+    private void createModelTreePane() {
+        modelTreePane = new ModelTreePane(TREE_AREA_WIDTH);
+        modelTreePane.shortMeshViewNames.bind(shortMeshViewNames);
+
+        for (InnerTreeNode.NodeCategory category : InnerTreeNode.NodeCategory.values()) {
+            final ObservableSet<ModelTreeNode> selectedNodes = FXCollections.observableSet();
+            modelTreePane.modelTreeView().selection().put(category, selectedNodes);
+            selectedNodes.addListener((SetChangeListener<ModelTreeNode>) change -> {
                 Logger.debug("Selection changed for category {}: {}", category, change);
-                updateDisplayedMeshViewSet(modelTree.getSelectionModel().getSelectedItem());
+                updateDisplayedMeshViewSet(
+                    modelTreePane.modelTreeView().getSelectionModel().getSelectedItem()
+                );
             });
         }
 
-        modelTree.getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
+        modelTreePane.modelTreeView().getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
             Logger.debug("Selected item: {}", selectedItem);
             updateDisplayedMeshViewSet(selectedItem);
         });
 
-        treeArea = new VBox(modelTree);
-        treeArea.setMinWidth(TREE_AREA_WIDTH);
-
-        modelTree.prefHeightProperty().bind(treeArea.heightProperty().subtract(1));
     }
 
-    private void updateDisplayedMeshViewSet(TreeItem<TreeNode> selectedTreeItem) {
+    private void updateDisplayedMeshViewSet(TreeItem<ModelTreeNode> selectedTreeItem) {
         if (selectedTreeItem == null) {
             Logger.debug("Nothing selected");
             return;
@@ -317,7 +303,7 @@ public class MeshViewerUI {
             }
         }
         else if (selectedTreeItem.getValue() instanceof MeshTreeNode) {
-            final TreeItem<TreeNode> parent = selectedTreeItem.getParent();
+            final TreeItem<ModelTreeNode> parent = selectedTreeItem.getParent();
             if (parent.getValue() instanceof InnerTreeNode innerTreeNode) {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
@@ -339,7 +325,7 @@ public class MeshViewerUI {
         previewArea.selectDisplayedMeshViews(all, displayed);
     }
 
-    private Set<MeshView> collectMeshViews(TreeItem<TreeNode> selectedTreeItem) {
+    private Set<MeshView> collectMeshViews(TreeItem<ModelTreeNode> selectedTreeItem) {
         return selectedTreeItem.getChildren().stream()
             .map(TreeItem::getValue)
             .filter(node -> node.checked.get())
@@ -361,7 +347,7 @@ public class MeshViewerUI {
     }
 
     private void showTreeArea(boolean visible) {
-        modelTree.setVisible(visible);
+        modelTreePane.setVisible(visible);
         updateSplitLayoutItems();
     }
 
@@ -372,8 +358,8 @@ public class MeshViewerUI {
 
     private void updateSplitLayoutItems() {
         splitLayout.getItems().clear();
-        if (treeArea.isVisible()) {
-            splitLayout.getItems().add(treeArea);
+        if (modelTreePane.isVisible()) {
+            splitLayout.getItems().add(modelTreePane);
         }
         splitLayout.getItems().add(previewArea);
         if (infoArea.isVisible()) {
@@ -394,13 +380,22 @@ public class MeshViewerUI {
         return model;
     }
 
-    private void createMeshViews(ObjModel objModel) {
+    private void createMeshViewsAndPhongMaterials(ObjModel objModel) {
         final Instant start = Instant.now();
-        objectMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_OBJECT);
-        groupMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
-        materialMeshViews = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_MATERIAL);
+        final MeshBuilder builder = new MeshBuilder(objModel);
+        objectMeshViews = builder.buildMeshViewsByObject();
+        groupMeshViews = builder.buildMeshViewsByGroup();
+        materialMeshViews = builder.buildMeshViewsByMaterial();
+        materialsMap = builder.materials();
         final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
         meshCreationTime.set(Duration.millis(duration.toMillis()));
+    }
+
+    private void clearMeshViewsAndPhongMaterials() {
+        objectMeshViews = Map.of();
+        groupMeshViews = Map.of();
+        materialMeshViews = Map.of();
+        materialsMap = Map.of();
     }
 
     private void createMenus(Stage stage) {
@@ -447,7 +442,7 @@ public class MeshViewerUI {
         miShortMeshViewNames.selectedProperty().bindBidirectional(shortMeshViewNames);
 
         final CheckMenuItem miTreeVisible = new CheckMenuItem("Mesh Tree");
-        miTreeVisible.selectedProperty().bindBidirectional(treeArea.visibleProperty());
+        miTreeVisible.selectedProperty().bindBidirectional(modelTreePane.visibleProperty());
         miTreeVisible.setOnAction(_ -> showTreeArea(miTreeVisible.isSelected()));
 
         final CheckMenuItem miInfoVisible = new CheckMenuItem("Info");

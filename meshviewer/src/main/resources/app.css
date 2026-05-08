@@ -7,7 +7,7 @@
     -fx-cursor: default;
 }
 
-/* OBJ model tree */
+/* OBJ model modeltree */
 
 #objModelTree .tree-view {
     -fx-background-color: black;

@@ -1,6 +1,6 @@
-package de.amr.meshviewer.tree;
+package de.amr.meshviewer.modeltree;
 
-import de.amr.meshviewer.tree.InnerTreeNode.NodeCategory;
+import de.amr.meshviewer.modeltree.InnerTreeNode.NodeCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -10,6 +10,7 @@ import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.CheckBoxTreeCell;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import org.tinylog.Logger;
 
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class ModelTree extends TreeView<TreeNode> {
+public class ModelTreeView extends TreeView<ModelTreeNode> {
 
     private static String computeCategoryNodeLabel(NodeCategory category, boolean empty) {
         final String emptySuffix = empty ? " (empty)" : "";
@@ -36,14 +37,14 @@ public class ModelTree extends TreeView<TreeNode> {
         }
     }
 
-    private final ObservableMap<NodeCategory, ObservableSet<TreeNode>> meshSelection = FXCollections.observableHashMap();
+    private final ObservableMap<NodeCategory, ObservableSet<ModelTreeNode>> meshSelection = FXCollections.observableHashMap();
 
     public final BooleanProperty showShortMeshNames = new SimpleBooleanProperty(true);
 
-    public ModelTree(String cssID) {
+    public ModelTreeView(String cssID) {
         setId(cssID);
 
-        final var root = new TreeItem<TreeNode>(new InnerTreeNode(NodeCategory.Model, "No OBJ model loaded"));
+        final var root = new TreeItem<ModelTreeNode>(new InnerTreeNode(NodeCategory.Model, "No OBJ model loaded"));
         root.setExpanded(true);
 
         //setFocusTraversable(false);
@@ -67,21 +68,17 @@ public class ModelTree extends TreeView<TreeNode> {
         // To be able to e.g. hide the check box for the root, we need an explicit cell factory
         setCellFactory(_ -> new CheckBoxTreeCell<>() {
             @Override
-            public void updateItem(TreeNode node, boolean empty) {
+            public void updateItem(ModelTreeNode node, boolean empty) {
                 super.updateItem(node, empty);
 
                 if (empty || node == null) {
                     return;
                 }
 
-                TreeItem<TreeNode> item = getTreeItem();
-
-                // Hide checkbox for the root
+                final TreeItem<ModelTreeNode> item = getTreeItem();
                 if (item.getParent() == null) {
-                    // Option A: hide the checkbox completely
                     setGraphic(null);
                 }
-
                 // Set the text for all nodes
                 setText(node.toString());
             }
@@ -108,14 +105,14 @@ public class ModelTree extends TreeView<TreeNode> {
 
     public void selectAllMeshesFromCategory(NodeCategory category) {
         final int childIndex = switch (category) {
-            case Model, Materials ->
+            case Model ->
                 throw new IllegalArgumentException("Category %s not allowed here".formatted(category));
             case MeshesByObjects -> 0;
             case MeshesByGroups -> 1;
             case MeshesByMaterials -> 2;
         };
 
-        final CheckBoxTreeItem<TreeNode> categoryCheckBox = (CheckBoxTreeItem<TreeNode>) getRoot().getChildren().get(childIndex);
+        final CheckBoxTreeItem<ModelTreeNode> categoryCheckBox = (CheckBoxTreeItem<ModelTreeNode>) getRoot().getChildren().get(childIndex);
         getSelectionModel().clearSelection();
         getSelectionModel().select(categoryCheckBox);
 
@@ -126,7 +123,7 @@ public class ModelTree extends TreeView<TreeNode> {
             .forEach(node -> node.setSelected(true));
     }
 
-    public ObservableMap<NodeCategory, ObservableSet<TreeNode>> selection() {
+    public ObservableMap<NodeCategory, ObservableSet<ModelTreeNode>> selection() {
         return meshSelection;
     }
 
@@ -134,27 +131,28 @@ public class ModelTree extends TreeView<TreeNode> {
         String title,
         Map<String, MeshView> objectMeshViews,
         Map<String, MeshView> groupMeshViews,
-        Map<String, MeshView> materialMeshViews)
+        Map<String, MeshView> materialMeshViews,
+        Map<String, PhongMaterial> materials)
     {
-        final TreeItem<TreeNode> root = getRoot();
-        root.setValue(new InnerTreeNode(NodeCategory.Model, title));
-        root.getChildren().clear();
-        addLevel(NodeCategory.MeshesByObjects,   objectMeshViews);
-        addLevel(NodeCategory.MeshesByGroups,    groupMeshViews);
-        addLevel(NodeCategory.MeshesByMaterials, materialMeshViews);
+        getRoot().setValue(new InnerTreeNode(NodeCategory.Model, title));
+        getRoot().getChildren().clear();
+
+        addMeshViewTreeNodes(NodeCategory.MeshesByObjects,   objectMeshViews);
+        addMeshViewTreeNodes(NodeCategory.MeshesByGroups,    groupMeshViews);
+        addMeshViewTreeNodes(NodeCategory.MeshesByMaterials, materialMeshViews);
     }
 
-    private void addLevel(NodeCategory category, Map<String, MeshView> meshViews) {
+    private void addMeshViewTreeNodes(NodeCategory category, Map<String, MeshView> meshViews) {
         final String title = computeCategoryNodeLabel(category, meshViews.isEmpty());
-        final TreeNode rootNode = new InnerTreeNode(category, title);
+        final ModelTreeNode rootNode = new InnerTreeNode(category, title);
 
         // Subtree root
-        final CheckBoxTreeItem<TreeNode> rootItem = new CheckBoxTreeItem<>(rootNode);
+        final CheckBoxTreeItem<ModelTreeNode> rootItem = new CheckBoxTreeItem<>(rootNode);
         rootItem.setExpanded(true);
 
         // Select/deselect all children when root is selected/deselected
         rootItem.selectedProperty().addListener((_, _, selected) -> rootItem.getChildren().forEach(child -> {
-            final CheckBoxTreeItem<TreeNode> childItem = (CheckBoxTreeItem<TreeNode>) child;
+            final CheckBoxTreeItem<ModelTreeNode> childItem = (CheckBoxTreeItem<ModelTreeNode>) child;
             childItem.setSelected(selected);
             if (selected) {
                 meshSelection.get(category).add(childItem.getValue());
@@ -166,7 +164,7 @@ public class ModelTree extends TreeView<TreeNode> {
         // Children of subtree root
         meshViews.keySet().stream().sorted().forEach(meshName -> {
             final var childNode = new MeshTreeNode(meshName, meshViews.get(meshName), showShortMeshNames.get());
-            final CheckBoxTreeItem<TreeNode> childItem = new CheckBoxTreeItem<>(childNode);
+            final CheckBoxTreeItem<ModelTreeNode> childItem = new CheckBoxTreeItem<>(childNode);
             rootItem.getChildren().add(childItem);
             childItem.selectedProperty().bindBidirectional(childNode.checked);
             childItem.selectedProperty().addListener((_, _, selected) -> {

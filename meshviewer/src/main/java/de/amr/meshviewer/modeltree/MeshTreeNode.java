@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer.tree;
+package de.amr.meshviewer.modeltree;
 
 import javafx.scene.shape.MeshView;
 
@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 
 import static de.amr.meshviewer.MeshViewerUI.ANON_OBJECT_PATTERN;
 
-public final class MeshTreeNode extends TreeNode {
+public final class MeshTreeNode extends ModelTreeNode {
 
     private static String removeAnonObjectPrefix(String text) {
         if (text != null) {

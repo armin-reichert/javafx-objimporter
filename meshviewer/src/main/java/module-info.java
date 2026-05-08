@@ -7,7 +7,7 @@ module de.amr.meshviewer {
 
     exports de.amr.meshviewer;
     exports de.amr.meshviewer.app;
-    exports de.amr.meshviewer.tree;
+    exports de.amr.meshviewer.modeltree;
     exports de.amr.samples;
     exports de.amr.meshviewer.info;
 }
