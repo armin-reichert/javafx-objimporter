@@ -4,6 +4,8 @@
 
 package de.amr.meshviewer;
 
+import de.amr.meshviewer.tree.MeshSelection;
+
 public record SampleInitSettings(
     double zoom,
     double rotateX,

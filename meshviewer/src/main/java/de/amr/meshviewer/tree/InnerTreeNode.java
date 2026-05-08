@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.tree;
 
 /**
  * Type of inner nodes in mesh views tree.

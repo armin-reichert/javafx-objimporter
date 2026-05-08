@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.tree;
 
 import javafx.scene.shape.MeshView;
 

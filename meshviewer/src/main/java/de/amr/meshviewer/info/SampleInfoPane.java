@@ -2,31 +2,16 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.info;
 
 import javafx.application.HostServices;
-import javafx.event.Event;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import org.tinylog.Logger;
 
 import static de.amr.meshviewer.MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH;
 
-public class SampleInfoPane extends GridPane {
-
-    private static final String NA = "No info available";
-
-    private static Hyperlink createHyperlink() {
-        final Hyperlink link = new Hyperlink();
-        link.setFocusTraversable(false);
-        link.addEventFilter(KeyEvent.ANY, Event::consume);
-        return link;
-    }
-
-    private final HostServices hostServices;
+public class SampleInfoPane extends InfoPane {
 
     private final Label lblTitle = new Label();
     private final Label lblAuthor = new Label();
@@ -35,9 +20,9 @@ public class SampleInfoPane extends GridPane {
     private final Hyperlink lnkLicenseURL = createHyperlink();
 
     public SampleInfoPane(String cssID, HostServices hostServices) {
-        setId(cssID);
-        this.hostServices = hostServices;
+        super(hostServices);
 
+        setId(cssID);
         setFocusTraversable(false); // Only mouse clicks allowed
 
         final var constraints = new ColumnConstraints(INFO_AREA_LABEL_COLUMN_WIDTH, INFO_AREA_LABEL_COLUMN_WIDTH, INFO_AREA_LABEL_COLUMN_WIDTH);
@@ -79,16 +64,5 @@ public class SampleInfoPane extends GridPane {
                 lnkLicenseURL.setDisable(true);
             }
         }
-    }
-
-    private void setLinkAction(Hyperlink link, String url) {
-        link.setOnAction(_ -> {
-            try {
-                hostServices.showDocument(url);
-            } catch (Exception x) {
-                Logger.error(x, "Could not open URL {}", url);
-            }
-        });
-        link.setDisable(false);
     }
 }

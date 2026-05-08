@@ -1,6 +1,6 @@
-package de.amr.meshviewer;
+package de.amr.meshviewer.tree;
 
-import de.amr.meshviewer.InnerTreeNode.NodeCategory;
+import de.amr.meshviewer.tree.InnerTreeNode.NodeCategory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;

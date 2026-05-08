@@ -5,7 +5,14 @@
 package de.amr.meshviewer;
 
 import de.amr.meshbuilder.MeshBuilder;
-import de.amr.meshviewer.InnerTreeNode.NodeCategory;
+import de.amr.meshviewer.info.ModelInfoPane;
+import de.amr.meshviewer.info.SampleInfo;
+import de.amr.meshviewer.info.SampleInfoPane;
+import de.amr.meshviewer.tree.InnerTreeNode;
+import de.amr.meshviewer.tree.InnerTreeNode.NodeCategory;
+import de.amr.meshviewer.tree.MeshTreeNode;
+import de.amr.meshviewer.tree.ModelTree;
+import de.amr.meshviewer.tree.TreeNode;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
 import javafx.application.HostServices;
@@ -345,7 +352,7 @@ public class MeshViewerUI {
     }
 
     private void createInfoArea() {
-        modelInfoPane = new ModelInfoPane(CSS_ID_MODEL_INFO_PANE);
+        modelInfoPane = new ModelInfoPane(CSS_ID_MODEL_INFO_PANE, hostServices);
         sampleInfoPane = new SampleInfoPane(CSS_ID_SAMPLE_INFO_PANE, hostServices);
 
         infoArea = new VBox(modelInfoPane, sampleInfoPane);

@@ -44,7 +44,7 @@
 
 /* --- Info panels --- */
 
-#objModelInfo, #sampleInfo {
+.infoPanel {
     -fx-background-color: black;
     -fx-text-fill: white;
 
@@ -55,21 +55,21 @@
 }
 
 /* Ensure labels inside the grid are white */
-#objModelInfo .label, #sampleInfo .label {
+.infoPanel .label {
     -fx-text-fill: white;
 }
 
 /* Optional: style text fields or other controls inside the grid */
-#objModelInfo .text-field, #sampleInfo .text-field {
+.infoPanel .text-field {
     -fx-background-color: #222;
     -fx-text-fill: white;
 }
 
-.hyperlink,
-.hyperlink:visited,
-.hyperlink:armed,
-.hyperlink:hover,
-.hyperlink:disabled {
+.infoPanel .hyperlink,
+.infoPanel .hyperlink:visited,
+.infoPanel .hyperlink:armed,
+.infoPanel .hyperlink:hover,
+.infoPanel .hyperlink:disabled {
     -fx-text-fill: -fx-accent;   /* or your custom color */
     -fx-underline: false;
     -fx-opacity: 1.0;

@@ -2,26 +2,21 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.info;
 
+import de.amr.meshviewer.MeshViewerUI;
 import de.amr.objparser.ObjModel;
+import javafx.application.HostServices;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class ModelInfoPane extends GridPane {
+public class ModelInfoPane extends InfoPane {
 
-    // For dots between thousands
-    private static final NumberFormat NUMBER_FORMAT = NumberFormat.getInstance(Locale.GERMANY);
-
-    private static final String NA = "-";
-
+    private final Label lblFilename = new Label();
     private final Label lblVertices = new Label();
     private final Label lblTexCoords = new Label();
     private final Label lblNormals = new Label();
@@ -33,13 +28,16 @@ public class ModelInfoPane extends GridPane {
     private final Label lblParsingTime = new Label();
     private final Label lblMeshCreationTime = new Label();
 
-    public ModelInfoPane(String cssID) {
+    public ModelInfoPane(String cssID, HostServices hostServices) {
+        super(hostServices);
+
         setId(cssID); // for CSS
 
         final var constraints = new ColumnConstraints(MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH);
         getColumnConstraints().add(constraints);
 
         int row = -1;
+        addRow(++row, new Label("File: "), lblFilename);
         addRow(++row, new Label("Vertices:"), lblVertices);
         addRow(++row, new Label("TexCoords:"), lblTexCoords);
         addRow(++row, new Label("Normals:"), lblNormals);
@@ -65,6 +63,7 @@ public class ModelInfoPane extends GridPane {
         }
 
         if (model == null) {
+            lblFilename.setText(NA);
             lblVertices.setText(NA);
             lblTexCoords.setText(NA);
             lblNormals.setText(NA);
@@ -77,6 +76,7 @@ public class ModelInfoPane extends GridPane {
             lblMaterials.setText(NA);
         }
         else {
+            lblFilename.setText(model.url()); //TODO
             lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
             lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
             lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));

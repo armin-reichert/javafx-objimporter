@@ -2,7 +2,9 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.info;
+
+import de.amr.meshviewer.SampleInitSettings;
 
 public record SampleInfo(
     String title,

@@ -7,7 +7,7 @@ package de.amr.meshviewer.app;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.amr.meshviewer.MeshViewerUI;
-import de.amr.meshviewer.SampleInfo;
+import de.amr.meshviewer.info.SampleInfo;
 import javafx.application.Application;
 import javafx.stage.Screen;
 import javafx.stage.Stage;

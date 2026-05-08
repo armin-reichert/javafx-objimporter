@@ -1,5 +1,9 @@
 package de.amr.meshviewer;
 
+import de.amr.meshviewer.info.SampleInfo;
+import de.amr.meshviewer.tree.InnerTreeNode;
+import de.amr.meshviewer.tree.MeshSelection;
+import de.amr.meshviewer.tree.ModelTree;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
