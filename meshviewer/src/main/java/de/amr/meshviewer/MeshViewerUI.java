@@ -73,10 +73,10 @@ public class MeshViewerUI {
     public static final int INFO_AREA_LABEL_COLUMN_WIDTH = 125;
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
-    private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    private final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
+    public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
+    public final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
     private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
-    private final ObjectProperty<Duration> meshCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
+    private final ObjectProperty<Duration> fxModelCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
 
@@ -89,8 +89,7 @@ public class MeshViewerUI {
     // UI
     private final Stage stage;
     private final Scene scene;
-    private MenuBar menuBar;
-    private Menu samplesMenu;
+    private MeshViewerMenus menus;
     private FileChooser fileChooser;
 
     // Layout
@@ -127,7 +126,7 @@ public class MeshViewerUI {
         if (objModel != null) {
             createFXModel(objModel);
             meshTreePane.update(objModel, fxModel);
-            modelInfoPane.update(objModel, meshViewCount(), parsingTime.get(), meshCreationTime.get());
+            modelInfoPane.update(objModel, meshViewCount(), parsingTime.get(), fxModelCreationTime.get());
         } else {
             clearFXModel();
             meshTreePane.clear();
@@ -145,6 +144,34 @@ public class MeshViewerUI {
 
     // Public
 
+    public File currentModelDir() {
+        return currentModelDir;
+    }
+
+    public FileChooser fileChooser() {
+        return fileChooser;
+    }
+
+    public Stage stage() {
+        return stage;
+    }
+
+    public TabPane selectionTabPane() {
+        return selectionTabPane;
+    }
+
+    public Pane infoArea() {
+        return infoArea;
+    }
+
+    public AboutDialog aboutDialog() {
+        return aboutDialog;
+    }
+
+    public ObservableList<SampleInfo> samples() {
+        return samples;
+    }
+
     public void show() {
         stage.show();
         if (!samples.isEmpty()) {
@@ -161,21 +188,11 @@ public class MeshViewerUI {
     public void addSampleModel(SampleInfo sample) {
         requireNonNull(sample);
         samples.add(sample);
-        final var menuItem = new MenuItem(sample.title());
-        menuItem.setOnAction(_ -> {
-            try {
-                showSampleModel(sample);
-            } catch (IOException x) {
-                Logger.error(x, "Cannot show sample model");
-                previewArea.flash("Cannot show sample model");
-            }
-        });
-        samplesMenu.getItems().add(menuItem);
+        menus.addSample(sample);
     }
 
-    // Private
 
-    private void showSampleModel(SampleInfo sample) throws IOException {
+    public void showSampleModel(SampleInfo sample) throws IOException {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
         previewArea.initSampleModel(meshTreePane.modelTreeView(), sample);
@@ -183,7 +200,7 @@ public class MeshViewerUI {
         sampleInfoPane.update(sample);
     }
 
-    private void showObjModel(File objFile) throws IOException {
+    public void showObjModel(File objFile) throws IOException {
         requireNonNull(objFile);
         loadModelFromURL(objFile.toURI().toURL());
         currentModelDir = objFile.getParentFile();
@@ -193,7 +210,7 @@ public class MeshViewerUI {
         meshTreePane.setInitialSelection();
     }
 
-    private void showObjModel(URL url) throws IOException {
+    public void showObjModel(URL url) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
         previewArea.reset();
@@ -201,6 +218,22 @@ public class MeshViewerUI {
         sampleInfoPane.setVisible(false);
         meshTreePane.setInitialExpansionState();
     }
+
+    public void showSelectionArea(boolean visible) {
+        selectionTabPane.setVisible(visible);
+        updateLayout();
+    }
+
+    public void showInfoArea(boolean visible) {
+        infoArea.setVisible(visible); // Triggers recomputation of preview subscene width!
+        updateLayout();
+    }
+
+    public void flash(String message) {
+        previewArea.flash(message);
+    }
+
+    // Private
 
     private void createUI(double width, double height) {
         final URL cssURL = getClass().getResource("/app.css");
@@ -236,9 +269,9 @@ public class MeshViewerUI {
 
         layoutSplitPane.setOrientation(Orientation.HORIZONTAL);
 
-        createMenus(stage);
+        menus = new MeshViewerMenus(this);
 
-        rootPane.setTop(menuBar);
+        rootPane.setTop(menus.menuBar());
         rootPane.setCenter(layoutSplitPane);
 
         final var previewClipping = Bindings.createDoubleBinding(
@@ -357,17 +390,7 @@ public class MeshViewerUI {
         infoArea.setMaxWidth(INFO_AREA_WIDTH);
     }
 
-    private void showSelectionArea(boolean visible) {
-        selectionTabPane.setVisible(visible);
-        updateLayoutSplitPane();
-    }
-
-    private void showInfoArea(boolean visible) {
-        infoArea.setVisible(visible); // Triggers recomputation of preview subscene width!
-        updateLayoutSplitPane();
-    }
-
-    private void updateLayoutSplitPane() {
+    private void updateLayout() {
         layoutSplitPane.getItems().clear();
         if (selectionTabPane.isVisible()) {
             layoutSplitPane.getItems().add(selectionTabPane);
@@ -377,6 +400,8 @@ public class MeshViewerUI {
             layoutSplitPane.getItems().add(infoArea);
         }
     }
+
+    // --- Model access
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
         final ObjModel model = parseObjModel(objFileURL);
@@ -401,85 +426,11 @@ public class MeshViewerUI {
             builder.materials()
         );
         final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
-        meshCreationTime.set(Duration.millis(duration.toMillis()));
+        fxModelCreationTime.set(Duration.millis(duration.toMillis()));
     }
 
     private void clearFXModel() {
-        fxModel = new ObjModelFX(Map.of(), Map.of(), Map.of(), Map.of());
-    }
-
-    private void createMenus(Stage stage) {
-
-        // -----------------------------
-        // File menu
-        // -----------------------------
-
-        Menu fileMenu = new Menu("File");
-
-        MenuItem openItem = new MenuItem("Open OBJ…");
-        MenuItem exitItem = new MenuItem("Exit");
-
-        fileMenu.getItems().addAll(openItem, exitItem);
-
-        openItem.setOnAction(_ -> {
-            if (currentModelDir != null && currentModelDir.exists()) {
-                fileChooser.setInitialDirectory(currentModelDir);
-            }
-            final File objFile = fileChooser.showOpenDialog(stage);
-            if (objFile != null) {
-                try {
-                    showObjModel(objFile);
-                } catch (IOException x) {
-                    Logger.error(x, "Cannot show OBJ model from file {}", objFile);
-                    previewArea.flash("Cannot show OBJ model");
-                }
-            }
-        });
-
-        exitItem.setOnAction(_ -> Platform.exit());
-
-        // -----------------------------
-        // View menu
-        // -----------------------------
-
-        final Menu viewMenu = new Menu("View");
-
-        final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
-        miWireframe.selectedProperty().addListener((_, _, sel) -> drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
-        drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
-
-        final CheckMenuItem miShortMeshViewNames = new CheckMenuItem("Short Mesh Names");
-        miShortMeshViewNames.selectedProperty().bindBidirectional(shortMeshViewNames);
-
-        final CheckMenuItem miSelectionAreaVisible = new CheckMenuItem("Selection");
-        miSelectionAreaVisible.selectedProperty().bindBidirectional(selectionTabPane.visibleProperty());
-        miSelectionAreaVisible.setOnAction(_ -> showSelectionArea(miSelectionAreaVisible.isSelected()));
-
-        final CheckMenuItem miInfoVisible = new CheckMenuItem("Info");
-        miInfoVisible.selectedProperty().bindBidirectional(infoArea.visibleProperty());
-        miInfoVisible.setOnAction(_ -> showInfoArea(miInfoVisible.isSelected()));
-
-        viewMenu.getItems().addAll(miWireframe, miShortMeshViewNames, miSelectionAreaVisible, miInfoVisible);
-
-        // -----------------------------
-        // Samples menu
-        // -----------------------------
-
-        samplesMenu = new Menu("Samples");
-        samplesMenu.disableProperty().bind(Bindings.isEmpty(samples));
-
-        // -----------------------------
-        // About menu
-        // -----------------------------
-
-        final var helpMenu = new Menu("?");
-
-        final MenuItem miAbout = new MenuItem("About Mesh Viewer");
-        miAbout.setOnAction(_ -> aboutDialog.showAndWait());
-
-        helpMenu.getItems().setAll(miAbout);
-
-        menuBar = new MenuBar(fileMenu, viewMenu, samplesMenu, helpMenu);
+        fxModel = ObjModelFX.EMPTY;
     }
 
     private void addDragNDropSupport() {
