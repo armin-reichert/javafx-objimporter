@@ -70,9 +70,9 @@ public class MeshViewerUI {
     public static final String CSS_ID_MODEL_INFO_PANE = "objModelInfo";
     public static final String CSS_ID_SAMPLE_INFO_PANE = "sampleInfo";
 
-    public static final int TREE_AREA_WIDTH = 300;
-    public static final int INFO_AREA_WIDTH = 260;
-    public static final int INFO_AREA_LABEL_COLUMN_WIDTH = 100;
+    public static final int TREE_AREA_WIDTH = 350;
+    public static final int INFO_AREA_WIDTH = 300;
+    public static final int INFO_AREA_LABEL_COLUMN_WIDTH = 125;
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
     private final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
@@ -355,7 +355,7 @@ public class MeshViewerUI {
         modelInfoPane = new ModelInfoPane(CSS_ID_MODEL_INFO_PANE, hostServices);
         sampleInfoPane = new SampleInfoPane(CSS_ID_SAMPLE_INFO_PANE, hostServices);
 
-        infoArea = new VBox(modelInfoPane, sampleInfoPane);
+        infoArea = new VBox(sampleInfoPane, modelInfoPane);
 
         infoArea.setBackground(Background.fill(Color.BLACK));
         infoArea.setMinWidth(INFO_AREA_WIDTH);

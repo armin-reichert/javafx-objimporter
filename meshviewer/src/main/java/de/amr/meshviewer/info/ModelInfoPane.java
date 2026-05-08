@@ -4,11 +4,10 @@
 
 package de.amr.meshviewer.info;
 
-import de.amr.meshviewer.MeshViewerUI;
 import de.amr.objparser.ObjModel;
 import javafx.application.HostServices;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.util.Duration;
 
 import java.util.Map;
@@ -16,7 +15,7 @@ import java.util.Objects;
 
 public class ModelInfoPane extends InfoPane {
 
-    private final Label lblFilename = new Label();
+    private final Hyperlink lnkFile = createHyperlink();
     private final Label lblVertices = new Label();
     private final Label lblTexCoords = new Label();
     private final Label lblNormals = new Label();
@@ -33,11 +32,8 @@ public class ModelInfoPane extends InfoPane {
 
         setId(cssID); // for CSS
 
-        final var constraints = new ColumnConstraints(MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH, MeshViewerUI.INFO_AREA_LABEL_COLUMN_WIDTH);
-        getColumnConstraints().add(constraints);
-
         int row = -1;
-        addRow(++row, new Label("File: "), lblFilename);
+        addRow(++row, new Label("File: "), lnkFile);
         addRow(++row, new Label("Vertices:"), lblVertices);
         addRow(++row, new Label("TexCoords:"), lblTexCoords);
         addRow(++row, new Label("Normals:"), lblNormals);
@@ -63,7 +59,8 @@ public class ModelInfoPane extends InfoPane {
         }
 
         if (model == null) {
-            lblFilename.setText(NA);
+            lnkFile.setText(NA);
+            lnkFile.setDisable(true);
             lblVertices.setText(NA);
             lblTexCoords.setText(NA);
             lblNormals.setText(NA);
@@ -76,7 +73,8 @@ public class ModelInfoPane extends InfoPane {
             lblMaterials.setText(NA);
         }
         else {
-            lblFilename.setText(model.url()); //TODO
+            lnkFile.setText(extractFilePart(model.url()));
+            setLinkAction(lnkFile, model.url());
             lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
             lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
             lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
