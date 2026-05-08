@@ -99,6 +99,7 @@ public class MeshViewerUI {
     // Selection Area
     private TabPane selectionTabPane = new TabPane();
     private MeshTreePane meshTreePane;
+    private BorderPane materialInfoPane;
 
     // Preview Area
     private PreviewArea previewArea;
@@ -243,49 +244,59 @@ public class MeshViewerUI {
             Logger.error("Cannot load app.css");
         }
 
-        createLayout();
         createFileChooser();
+        addDragNDropSupport();
+
+        createLayout();
 
         stage.setScene(scene);
         stage.setTitle(STAGE_TITLE);
         stage.setWidth(width);
         stage.setHeight(height);
-
-        addDragNDropSupport();
     }
 
     private void createLayout() {
+        createSelectionArea();
         createPreviewArea();
-        createModelTreePane();
         createInfoArea();
+
+        layoutSplitPane.setOrientation(Orientation.HORIZONTAL);
+
+        // Not sure if this is the best way but it works well
+        final var previewWidthReduction = Bindings.createDoubleBinding(
+            () -> {
+                double w = 0;
+                if (selectionTabPane.isVisible()) w += selectionTabPane.getWidth();
+                if (infoArea.isVisible()) w += infoArea.getWidth();
+                return w;
+            },
+            selectionTabPane.visibleProperty(), selectionTabPane.widthProperty(),
+            infoArea.visibleProperty(), infoArea.widthProperty()
+        );
+        previewArea.subScene().widthProperty().bind(rootPane.widthProperty().subtract(previewWidthReduction));
+        previewArea.subScene().heightProperty().bind(previewArea.heightProperty());
+
+        menus = new MeshViewerMenus(this);
+        rootPane.setTop(menus.menuBar());
+        rootPane.setCenter(layoutSplitPane);
+    }
+
+    private void createSelectionArea() {
+        createMeshTreePane();
+
+        materialInfoPane = new BorderPane();
+        materialInfoPane.setCenter(new Label("Material Info"));
+
+        final Tab meshTreeTab = new Tab("Mesh Tree", meshTreePane);
+        meshTreeTab.setClosable(false);
+
+        final Tab materialInfoTab = new Tab("Materials", materialInfoPane);
+        materialInfoTab.setClosable(false);
 
         selectionTabPane = new TabPane();
         selectionTabPane.setSide(Side.BOTTOM);
         selectionTabPane.setMinWidth(TREE_AREA_WIDTH);
-
-        final Tab meshTreeTab = new Tab("Mesh Tree", meshTreePane);
-        meshTreeTab.setClosable(false);
-        selectionTabPane.getTabs().add(meshTreeTab);
-
-        layoutSplitPane.setOrientation(Orientation.HORIZONTAL);
-
-        menus = new MeshViewerMenus(this);
-
-        rootPane.setTop(menus.menuBar());
-        rootPane.setCenter(layoutSplitPane);
-
-        final var previewClipping = Bindings.createDoubleBinding(
-            () -> {
-                double w = 0;
-                if (meshTreePane.isVisible()) w += meshTreePane.getWidth();
-                if (infoArea.isVisible()) w += infoArea.getWidth();
-                return w;
-            },
-            meshTreePane.visibleProperty(), meshTreePane.widthProperty(),
-            infoArea.visibleProperty(), infoArea.widthProperty()
-        );
-        previewArea.subScene().widthProperty().bind(rootPane.widthProperty().subtract(previewClipping));
-        previewArea.subScene().heightProperty().bind(previewArea.heightProperty());
+        selectionTabPane.getTabs().addAll(meshTreeTab, materialInfoTab);
     }
 
     private void createFileChooser() {
@@ -299,7 +310,7 @@ public class MeshViewerUI {
         previewArea.drawMode.bindBidirectional(drawMode);
     }
 
-    private void createModelTreePane() {
+    private void createMeshTreePane() {
         meshTreePane = new MeshTreePane(TREE_AREA_WIDTH);
         meshTreePane.shortMeshViewNames.bind(shortMeshViewNames);
 
