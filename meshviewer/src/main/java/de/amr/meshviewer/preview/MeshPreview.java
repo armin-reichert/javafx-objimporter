@@ -2,8 +2,10 @@
  * Copyright (c) 2026 Armin Reichert (MIT License)
  */
 
-package de.amr.meshviewer;
+package de.amr.meshviewer.preview;
 
+import de.amr.meshviewer.FlashMessageOverlay;
+import de.amr.meshviewer.SampleInitSettings;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.meshtree.InnerTreeNode;
 import de.amr.meshviewer.meshtree.MeshSelection;
@@ -34,7 +36,7 @@ import org.tinylog.Logger;
 import java.util.Collection;
 import java.util.Set;
 
-public class PreviewArea extends StackPane {
+public class MeshPreview extends StackPane {
 
     public static final Paint SKY_GRADIENT = new LinearGradient(
         0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
@@ -89,9 +91,9 @@ public class PreviewArea extends StackPane {
     private final Rotate autoRotateY = new Rotate(0, Rotate.Y_AXIS);
     private Point3D autoRotateAxis = Rotate.Y_AXIS; // horizontally be default
 
-    private final FlashMessageOverlay flashMessageOverlay = new FlashMessageOverlay();
+    private final FlashMessageOverlay flashMessageOverlay;
 
-    public PreviewArea() {
+    public MeshPreview() {
         setId("preview");
 
         subScene = new SubScene(previewGroup, 400, 400, true, SceneAntialiasing.BALANCED);
@@ -99,25 +101,31 @@ public class PreviewArea extends StackPane {
         subScene.focusedProperty().addListener((_, _, focussed) ->
             Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
 
+        flashMessageOverlay = new FlashMessageOverlay();
+        flashMessageOverlay.setFocusTraversable(false);
+        flashMessageOverlay.setMouseTransparent(true);
+        flashMessageOverlay.setPickOnBounds(false);
+
         configureCamera();
         addLights();
         setKeyboardAndMouseHandlers();
         setBackground(Background.fill(SKY_GRADIENT));
-        getChildren().setAll(subScene, flashMessageOverlay);
+        getChildren().addAll(subScene, flashMessageOverlay);
 
         // Make key events work as expected
         subScene.setFocusTraversable(true);
-        flashMessageOverlay.setFocusTraversable(false);
 
         // Make mouse events work as expected
         setPickOnBounds(false);
-        flashMessageOverlay.setMouseTransparent(true);
-        flashMessageOverlay.setPickOnBounds(false);
         subScene.setPickOnBounds(true);
 
         addNoFocusWarningHint();
 
         previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
+    }
+
+    public void flash(String message) {
+        flashMessageOverlay.showMessage(message);
     }
 
     private void addNoFocusWarningHint() {
@@ -167,10 +175,6 @@ public class PreviewArea extends StackPane {
 
     public SubScene subScene() {
         return subScene;
-    }
-
-    public void flash(String message) {
-        flashMessageOverlay.showMessage(message);
     }
 
     // private

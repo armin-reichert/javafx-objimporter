@@ -13,6 +13,7 @@ import de.amr.meshviewer.meshtree.InnerTreeNode;
 import de.amr.meshviewer.meshtree.MeshTreeLeaf;
 import de.amr.meshviewer.meshtree.MeshTreeNode;
 import de.amr.meshviewer.meshtree.MeshTreePane;
+import de.amr.meshviewer.preview.MeshPreview;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
 import javafx.application.HostServices;
@@ -30,7 +31,10 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
@@ -94,7 +98,7 @@ public class MeshViewerUI {
     private FileChooser fileChooser;
 
     // Layout
-    private final BorderPane rootPane = new BorderPane();
+    private final BorderPane mainLayout = new BorderPane();
     private final SplitPane layoutSplitPane = new SplitPane();
 
     // Selection Area
@@ -103,7 +107,7 @@ public class MeshViewerUI {
     private MaterialInfoPane materialInfoPane;
 
     // Preview Area
-    private PreviewArea previewArea;
+    private MeshPreview previewArea;
 
     // Model Info Area
     private Pane infoArea;
@@ -115,8 +119,25 @@ public class MeshViewerUI {
     public MeshViewerUI(Stage stage, double width, double height, HostServices hostServices) {
         this.stage = requireNonNull(stage);
         this.hostServices = requireNonNull(hostServices);
-        scene = new Scene(rootPane);
-        createUI(width, height);
+
+        createSceneLayout();
+
+        scene = new Scene(mainLayout);
+        final URL cssURL = getClass().getResource("/app.css");
+        if (cssURL != null) {
+            scene.getStylesheets().add(cssURL.toExternalForm());
+        } else {
+            Logger.error("Cannot load app.css");
+        }
+
+        createFileChooser();
+        addDragNDropSupport();
+
+        stage.setScene(scene);
+        stage.setTitle(STAGE_TITLE);
+        stage.setWidth(width);
+        stage.setHeight(height);
+
         objModel.addListener(this::handleObjModelChange);
         Platform.runLater(() -> {
             showSelectionArea(true);
@@ -160,6 +181,10 @@ public class MeshViewerUI {
         return stage;
     }
 
+    public MeshPreview previewArea() {
+        return previewArea;
+    }
+
     public TabPane selectionTabPane() {
         return selectionTabPane;
     }
@@ -194,7 +219,6 @@ public class MeshViewerUI {
         samples.add(sample);
         menus.addSample(sample);
     }
-
 
     public void showSampleModel(SampleInfo sample) throws IOException {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
@@ -233,32 +257,10 @@ public class MeshViewerUI {
         updateLayout();
     }
 
-    public void flash(String message) {
-        previewArea.flash(message);
-    }
 
     // Private
 
-    private void createUI(double width, double height) {
-        final URL cssURL = getClass().getResource("/app.css");
-        if (cssURL != null) {
-            scene.getStylesheets().add(cssURL.toExternalForm());
-        } else {
-            Logger.error("Cannot load app.css");
-        }
-
-        createFileChooser();
-        addDragNDropSupport();
-
-        createLayout();
-
-        stage.setScene(scene);
-        stage.setTitle(STAGE_TITLE);
-        stage.setWidth(width);
-        stage.setHeight(height);
-    }
-
-    private void createLayout() {
+    private void createSceneLayout() {
         createSelectionArea();
         createPreviewArea();
         createInfoArea();
@@ -276,12 +278,12 @@ public class MeshViewerUI {
             selectionTabPane.visibleProperty(), selectionTabPane.widthProperty(),
             infoArea.visibleProperty(), infoArea.widthProperty()
         );
-        previewArea.subScene().widthProperty().bind(rootPane.widthProperty().subtract(previewWidthReduction));
+        previewArea.subScene().widthProperty().bind(mainLayout.widthProperty().subtract(previewWidthReduction));
         previewArea.subScene().heightProperty().bind(previewArea.heightProperty());
 
         menus = new MeshViewerMenus(this);
-        rootPane.setTop(menus.menuBar());
-        rootPane.setCenter(layoutSplitPane);
+        mainLayout.setTop(menus.menuBar());
+        mainLayout.setCenter(layoutSplitPane);
     }
 
     private void createSelectionArea() {
@@ -308,7 +310,7 @@ public class MeshViewerUI {
     }
 
     private void createPreviewArea() {
-        previewArea = new PreviewArea();
+        previewArea = new MeshPreview();
         previewArea.drawMode.bindBidirectional(drawMode);
     }
 

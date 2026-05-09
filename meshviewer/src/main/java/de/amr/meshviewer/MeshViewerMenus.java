@@ -49,7 +49,7 @@ public class MeshViewerMenus {
                     ui.showObjModel(objFile);
                 } catch (IOException x) {
                     Logger.error(x, "Cannot show OBJ model from file {}", objFile);
-                    ui.flash("Cannot show OBJ model");
+                    ui.previewArea().flash("Cannot show OBJ model");
                 }
             }
         });
@@ -114,7 +114,7 @@ public class MeshViewerMenus {
                     ui.showSampleModel(sample);
                 } catch (IOException x) {
                     Logger.error(x, "Cannot show sample model");
-                    ui.flash("Cannot show sample model");
+                    ui.previewArea().flash("Cannot show sample model");
                 }
             });
         } else {

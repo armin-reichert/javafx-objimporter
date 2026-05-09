@@ -10,4 +10,5 @@ module de.amr.meshviewer {
     exports de.amr.meshviewer.meshtree;
     exports de.amr.samples;
     exports de.amr.meshviewer.info;
+    exports de.amr.meshviewer.preview;
 }
