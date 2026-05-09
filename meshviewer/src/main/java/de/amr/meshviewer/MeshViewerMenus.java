@@ -112,14 +112,6 @@ public class MeshViewerMenus {
         return menuBar;
     }
 
-    public Menu samplesMenu() {
-        return samplesMenu;
-    }
-
-    public Menu userSamplesMenu() {
-        return userSamplesMenu;
-    }
-
     public void addIntegratedSample(SampleInfo sample) {
         final var menuItem = new MenuItem(sample.title());
         // Test if sample URL is accessible
