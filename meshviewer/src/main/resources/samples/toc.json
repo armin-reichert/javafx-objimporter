@@ -114,25 +114,6 @@
     }
   },
   {
-    "title": "Datsun 280Z",
-    "author": "Martin Trafas",
-    "fileName": "Datsun_280Z.obj",
-    "path": "/samples/datsun_280Z/",
-    "downloadURL": "https://sketchfab.com/3d-models/free-datsun-280z-0789ab2ece9442de94b3c41595e0ecbd",
-    "homepage": "https://sketchfab.com/TinoD2",
-    "licenseType": "CC Attribution",
-    "licenseURL": "https://creativecommons.org/licenses/by/4.0/",
-    "initSettings": {
-      "zoom": -4,
-      "rotateX": 0,
-      "rotateY": 0,
-      "rotateZ": 0,
-      "initialMeshSelection": "ALL_MATERIALS",
-      "wireframe": false,
-      "autorotate": true
-    }
-  },
-  {
     "title": "Pac-Man",
     "author": "Gianmarco Cavallaccio",
     "fileName": "pacman.obj",
