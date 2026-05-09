@@ -31,7 +31,10 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
@@ -81,6 +84,7 @@ public class MeshViewerUI {
     private final ObjectProperty<Duration> fxModelCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
+    private final ObservableList<SampleInfo> userSamples = FXCollections.observableArrayList();
 
     // FX artifacts created from OBJ model
     private ObjModelFX fxModel;
@@ -202,11 +206,15 @@ public class MeshViewerUI {
         return samples;
     }
 
+    public ObservableList<SampleInfo> userSamples() {
+        return userSamples;
+    }
+
     public void show() {
         stage.show();
         if (!samples.isEmpty()) {
             try {
-                showSampleModel(samples.getFirst());
+                showIntegratedSample(samples.getFirst());
             } catch (IOException x){
                 Logger.error(x, "Cannot show first sample model");
                 previewArea.flash("Cannot show sample model");
@@ -215,18 +223,42 @@ public class MeshViewerUI {
         showInfoArea(false);
     }
 
-    public void addSampleModel(Menu menu, SampleInfo sample) {
+    public void addIntegratedSample(SampleInfo sample) {
         requireNonNull(sample);
+
         samples.add(sample);
-        menus.addSample(menu, sample);
+        menus.addIntegratedSample(sample);
     }
 
-    public void showSampleModel(SampleInfo sample) throws IOException {
+    public void addUserSample(File userSampleDir, SampleInfo sample) {
+        requireNonNull(userSampleDir);
+        requireNonNull(sample);
+
+        userSamples.add(sample);
+        menus.addUserSample(userSampleDir, sample);
+    }
+
+    public void showIntegratedSample(SampleInfo sample) throws IOException {
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         showObjModel(url);
         previewArea.initSampleModel(meshTreePane.modelTreeView(), sample);
         sampleInfoPane.setVisible(true);
         sampleInfoPane.update(sample);
+    }
+
+    public void showUserSample(File userSampleDir, SampleInfo sample) {
+        final File objFile = new File(userSampleDir, sample.path() + sample.fileName());
+        if (objFile.exists() && objFile.isFile()) {
+            try {
+                showObjModel(objFile);
+                previewArea.initSampleModel(meshTreePane.modelTreeView(), sample);
+                sampleInfoPane.setVisible(true);
+                sampleInfoPane.update(sample);
+            }
+            catch (IOException x) {
+                Logger.error(x);
+            }
+        }
     }
 
     public void showObjModel(File objFile) throws IOException {

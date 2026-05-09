@@ -13,30 +13,30 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class SampleInfoReader {
 
-    public static List<SampleInfo> loadSampleInfo(URL url) {
+    public static List<SampleInfo> loadSamplesTOC(URL url) {
         final Gson gson = new Gson();
         List<SampleInfo> result = List.of();
         try (final InputStream in = url.openStream()) {
             if (in != null) {
                 result = gson.fromJson(
                     new InputStreamReader(in, StandardCharsets.UTF_8),
-                    new TypeToken<List<SampleInfo>>() {}.getType());
+                    new TypeToken<List<SampleInfo>>() {
+                    }.getType());
             }
-        } catch (IOException x) {
-            Logger.error(x, "Could not load samples/toc.json");
+        }
+        catch (IOException x) {
+            Logger.error(x, "Could not load sample TOC");
         }
         return result;
     }
 
-    public static List<SampleInfo> loadUserProvidedSampleInfo(File userDir) throws MalformedURLException {
-        final URL url = new File(userDir, "toc.json").toURI().toURL();
-        return loadSampleInfo(url);
+    public static List<SampleInfo> loadUserProvidedSamplesToc(File userSamplesDir) throws IOException {
+        return loadSamplesTOC(new File(userSamplesDir, "toc.json").toURI().toURL());
     }
 }

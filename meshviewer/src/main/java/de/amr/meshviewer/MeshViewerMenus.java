@@ -23,6 +23,7 @@ public class MeshViewerMenus {
     private final MeshViewerUI ui;
     private final MenuBar menuBar;
     private final Menu samplesMenu;
+    private final Menu userSamplesMenu;
 
     public MeshViewerMenus(MeshViewerUI ui) {
         this.ui = ui;
@@ -87,6 +88,13 @@ public class MeshViewerMenus {
         samplesMenu.disableProperty().bind(Bindings.isEmpty(ui.samples()));
 
         // -----------------------------
+        // User samples menu
+        // -----------------------------
+
+        userSamplesMenu = new Menu("User Samples");
+        userSamplesMenu.disableProperty().bind(Bindings.isEmpty(ui.userSamples()));
+
+        // -----------------------------
         // About menu
         // -----------------------------
 
@@ -97,7 +105,7 @@ public class MeshViewerMenus {
 
         helpMenu.getItems().setAll(miAbout);
 
-        menuBar.getMenus().setAll(fileMenu, viewMenu, samplesMenu, helpMenu);
+        menuBar.getMenus().setAll(fileMenu, viewMenu, samplesMenu, userSamplesMenu, helpMenu);
     }
 
     public MenuBar menuBar() {
@@ -108,14 +116,18 @@ public class MeshViewerMenus {
         return samplesMenu;
     }
 
-    public void addSample(Menu menu, SampleInfo sample) {
+    public Menu userSamplesMenu() {
+        return userSamplesMenu;
+    }
+
+    public void addIntegratedSample(SampleInfo sample) {
         final var menuItem = new MenuItem(sample.title());
         // Test if sample URL is accessible
         final URL url = getClass().getResource(sample.path() + sample.fileName());
         if (url != null) {
             menuItem.setOnAction(_ -> {
                 try {
-                    ui.showSampleModel(sample);
+                    ui.showIntegratedSample(sample);
                 } catch (IOException x) {
                     Logger.error(x, "Cannot show sample model");
                     ui.previewArea().flash("Cannot show sample model");
@@ -124,6 +136,12 @@ public class MeshViewerMenus {
         } else {
             menuItem.setDisable(true);
         }
-        menu.getItems().add(menuItem);
+        samplesMenu.getItems().add(menuItem);
+    }
+
+    public void addUserSample(File userSampleDir, SampleInfo sample) {
+        final var menuItem = new MenuItem(sample.title());
+        menuItem.setOnAction(_ -> ui.showUserSample(userSampleDir, sample));
+        userSamplesMenu.getItems().add(menuItem);
     }
 }

@@ -12,10 +12,13 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.tinylog.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-import static de.amr.meshviewer.SampleInfoReader.loadSampleInfo;
+import static de.amr.meshviewer.SampleInfoReader.loadSamplesTOC;
+import static de.amr.meshviewer.SampleInfoReader.loadUserProvidedSamplesToc;
 
 public class MeshViewerApp extends Application {
 
@@ -31,16 +34,50 @@ public class MeshViewerApp extends Application {
 
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height, getHostServices());
 
+        try {
+            loadIntegratedSamples(ui);
+        }
+        catch (IOException x) {
+            Logger.error(x, "Could not load integrated samples");
+        }
+
+        try {
+            loadUserSamples(ui);
+        }
+        catch (Exception x) {
+            Logger.error(x, "Could not load user samples");
+        }
+
+        ui.show();
+    }
+
+    private void loadIntegratedSamples(MeshViewerUI ui) throws IOException {
         final URL toc = getClass().getResource(INTEGRATED_SAMPLES_TOC);
         if (toc != null) {
-            final List<SampleInfo> samplesToc = loadSampleInfo(toc);
+            final List<SampleInfo> samplesToc = loadSamplesTOC(toc);
             Logger.info("{} integrated samples should be available, see menu 'Samples'", samplesToc.size());
             for (final SampleInfo sample : samplesToc) {
-                ui.addSampleModel(ui.menus().samplesMenu(), sample);
+                ui.addIntegratedSample(sample);
             }
         } else {
-            Logger.error("Could not access samples TOC");
+            Logger.error("Could not access integrated samples TOC");
         }
-        ui.show();
+    }
+
+    private void loadUserSamples(MeshViewerUI ui) throws IOException {
+        final File userSamplesDir = new File(System.getProperty("user.home"), ".meshviewerfx/samples");
+        if (!userSamplesDir.exists()) {
+            boolean created = userSamplesDir.mkdirs();
+            if (created) {
+                Logger.info("User samples dir {} created", userSamplesDir);
+            }
+        }
+        if (userSamplesDir.exists()) {
+            final List<SampleInfo> userSamplesToc = loadUserProvidedSamplesToc(userSamplesDir);
+            Logger.info("{} user samples should be available, see menu 'User Samples'", userSamplesToc.size());
+            for (final SampleInfo sample : userSamplesToc) {
+                ui.addUserSample(userSamplesDir, sample);
+            }
+        }
     }
 }
