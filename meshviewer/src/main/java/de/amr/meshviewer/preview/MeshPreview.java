@@ -96,6 +96,8 @@ public class MeshPreview extends StackPane {
     public MeshPreview() {
         setId("preview");
 
+        previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
+
         subScene = new SubScene(previewGroup, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
         subScene.focusedProperty().addListener((_, _, focussed) ->
@@ -120,8 +122,6 @@ public class MeshPreview extends StackPane {
         subScene.setPickOnBounds(true);
 
         addNoFocusWarningHint();
-
-        previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
     }
 
     public void flash(String message) {
@@ -238,13 +238,10 @@ public class MeshPreview extends StackPane {
             double dx = e.getSceneX() - mouseOldX;
             double dy = e.getSceneY() - mouseOldY;
 
-            boolean shift = e.isShiftDown();
             if (e.getButton() == MouseButton.PRIMARY) {
-                if (shift) {
-                    rotateXBy(-dx * 1.5);
-                } else {
-                    rotateYBy(-dy * 1.5);
-                }
+                // TODO: How to implement correctly with flipped world?
+                rotateYBy(0.5 * dx);
+                rotateXBy(0.5 * dy);
             }
 
             mouseOldX = e.getSceneX();
