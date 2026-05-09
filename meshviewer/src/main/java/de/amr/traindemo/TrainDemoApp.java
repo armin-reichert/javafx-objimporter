@@ -47,13 +47,13 @@ public class TrainDemoApp extends Application {
         final Transform upsideDown = new Rotate(180, Rotate.X_AXIS);
         world.getTransforms().add(upsideDown);
 
-        final Scene scene = new Scene(world, 800, 600, true, SceneAntialiasing.BALANCED);
-        scene.setFill(Color.DARKGRAY);
-
-        // Camera looks at orgin, take a step back
+        // Camera looks at origin, take a step back
         final PerspectiveCamera camera = new PerspectiveCamera(true);
-        scene.setCamera(camera);
         camera.setTranslateZ(-60);
+
+        final Scene scene = new Scene(world, 800, 600, true, SceneAntialiasing.BALANCED);
+        scene.setCamera(camera);
+        scene.setFill(Color.DARKGRAY);
 
         // Zoom in/out with "+" and "-" keys
         scene.setOnKeyPressed(event -> {
