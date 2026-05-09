@@ -31,10 +31,7 @@ import javafx.collections.SetChangeListener;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Scene;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TreeItem;
+import javafx.scene.control.*;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
@@ -173,6 +170,10 @@ public class MeshViewerUI {
         return currentModelDir;
     }
 
+    public MeshViewerMenus menus() {
+        return menus;
+    }
+
     public FileChooser fileChooser() {
         return fileChooser;
     }
@@ -214,10 +215,10 @@ public class MeshViewerUI {
         showInfoArea(false);
     }
 
-    public void addSampleModel(SampleInfo sample) {
+    public void addSampleModel(Menu menu, SampleInfo sample) {
         requireNonNull(sample);
         samples.add(sample);
-        menus.addSample(sample);
+        menus.addSample(menu, sample);
     }
 
     public void showSampleModel(SampleInfo sample) throws IOException {

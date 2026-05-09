@@ -104,7 +104,11 @@ public class MeshViewerMenus {
         return menuBar;
     }
 
-    public void addSample(SampleInfo sample) {
+    public Menu samplesMenu() {
+        return samplesMenu;
+    }
+
+    public void addSample(Menu menu, SampleInfo sample) {
         final var menuItem = new MenuItem(sample.title());
         // Test if sample URL is accessible
         final URL url = getClass().getResource(sample.path() + sample.fileName());
@@ -120,6 +124,6 @@ public class MeshViewerMenus {
         } else {
             menuItem.setDisable(true);
         }
-        samplesMenu.getItems().add(menuItem);
+        menu.getItems().add(menuItem);
     }
 }

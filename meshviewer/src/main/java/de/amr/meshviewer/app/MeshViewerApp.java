@@ -36,7 +36,7 @@ public class MeshViewerApp extends Application {
             final List<SampleInfo> samplesToc = loadSampleInfo(toc);
             Logger.info("{} integrated samples should be available, see menu 'Samples'", samplesToc.size());
             for (final SampleInfo sample : samplesToc) {
-                ui.addSampleModel(sample);
+                ui.addSampleModel(ui.menus().samplesMenu(), sample);
             }
         } else {
             Logger.error("Could not access samples TOC");

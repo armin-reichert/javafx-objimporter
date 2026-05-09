@@ -9,9 +9,11 @@ import com.google.gson.reflect.TypeToken;
 import de.amr.meshviewer.info.SampleInfo;
 import org.tinylog.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -31,5 +33,10 @@ public class SampleInfoReader {
             Logger.error(x, "Could not load samples/toc.json");
         }
         return result;
+    }
+
+    public static List<SampleInfo> loadUserProvidedSampleInfo(File userDir) throws MalformedURLException {
+        final URL url = new File(userDir, "toc.json").toURI().toURL();
+        return loadSampleInfo(url);
     }
 }
