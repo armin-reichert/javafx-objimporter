@@ -1,4 +1,4 @@
-package de.amr.samples;
+package de.amr.scooterdemo;
 
 import de.amr.meshbuilder.MeshBuilder;
 import de.amr.objparser.ObjFileParser;
