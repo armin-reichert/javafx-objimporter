@@ -8,7 +8,10 @@ module de.amr.meshviewer {
     exports de.amr.meshviewer;
     exports de.amr.meshviewer.app;
     exports de.amr.meshviewer.meshtree;
-    exports de.amr.scooterdemo;
     exports de.amr.meshviewer.info;
     exports de.amr.meshviewer.preview;
+
+    exports de.amr.scooterdemo;
+    exports de.amr.traindemo;
+
 }
