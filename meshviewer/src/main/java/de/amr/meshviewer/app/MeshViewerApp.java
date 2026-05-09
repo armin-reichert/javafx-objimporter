@@ -4,55 +4,43 @@
 
 package de.amr.meshviewer.app;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import de.amr.meshviewer.MeshViewerUI;
 import de.amr.meshviewer.info.SampleInfo;
 import javafx.application.Application;
+import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.tinylog.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
+import java.net.URL;
 import java.util.List;
+
+import static de.amr.meshviewer.SampleInfoReader.loadSampleInfo;
 
 public class MeshViewerApp extends Application {
 
-    private List<SampleInfo> samples = List.of();
-
-    @Override
-    public void init() {
-        loadSampleModels();
-    }
+    public static final String INTEGRATED_SAMPLES_TOC = "/samples/toc.json";
 
     @Override
     public void start(Stage stage) {
-        final double screenHeight = Screen.getPrimary().getBounds().getHeight();
-        final double screenWidth = Screen.getPrimary().getBounds().getWidth();
-        final double aspect = screenWidth / screenHeight;
-        final double height = Math.min(0.90 * screenHeight, 800);
+        final Rectangle2D screen = Screen.getPrimary().getBounds();
+        final double aspect = screen.getWidth() / screen.getHeight();
+        // Use 90% of screen height but no more than 800px
+        final double height = Math.min(0.90 * screen.getHeight(), 800);
         final double width = aspect * height;
+
         final MeshViewerUI ui = new MeshViewerUI(stage, width, height, getHostServices());
-        for (final SampleInfo sample : samples) {
-            ui.addSampleModel(sample);
+
+        final URL toc = getClass().getResource(INTEGRATED_SAMPLES_TOC);
+        if (toc != null) {
+            final List<SampleInfo> samplesToc = loadSampleInfo(toc);
+            Logger.info("{} integrated samples should be available, see menu 'Samples'", samplesToc.size());
+            for (final SampleInfo sample : samplesToc) {
+                ui.addSampleModel(sample);
+            }
+        } else {
+            Logger.error("Could not access samples TOC");
         }
         ui.show();
-    }
-
-    private void loadSampleModels() {
-        final Gson gson = new Gson();
-        try (final InputStream in = getClass().getResourceAsStream("/models/toc.json")) {
-            if (in != null) {
-                samples = gson.fromJson(
-                    new InputStreamReader(in, StandardCharsets.UTF_8),
-                    new TypeToken<List<SampleInfo>>() {}.getType());
-            }
-        } catch (IOException x) {
-            Logger.error(x, "Could not load models/toc.json");
-        }
-        Logger.info("Found {} sample models", samples.size());
     }
 }

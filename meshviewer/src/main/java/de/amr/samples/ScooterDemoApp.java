@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ScooterDemoApp extends Application {
 
-    public static final String SCOOTER_OBJ = "/models/scooter/Scooter-smgrps.obj";
+    public static final String SCOOTER_OBJ = "/samples/scooter/Scooter-smgrps.obj";
 
     public static final double AUTO_ROTATE_SPEED = 0.1;
 
