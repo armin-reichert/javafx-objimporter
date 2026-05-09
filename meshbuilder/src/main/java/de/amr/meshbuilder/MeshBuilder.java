@@ -80,8 +80,11 @@ public class MeshBuilder {
         };
     }
 
+    /**
+     * @return unmodifiable map of Phong materials created from the parsed OBJ file
+     */
     public Map<String, PhongMaterial> materials() {
-        return materials;
+        return Collections.unmodifiableMap(materials);
     }
 
     /**
