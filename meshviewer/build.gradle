@@ -3,22 +3,18 @@
  */
 
 plugins {
-    id "application"
     alias(libs.plugins.javafx)
     alias(libs.plugins.jlink)
-    //alias(libs.plugins.osdetector)
+    alias(libs.plugins.osdetector)
 }
 
 dependencies {
-    implementation(libs.bundles.tinylog)
-    implementation(libs.gson)
-    implementation(project(":objparser"))
-    implementation(project(":meshbuilder"))
-}
-
-javafx {
-    version = libs.versions.javafx.get()
-    modules = ["javafx.base", "javafx.graphics", "javafx.controls"]
+    implementation(
+        project(":objparser"),
+        project(":meshbuilder"),
+        libs.bundles.tinylog,
+        libs.gson
+    )
 }
 
 application {
@@ -26,20 +22,22 @@ application {
     mainClass  = "de.amr.meshviewer.app.Main"
 }
 
-jlink {
+javafx {
+    modules = ["javafx.base", "javafx.graphics", "javafx.controls"]
+}
 
+jlink {
     // This bullshit is only necessary because my registered domain name ends with digits. If I had known before...
     mergedModule {
         additive = false
-        mergedModuleName = "de.amrsixtysix.objimporter.merged"
+        mergedModuleName = "de.amrsysx.objimporter.merged"
     }
 
     options = [
         "--compress", "zip-9",
         "--strip-debug",
         "--no-header-files",
-        "--no-man-pages",
-        "--strip-native-commands"
+        "--no-man-pages"
     ]
 
     launcher {
@@ -47,7 +45,7 @@ jlink {
     }
 
     jpackage {
-        appVersion = "1.0"
+        appVersion = "0.0.1"
         vendor = "Armin Reichert"
         installerOptions = []
         installerType = installerPkg

@@ -16,6 +16,7 @@ import org.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 public class MeshViewerMenus {
 
@@ -105,14 +106,20 @@ public class MeshViewerMenus {
 
     public void addSample(SampleInfo sample) {
         final var menuItem = new MenuItem(sample.title());
-        menuItem.setOnAction(_ -> {
-            try {
-                ui.showSampleModel(sample);
-            } catch (IOException x) {
-                Logger.error(x, "Cannot show sample model");
-                ui.flash("Cannot show sample model");
-            }
-        });
+        // Test if sample URL is accessible
+        final URL url = getClass().getResource(sample.path() + sample.fileName());
+        if (url != null) {
+            menuItem.setOnAction(_ -> {
+                try {
+                    ui.showSampleModel(sample);
+                } catch (IOException x) {
+                    Logger.error(x, "Cannot show sample model");
+                    ui.flash("Cannot show sample model");
+                }
+            });
+        } else {
+            menuItem.setDisable(true);
+        }
         samplesMenu.getItems().add(menuItem);
     }
 }

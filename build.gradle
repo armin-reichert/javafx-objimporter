@@ -30,7 +30,8 @@ subprojects {
     apply plugin: "java"
     apply plugin: "maven-publish"
     apply plugin: 'signing'
-
+    pluginManager.apply(libs.plugins.javafx.get().pluginId)
+    pluginManager.apply(libs.plugins.osdetector.get().pluginId)
 
     // Java toolchain
     java {
@@ -42,6 +43,11 @@ subprojects {
             withJavadocJar()
         }
     }
+
+    javafx {
+        version = libs.versions.javafx.get()
+    }
+
 
     // Compiler settings
     tasks.withType(JavaCompile).configureEach {
