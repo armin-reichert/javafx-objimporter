@@ -135,8 +135,8 @@ public class MeshViewerUI {
 
         fxModel.addListener(this::handleModelChange);
         Platform.runLater(() -> {
-            showSelectionArea(true);
-            showInfoArea(false);
+            showSelectionArea(false);
+            showInfoArea(true);
         });
     }
 
