@@ -55,8 +55,7 @@ public class MeshBuilder {
         materials = new HashMap<>();
         for (Map<String, ObjMaterial> lib : model.materialLibsMap.values()) {
             lib.forEach((name, material) -> {
-                final String nameWithoutSpaces = replaceSpacesByUnderscores(name);
-                materials.put(nameWithoutSpaces, createPhongMaterial(material));
+                materials.put(name, createPhongMaterial(material));
             });
         }
     }
@@ -218,7 +217,7 @@ public class MeshBuilder {
 
         if (!faces.isEmpty()) {
             // Assign material if all faces share one
-            final String matName = replaceSpacesByUnderscores(faces.getFirst().materialName);
+            final String matName = faces.getFirst().materialName;
             if (materials.containsKey(matName)) {
                 meshView.setMaterial(materials.get(matName));
             }
