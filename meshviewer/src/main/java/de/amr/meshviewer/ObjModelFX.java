@@ -18,27 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 public class ObjModelFX {
 
-    public static final ObjModelFX EMPTY = new ObjModelFX() {
-        @Override
-        public Map<String, MeshView> objectMeshViews() {
-            return Map.of();
-        }
-
-        @Override
-        public Map<String, MeshView> groupMeshViews() {
-            return Map.of();
-        }
-
-        @Override
-        public Map<String, MeshView> materialMeshViews() {
-            return Map.of();
-        }
-
-        @Override
-        public Map<String, PhongMaterial> materials() {
-            return Map.of();
-        }
-    };
+    public static final ObjModelFX EMPTY = new ObjModelFX();
 
     private static void logTime(Runnable code, String description) {
         Instant before = Instant.now();
@@ -51,17 +31,27 @@ public class ObjModelFX {
         }
     }
 
+    private final ObjModel objModel;
     private Map<String, MeshView> objectMeshViews;
     private Map<String, MeshView> groupMeshViews;
     private Map<String, MeshView> materialMeshViews;
 
     private MeshBuilder builder;
 
-    private ObjModelFX() {}
+    private ObjModelFX() {
+        objModel = null;
+        objectMeshViews = Map.of();
+        groupMeshViews = Map.of();
+        materialMeshViews = Map.of();
+    }
 
     public ObjModelFX(ObjModel objModel) {
-        requireNonNull(objModel);
+        this.objModel = requireNonNull(objModel);
         builder = new MeshBuilder(objModel);
+    }
+
+    public ObjModel objModel() {
+        return objModel;
     }
 
     public Map<String, MeshView> objectMeshViews() {

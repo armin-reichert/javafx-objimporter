@@ -61,7 +61,7 @@ public class ModelInfoPane extends InfoPane {
         lblMaterials.setText(NA);
     }
 
-    public void update(ObjModel model, int numMeshViews, Duration parsingTime) {
+    public void update(ObjModel model, Duration parsingTime) {
         requireNonNull(model);
         if (parsingTime != null) {
             lblParsingTime.setText("%.3f s".formatted(parsingTime.toSeconds()));

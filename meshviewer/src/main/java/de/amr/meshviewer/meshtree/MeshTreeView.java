@@ -41,7 +41,7 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
         }
     }
 
-    private final ObservableMap<NodeCategory, ObservableSet<MeshTreeNode>> meshSelection = FXCollections.observableHashMap();
+    private final ObservableMap<NodeCategory, ObservableSet<MeshTreeNode>> nodeSelection = FXCollections.observableHashMap();
 
     public final BooleanProperty showShortMeshNames = new SimpleBooleanProperty(true);
 
@@ -56,9 +56,9 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
         setShowRoot(true);
         setCellFactory(CheckBoxTreeCell.forTreeView());
 
-        meshSelection.put(NodeCategory.MeshesByObjects, FXCollections.observableSet());
-        meshSelection.put(NodeCategory.MeshesByGroups, FXCollections.observableSet());
-        meshSelection.put(NodeCategory.MeshesByMaterials, FXCollections.observableSet());
+        nodeSelection.put(NodeCategory.MeshesByObjects, FXCollections.observableSet());
+        nodeSelection.put(NodeCategory.MeshesByGroups, FXCollections.observableSet());
+        nodeSelection.put(NodeCategory.MeshesByMaterials, FXCollections.observableSet());
 
         showShortMeshNames.addListener((_, _, shortName) -> {
             traverse(getRoot(), item -> {
@@ -104,7 +104,7 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
     }
 
     public void clearMeshSelection() {
-        meshSelection.values().forEach(Set::clear);
+        nodeSelection.values().forEach(Set::clear);
     }
 
     public void selectAllMeshesFromCategory(NodeCategory category) {
@@ -128,7 +128,7 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
     }
 
     public ObservableMap<NodeCategory, ObservableSet<MeshTreeNode>> selection() {
-        return meshSelection;
+        return nodeSelection;
     }
 
     // TODO: Avoid creating all mesh views when tree is populated. Expand only one category
@@ -156,9 +156,9 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
             final CheckBoxTreeItem<MeshTreeNode> childItem = (CheckBoxTreeItem<MeshTreeNode>) child;
             childItem.setSelected(selected);
             if (selected) {
-                meshSelection.get(category).add(childItem.getValue());
+                nodeSelection.get(category).add(childItem.getValue());
             } else {
-                meshSelection.get(category).remove(childItem.getValue());
+                nodeSelection.get(category).remove(childItem.getValue());
             }
         }));
 
@@ -170,14 +170,14 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
             childItem.selectedProperty().bindBidirectional(childNode.checked);
             childItem.selectedProperty().addListener((_, _, selected) -> {
                 Logger.debug("Tree node {}, selected={}", childNode, selected);
-                Logger.debug("Selection before: {}", meshSelection.get(category));
+                Logger.debug("Selection before: {}", nodeSelection.get(category));
                 if (selected) {
-                    meshSelection.get(category).add(childNode);
+                    nodeSelection.get(category).add(childNode);
                 }
                 else {
-                    meshSelection.get(category).remove(childNode);
+                    nodeSelection.get(category).remove(childNode);
                 }
-                Logger.debug("Selection after: {}", meshSelection.get(category));
+                Logger.debug("Selection after: {}", nodeSelection.get(category));
             });
         });
         getRoot().getChildren().add(rootItem);
