@@ -35,6 +35,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
@@ -134,6 +135,8 @@ public class MeshViewerUI {
         stage.setHeight(height);
 
         fxModel.addListener(this::handleModelChange);
+        addKeyListener();
+
         Platform.runLater(() -> {
             showSelectionArea(false);
             showInfoArea(true);
@@ -265,13 +268,38 @@ public class MeshViewerUI {
         updateLayout();
     }
 
+    public boolean isSelectionAreaVisible() {
+        return selectionTabPane.isVisible();
+    }
+
     public void showInfoArea(boolean visible) {
         infoArea.setVisible(visible); // Triggers recomputation of preview subscene width!
         updateLayout();
     }
 
+    public boolean isInfoAreaVisible() {
+        return infoArea.isVisible();
+    }
 
     // Private
+
+    private void addKeyListener() {
+        scene.addEventFilter(KeyEvent.KEY_TYPED, e -> {
+            switch (e.getCharacter()) {
+                case "s" -> {
+                    final boolean visible = isSelectionAreaVisible();
+                    showSelectionArea(!visible);
+                    e.consume();
+                }
+                case "i" -> {
+                    boolean visible = isInfoAreaVisible();
+                    showInfoArea(!visible);
+                    e.consume();
+                }
+            }
+        });
+    }
+
 
     private void createSceneLayout() {
         createSelectionArea();
