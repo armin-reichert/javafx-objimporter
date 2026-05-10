@@ -131,6 +131,8 @@ public class MeshTreeView extends TreeView<MeshTreeNode> {
         return meshSelection;
     }
 
+    // TODO: Avoid creating all mesh views when tree is populated. Expand only one category
+    //       and create its mesh views. Create mesh views for other categories when their root is expanded.
     public void populate(String title, ObjModelFX fxModel)
     {
         getRoot().setValue(new InnerTreeNode(NodeCategory.Model, title));
