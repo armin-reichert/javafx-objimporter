@@ -1,6 +1,6 @@
 ## javafx-objimporter
 
-### Parsing Wavefront OBJ files and creation of JavaFX mesh views 
+### Translating Wavefront OBJ files into JavaFX Phing materials and mesh views 
 
 ![Mesh Viewer App - Alien Animal](images/meshviewer.png)
 
