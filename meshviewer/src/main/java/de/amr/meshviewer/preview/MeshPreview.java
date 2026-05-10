@@ -14,12 +14,17 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
-import javafx.scene.*;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
+import javafx.scene.SceneAntialiasing;
+import javafx.scene.SubScene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
@@ -73,10 +78,11 @@ public class MeshPreview extends StackPane {
     private static final Rotate FLIP_Y_DIRECTION = new Rotate(180, Rotate.X_AXIS);
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
+    public final BooleanProperty showAxes = new SimpleBooleanProperty(false);
 
-    private final Group meshesPivot = new Group();
+    private final Group meshesGroup = new Group();
     private final PerspectiveCamera cam = new PerspectiveCamera(true);
-    private final Group previewGroup = new Group();
+
     private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final SubScene subScene;
 
@@ -96,9 +102,15 @@ public class MeshPreview extends StackPane {
     public MeshPreview() {
         setId("preview");
 
-        previewGroup.getTransforms().add(FLIP_Y_DIRECTION);
+        final Group preview = new Group();
+        final CoordinateSystem coordinateSystem = new CoordinateSystem();
+        coordinateSystem.visibleProperty().bind(showAxes);
 
-        subScene = new SubScene(previewGroup, 400, 400, true, SceneAntialiasing.BALANCED);
+        preview.getChildren().addAll(coordinateSystem, meshesGroup);
+
+        preview.getTransforms().add(FLIP_Y_DIRECTION);
+
+        subScene = new SubScene(preview, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
         subScene.focusedProperty().addListener((_, _, focussed) ->
             Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
@@ -109,7 +121,6 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.setPickOnBounds(false);
 
         configureCamera();
-        addLights();
         setKeyboardAndMouseHandlers();
         setBackground(Background.fill(SKY_GRADIENT));
         getChildren().addAll(subScene, flashMessageOverlay);
@@ -134,29 +145,29 @@ public class MeshPreview extends StackPane {
         noFocusWarning.setFocusTraversable(false);
         noFocusWarning.setId("noFocusWarning");
         noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
-        StackPane.setAlignment(noFocusWarning, Pos.CENTER);
+        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_LEFT);
         getChildren().add(noFocusWarning);
     }
 
-    public void selectDisplayedMeshViews(Collection<MeshView> all, Set<MeshView> displayed) {
-
-        all.forEach(meshView -> {
+    public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
+        allMeshViews.forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
             meshView.setVisible(true); // such that bounds computation takes it into account
         });
-        meshesPivot.getChildren().setAll(all);
+        meshesGroup.getChildren().setAll(allMeshViews);
+        final Bounds bounds = meshesGroup.getBoundsInLocal();
 
-        final Bounds bounds = meshesPivot.getBoundsInLocal();
         final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
 
-        meshesPivot.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
+        meshesGroup.getChildren().setAll(displayedMeshViews);
 
-        all.forEach(meshView -> {
+        meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
+
+        allMeshViews.forEach(meshView -> {
             meshView.drawModeProperty().bind(drawMode);
-            meshView.setVisible(displayed.contains(meshView));
+            meshView.setVisible(displayedMeshViews.contains(meshView));
         });
 
-        previewGroup.getChildren().setAll(meshesPivot);
         assignFocusToSubScene();
     }
 
@@ -267,35 +278,19 @@ public class MeshPreview extends StackPane {
         cam.setFarClip(10_000);
     }
 
-    private void addLights() {
-        final var ambient = new AmbientLight(Color.color(0.3, 0.3, 0.3));
-
-        final var keyLight = new PointLight(Color.WHITE);
-        keyLight.setTranslateX(200);
-        keyLight.setTranslateY(-200);
-        keyLight.setTranslateZ(-300);
-
-        final var fillLight = new PointLight(Color.color(0.6, 0.6, 0.8));
-        fillLight.setTranslateX(-200);
-        fillLight.setTranslateY(200);
-        fillLight.setTranslateZ(-300);
-
-        previewGroup.getChildren().addAll(ambient, keyLight, fillLight);
-    }
-
     public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
         final SampleInitSettings settings = sample.initSettings();
 
         camZoom.setZ(settings.zoom());
 
         if (settings.rotateX() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
+            meshesGroup.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
         }
         if (settings.rotateY() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateY(), Rotate.Y_AXIS));
+            meshesGroup.getTransforms().addLast(new Rotate(settings.rotateY(), Rotate.Y_AXIS));
         }
         if (settings.rotateZ() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateZ(), Rotate.Z_AXIS));
+            meshesGroup.getTransforms().addLast(new Rotate(settings.rotateZ(), Rotate.Z_AXIS));
         }
 
         tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
