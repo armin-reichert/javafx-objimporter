@@ -11,6 +11,7 @@
 
 `./gradlew publishToMavenLocal`
 
+(Publishing to Maven Central not yet available)
 
 ### Using the library from a Gradle project
 
@@ -29,8 +30,6 @@ requires de.amr.meshbuilder;
 
 exports whatever.your.app.module.is.named;
 ```
-
-(Publishing to Maven Central pending)
 
 ### Adding your own sample models to the meshviewer application
 
