@@ -30,7 +30,7 @@ jlink {
     // This bullshit is only necessary because my registered domain name ends with digits. If I had known before...
     mergedModule {
         additive = false
-        mergedModuleName = "de.amrsysx.objimporter.merged"
+        mergedModuleName = "de.amrsixtysix.objimporter.merged"
     }
 
     options = [
