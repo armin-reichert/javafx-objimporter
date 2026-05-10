@@ -29,14 +29,8 @@ public class AboutDialog extends Dialog<Void> {
         
         Explore JavaFX mesh views with geometry and materials defined in OBJ models.
         
-        
-        DISCLAIMER:
-        
         Parser development supported by Copilot AI.
         (Do *not* tell this on Reddit or you will get censored!)
-        
-        Written by an "unvaxxed", "climate change denying" old white man
-        who hates wokeness and gender bullshit.
         
         © 2026 Armin Reichert
         """;
