@@ -93,7 +93,8 @@ public class TrainDemoApp extends Application {
 
         // Parse the OBJ file and create the JavaFX materials and mesh views
         final ObjModel model3D = new ObjFileParser(url, StandardCharsets.UTF_8).parse();
-        final Collection<MeshView> meshViews = new MeshBuilder(model3D).buildMeshViewsByMaterial().values();
+        final Collection<MeshView> meshViews = new MeshBuilder(model3D)
+            .buildMeshViewsByMaterial().values();
 
         // Create the scene content
         final Group train = new Group(meshViews.toArray(MeshView[]::new));
