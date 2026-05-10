@@ -13,6 +13,8 @@ import javafx.util.Duration;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 public class ModelInfoPane extends InfoPane {
 
     private final Hyperlink lnkFile = createHyperlink();
@@ -25,7 +27,6 @@ public class ModelInfoPane extends InfoPane {
     private final Label lblSmoothingGroups = new Label();
     private final Label lblMaterials = new Label();
     private final Label lblParsingTime = new Label();
-    private final Label lblMeshCreationTime = new Label();
 
     public ModelInfoPane(String cssID, HostServices hostServices) {
         super(hostServices);
@@ -43,68 +44,62 @@ public class ModelInfoPane extends InfoPane {
         addRow(++row, new Label("Smoothing Groups:"), lblSmoothingGroups);
         addRow(++row, new Label("Materials:"), lblMaterials);
         addRow(++row, new Label("Parsing:"), lblParsingTime);
-        addRow(++row, new Label("Mesh Creation:"), lblMeshCreationTime);
     }
 
-    public void update(ObjModel model, int numMeshViews, Duration parsingTime, Duration meshCreationTime) {
+    public void clear() {
+        lnkFile.setText(NA);
+        lnkFile.setDisable(true);
+        lblVertices.setText(NA);
+        lblTexCoords.setText(NA);
+        lblNormals.setText(NA);
+        lblObjects.setText(NA);
+        lblGroups.setText(NA);
+        lblFaces.setText(NA);
+        lblSmoothingGroups.setText(NA);
+        lblMaterials.setText(NA);
+        lblParsingTime.setText(NA);
+        lblMaterials.setText(NA);
+    }
+
+    public void update(ObjModel model, int numMeshViews, Duration parsingTime) {
+        requireNonNull(model);
         if (parsingTime != null) {
             lblParsingTime.setText("%.3f s".formatted(parsingTime.toSeconds()));
         } else {
             lblParsingTime.setText(NA);
         }
-        if (meshCreationTime != null) {
-            lblMeshCreationTime.setText("%.3f s (%d meshes)".formatted(meshCreationTime.toSeconds(), numMeshViews));
-        } else {
-            lblMeshCreationTime.setText(NA);
-        }
 
-        if (model == null) {
-            lnkFile.setText(NA);
-            lnkFile.setDisable(true);
-            lblVertices.setText(NA);
-            lblTexCoords.setText(NA);
-            lblNormals.setText(NA);
-            lblObjects.setText(NA);
-            lblGroups.setText(NA);
-            lblFaces.setText(NA);
-            lblSmoothingGroups.setText(NA);
-            lblMaterials.setText(NA);
-            lblParsingTime.setText(NA);
-            lblMaterials.setText(NA);
-        }
-        else {
-            lnkFile.setText(extractFilePart(model.url()));
-            setLinkAction(lnkFile, model.url());
-            lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
-            lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
-            lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
+        lnkFile.setText(extractFilePart(model.url()));
+        setLinkAction(lnkFile, model.url());
+        lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
+        lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
+        lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
 
-            lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
+        lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
 
-            final int groupCount = model.objects.stream()
-                .mapToInt(o -> o.groups.size())
-                .sum();
-            lblGroups.setText(NUMBER_FORMAT.format(groupCount));
+        final int groupCount = model.objects.stream()
+            .mapToInt(o -> o.groups.size())
+            .sum();
+        lblGroups.setText(NUMBER_FORMAT.format(groupCount));
 
-            final int faceCount = model.objects.stream()
-                .flatMap(o -> o.groups.stream())
-                .mapToInt(g -> g.faces.size())
-                .sum();
-            lblFaces.setText(NUMBER_FORMAT.format(faceCount));
+        final int faceCount = model.objects.stream()
+            .flatMap(o -> o.groups.stream())
+            .mapToInt(g -> g.faces.size())
+            .sum();
+        lblFaces.setText(NUMBER_FORMAT.format(faceCount));
 
-            final long smoothingGroupsCount = model.objects.stream()
-                .flatMap(o -> o.groups.stream())
-                .flatMap(g -> g.faces.stream())
-                .map(f -> f.smoothingGroup)
-                .filter(Objects::nonNull)
-                .distinct()
-                .count();
-            lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroupsCount));
+        final long smoothingGroupsCount = model.objects.stream()
+            .flatMap(o -> o.groups.stream())
+            .flatMap(g -> g.faces.stream())
+            .map(f -> f.smoothingGroup)
+            .filter(Objects::nonNull)
+            .distinct()
+            .count();
+        lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroupsCount));
 
-            final int materialCount = model.materialLibsMap.values().stream()
-                .mapToInt(Map::size)
-                .sum();
-            lblMaterials.setText(NUMBER_FORMAT.format(materialCount));
-        }
+        final int materialCount = model.materialLibsMap.values().stream()
+            .mapToInt(Map::size)
+            .sum();
+        lblMaterials.setText(NUMBER_FORMAT.format(materialCount));
     }
 }

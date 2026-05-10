@@ -15,7 +15,7 @@ public class MaterialInfoPane extends VBox {
     }
 
     public void update(ObjModelFX fxModel) {
-        treeView.populate(fxModel.materialsMap());
+        treeView.populate(fxModel.materials());
     }
 
     public void clear() {

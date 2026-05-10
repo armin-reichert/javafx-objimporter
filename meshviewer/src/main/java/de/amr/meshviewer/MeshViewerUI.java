@@ -4,7 +4,6 @@
 
 package de.amr.meshviewer;
 
-import de.amr.meshbuilder.MeshBuilder;
 import de.amr.meshviewer.info.ModelInfoPane;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.info.SampleInfoPane;
@@ -78,10 +77,9 @@ public class MeshViewerUI {
     public static final int INFO_AREA_LABEL_COLUMN_WIDTH = 125;
 
     private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
-    public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    public final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
+    public  final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
+    public  final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
     private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
-    private final ObjectProperty<Duration> fxModelCreationTime = new SimpleObjectProperty<>(Duration.ZERO);
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
     private final ObservableList<SampleInfo> userSamples = FXCollections.observableArrayList();
@@ -151,12 +149,12 @@ public class MeshViewerUI {
             createFXModel(objModel);
             meshTreePane.update(objModel, fxModel);
             materialInfoPane.update(fxModel);
-            modelInfoPane.update(objModel, meshViewCount(), parsingTime.get(), fxModelCreationTime.get());
+            modelInfoPane.update(objModel, meshViewCount(), parsingTime.get());
         } else {
             clearFXModel();
             meshTreePane.clear();
             materialInfoPane.clear();
-            modelInfoPane.update(null, 0, null, null); //TODO clear()
+            modelInfoPane.clear();
         }
     }
 
@@ -172,10 +170,6 @@ public class MeshViewerUI {
 
     public File currentModelDir() {
         return currentModelDir;
-    }
-
-    public MeshViewerMenus menus() {
-        return menus;
     }
 
     public FileChooser fileChooser() {
@@ -465,16 +459,7 @@ public class MeshViewerUI {
     }
 
     private void createFXModel(ObjModel objModel) {
-        final Instant start = Instant.now();
-        final MeshBuilder builder = new MeshBuilder(objModel);
-        fxModel = new ObjModelFX(
-            builder.buildMeshViewsByObject(),
-            builder.buildMeshViewsByGroup(),
-            builder.buildMeshViewsByMaterial(),
-            builder.materials()
-        );
-        final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
-        fxModelCreationTime.set(Duration.millis(duration.toMillis()));
+        fxModel = new ObjModelFX(objModel);
     }
 
     private void clearFXModel() {
