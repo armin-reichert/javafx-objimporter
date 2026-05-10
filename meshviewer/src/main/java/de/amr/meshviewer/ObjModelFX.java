@@ -21,11 +21,11 @@ public class ObjModelFX {
     public static final ObjModelFX EMPTY = new ObjModelFX();
 
     private static void logTime(Runnable code, String description) {
-        Instant before = Instant.now();
+        final Instant before = Instant.now();
         try {
             code.run();
-            Duration duration = Duration.between(before, Instant.now());
-            Logger.info("'{}' took {} millis", description, duration.toMillis());
+            final Duration duration = Duration.between(before, Instant.now());
+            Logger.info("{} millis: {}", duration.toMillis(), description);
         } catch (Exception x) {
             Logger.error(x, "Error measuring runtime of '{}'", description);
         }
@@ -58,7 +58,7 @@ public class ObjModelFX {
         if (objectMeshViews == null) {
             logTime(
                 () -> objectMeshViews = builder.buildMeshViewsByObject(),
-                "Creating mesh views for objects"
+                "Creating mesh views for objects of OBJ %s".formatted(objModel.url())
             );
         }
         return objectMeshViews;
@@ -68,7 +68,7 @@ public class ObjModelFX {
         if (groupMeshViews == null) {
             logTime(
                 () -> groupMeshViews =  builder.buildMeshViewsByGroup(),
-                "Creating mesh views for groups"
+                "Creating mesh views for groups of OBJ %s".formatted(objModel.url())
             );
         }
         return groupMeshViews;
@@ -78,7 +78,7 @@ public class ObjModelFX {
         if (materialMeshViews == null) {
             logTime(
                 () -> materialMeshViews = builder.buildMeshViewsByMaterial(),
-                "Creating mesh views for materials"
+                "Creating mesh views for materials of OBJ %s".formatted(objModel.url())
             );
         }
         return materialMeshViews;

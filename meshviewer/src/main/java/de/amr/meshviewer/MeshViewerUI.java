@@ -45,7 +45,6 @@ import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.tinylog.Logger;
 
 import java.io.File;
@@ -76,14 +75,13 @@ public class MeshViewerUI {
 
     public  final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public  final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
-    private final ObjectProperty<Duration> parsingTime = new SimpleObjectProperty<>(Duration.ZERO);
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
     private final ObservableList<SampleInfo> userSamples = FXCollections.observableArrayList();
 
-    private final ObjectProperty<ObjModel> objModel = new SimpleObjectProperty<>();
-    // FX artifacts created from OBJ model
     private final ObjectProperty<ObjModelFX> fxModel = new SimpleObjectProperty<>(ObjModelFX.EMPTY);
+
+    private long parsingTimeMillis;
 
     private final HostServices hostServices;
     private File currentModelDir;
@@ -135,21 +133,19 @@ public class MeshViewerUI {
         stage.setWidth(width);
         stage.setHeight(height);
 
-        objModel.addListener(this::handleObjModelChange);
+        fxModel.addListener(this::handleModelChange);
         Platform.runLater(() -> {
             showSelectionArea(true);
             showInfoArea(false);
         });
     }
 
-    private void handleObjModelChange(ObservableValue<? extends ObjModel> py, ObjModel oldModel, ObjModel objModel) {
-        if (objModel != null) {
-            fxModel.set(new ObjModelFX(objModel));
-            meshTreePane.update(objModel, fxModel.get());
-            materialInfoPane.update(fxModel.get());
-            modelInfoPane.update(objModel, parsingTime.get());
+    private void handleModelChange(ObservableValue<? extends ObjModelFX> py, ObjModelFX oldModel, ObjModelFX newModel) {
+        if (newModel != ObjModelFX.EMPTY) {
+            meshTreePane.update(newModel);
+            materialInfoPane.update(newModel);
+            modelInfoPane.update(newModel, parsingTimeMillis);
         } else {
-            fxModel.set(ObjModelFX.EMPTY);
             meshTreePane.clear();
             materialInfoPane.clear();
             modelInfoPane.clear();
@@ -436,16 +432,16 @@ public class MeshViewerUI {
     // --- Model access
 
     private void loadModelFromURL(URL objFileURL) throws IOException {
-        final ObjModel model = parseObjModel(objFileURL);
-        objModel.set(model);
+        final ObjModel obj = parseObjModel(objFileURL);
+        fxModel.set(new ObjModelFX(obj));
     }
 
     private ObjModel parseObjModel(URL objFileURL) throws IOException {
         final Instant start = Instant.now();
-        final ObjModel model = new ObjFileParser(objFileURL, StandardCharsets.UTF_8).parse();
-        final java.time.Duration duration = java.time.Duration.between(start, Instant.now());
-        parsingTime.set(Duration.millis(duration.toMillis()));
-        return model;
+        final ObjModel obj = new ObjFileParser(objFileURL, StandardCharsets.UTF_8).parse();
+        final var duration = java.time.Duration.between(start, Instant.now());
+        parsingTimeMillis = duration.toMillis();
+        return obj;
     }
 
     private void addDragNDropSupport() {

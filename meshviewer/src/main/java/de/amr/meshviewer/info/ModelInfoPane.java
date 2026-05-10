@@ -4,11 +4,11 @@
 
 package de.amr.meshviewer.info;
 
+import de.amr.meshviewer.ObjModelFX;
 import de.amr.objparser.ObjModel;
 import javafx.application.HostServices;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
-import javafx.util.Duration;
 
 import java.util.Map;
 import java.util.Objects;
@@ -61,43 +61,46 @@ public class ModelInfoPane extends InfoPane {
         lblMaterials.setText(NA);
     }
 
-    public void update(ObjModel model, Duration parsingTime) {
+    public void update(ObjModelFX model, long parsingTimeMillis) {
         requireNonNull(model);
-        if (parsingTime != null) {
-            lblParsingTime.setText("%.3f s".formatted(parsingTime.toSeconds()));
+
+        if (parsingTimeMillis >= 0) {
+            lblParsingTime.setText("%.3f s".formatted(parsingTimeMillis / 1000.0));
         } else {
             lblParsingTime.setText(NA);
         }
 
-        lnkFile.setText(extractFilePart(model.url()));
-        setLinkAction(lnkFile, model.url());
-        lblVertices.setText(NUMBER_FORMAT.format(model.vertexCount()));
-        lblTexCoords.setText(NUMBER_FORMAT.format(model.texCoordCount()));
-        lblNormals.setText(NUMBER_FORMAT.format(model.normalCount()));
+        final ObjModel obj = model.objModel();
 
-        lblObjects.setText(NUMBER_FORMAT.format(model.objects.size()));
+        lnkFile.setText(extractFilePart(obj.url()));
+        setLinkAction(lnkFile, obj.url());
+        lblVertices.setText(NUMBER_FORMAT.format(obj.vertexCount()));
+        lblTexCoords.setText(NUMBER_FORMAT.format(obj.texCoordCount()));
+        lblNormals.setText(NUMBER_FORMAT.format(obj.normalCount()));
 
-        final int groupCount = model.objects.stream()
-            .mapToInt(o -> o.groups.size())
+        lblObjects.setText(NUMBER_FORMAT.format(obj.objects.size()));
+
+        final int groupCount = obj.objects.stream()
+            .mapToInt(object -> object.groups.size())
             .sum();
         lblGroups.setText(NUMBER_FORMAT.format(groupCount));
 
-        final int faceCount = model.objects.stream()
-            .flatMap(o -> o.groups.stream())
-            .mapToInt(g -> g.faces.size())
+        final int faceCount = obj.objects.stream()
+            .flatMap(object -> object.groups.stream())
+            .mapToInt(group -> group.faces.size())
             .sum();
         lblFaces.setText(NUMBER_FORMAT.format(faceCount));
 
-        final long smoothingGroupsCount = model.objects.stream()
-            .flatMap(o -> o.groups.stream())
-            .flatMap(g -> g.faces.stream())
-            .map(f -> f.smoothingGroup)
+        final long smoothingGroupsCount = obj.objects.stream()
+            .flatMap(object -> object.groups.stream())
+            .flatMap(group -> group.faces.stream())
+            .map(face -> face.smoothingGroup)
             .filter(Objects::nonNull)
             .distinct()
             .count();
         lblSmoothingGroups.setText(NUMBER_FORMAT.format(smoothingGroupsCount));
 
-        final int materialCount = model.materialLibsMap.values().stream()
+        final int materialCount = obj.materialLibsMap.values().stream()
             .mapToInt(Map::size)
             .sum();
         lblMaterials.setText(NUMBER_FORMAT.format(materialCount));

@@ -36,9 +36,9 @@ public class MeshTreePane extends VBox {
         return meshTreeView;
     }
 
-    public void update(ObjModel objModel, ObjModelFX fxModel)
+    public void update(ObjModelFX fxModel)
     {
-        final String url = objModel.url();
+        final String url = fxModel.objModel().url();
         final String title = URLDecoder.decode(url.substring(url.lastIndexOf('/') + 1), StandardCharsets.UTF_8);
         meshTreeView.populate(title, fxModel);
         meshTreeView.clearMeshSelection();
