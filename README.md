@@ -11,15 +11,8 @@
 
 `./gradlew publishToMavenLocal`
 
-### Sample code for creating a JavaFX mesh view from an OBJ file loaded via an URL:
 
-```
-ObjModel objModel = new ObjFileParser(objFileURL, StandardCharsets.UTF_8).parse();
-// To build the mesh views for the groups inside the OBJ file:
-Map<String, MeshView> meshes = MeshBuilder.build(objModel, MeshBuilder.BuildMode.BY_GROUP);
-```
-
-### Using the library from another Gradle project
+### Using the library from a Gradle project
 
 ```
 dependencies {
@@ -37,11 +30,11 @@ requires de.amr.meshbuilder;
 exports whatever.your.app.module.is.named;
 ```
 
-(Download from Maven Central not yet available)
+(Publishing to Maven Central pending)
 
-### Adding your own sample models
+### Adding your own sample models to the meshviewer application
 
-The application creates a folder `$HOME/.meshviewerfx/samples` under your home directory. 
+The included mesh viewer application creates the folder `$HOME/.meshviewerfx/samples` under your home directory. 
 To add your own samples, you have to create a subdirectory for each sample in this folder and register the sample in a TOC file named `toc.json`
 which has to be placed in the folder above. 
 
