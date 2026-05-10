@@ -11,6 +11,7 @@
 
 `./gradlew publishToMavenLocal`
 
+(Publishing to Maven Central not yet available)
 
 ### Using the library from a Gradle project
 
@@ -29,8 +30,6 @@ requires de.amr.meshbuilder;
 
 exports whatever.your.app.module.is.named;
 ```
-
-(Publishing to Maven Central pending)
 
 ### Adding your own sample models to the meshviewer application
 
@@ -70,7 +69,7 @@ Here, the `path` attribute must store the relative path to your model from the `
 In the `initSettings` object, you can specify the initial preview settings which may vary between samples such that the sample is e.g. zoomed
 appropriately when displayed for the first time.
 
-For the TOC file shown above, there must exist a folder `$HOME/.meshviewerfx/samples/newwell_teaset` containing on OBJ file named `teapot.obj`.
+For the TOC file shown above, there must exist a folder `$HOME/.meshviewerfx/samples/newell_teaset` containing on OBJ file named `teapot.obj`.
 
 For each registered sample, the menu "User Samples" will create an entry where you can select the OBJ file and preview it.
 
