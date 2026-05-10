@@ -178,22 +178,20 @@ public class MeshBuilder {
         for (ObjObject obj : model.objects) {
             for (ObjGroup group : obj.groups) {
                 for (ObjFace face : group.faces) {
-                    final String id = replaceSpacesByUnderscores(face.materialName);
-                    facesByMaterial.computeIfAbsent(id, _ -> new ArrayList<>()).add(face);
+                    final String key = face.materialName;
+                    facesByMaterial.computeIfAbsent(key, _ -> new ArrayList<>()).add(face);
                 }
             }
         }
         final Map<String, MeshView> result = new LinkedHashMap<>();
         for (var entry : facesByMaterial.entrySet()) {
-            final String id = replaceSpacesByUnderscores(entry.getKey());
-            if (!included.test(id)) {
-                continue;
-            }
+            final String key = entry.getKey();
             final List<ObjFace> faces = entry.getValue();
             final MeshView meshView = buildMeshViewForFaces(faces);
+            final String id = replaceSpacesByUnderscores(key);
             meshView.setId(id);
-            if (materials.containsKey(id)) {
-                meshView.setMaterial(materials.get(id));
+            if (materials.containsKey(key)) {
+                meshView.setMaterial(materials.get(key));
             }
             result.put(id, meshView);
         }
