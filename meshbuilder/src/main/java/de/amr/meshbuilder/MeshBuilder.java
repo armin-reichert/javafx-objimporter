@@ -13,6 +13,7 @@ import javafx.scene.shape.TriangleMesh;
 import org.tinylog.Logger;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
@@ -21,7 +22,9 @@ import static java.util.Objects.requireNonNull;
  */
 public class MeshBuilder {
 
-    private static String replaceSpace(String str) {
+    private static final Predicate<String> INCLUDE_ALL = _ -> true;
+
+    private static String replaceSpacesByUnderscores(String str) {
         requireNonNull(str);
         return str.replace(" ", "_");
     }
@@ -52,7 +55,7 @@ public class MeshBuilder {
         materials = new HashMap<>();
         for (Map<String, ObjMaterial> lib : model.materialLibsMap.values()) {
             lib.forEach((name, material) -> {
-                final String nameWithoutSpaces = replaceSpace(name);
+                final String nameWithoutSpaces = replaceSpacesByUnderscores(name);
                 materials.put(nameWithoutSpaces, createPhongMaterial(material));
             });
         }
@@ -89,16 +92,21 @@ public class MeshBuilder {
 
     /**
      * Builds one MeshView per OBJ group.
-     * Key format: "objectName.groupName"
+     * <p>
+     * Key format: "objectName.groupName". Spaces in names from OBJ file are replaced by underscores.
      *
+     * @param included determines for which IDs mesh views should be created. These are the IDs without spaces!
      * @return map with mesh views for OBJ groups
      */
-    public Map<String, MeshView> buildMeshViewsByGroup() {
+    public Map<String, MeshView> buildMeshViewsByGroup(Predicate<String> included) {
+        requireNonNull(included);
         final Map<String, MeshView> result = new LinkedHashMap<>();
-
         for (ObjObject obj : model.objects) {
             for (ObjGroup group : obj.groups) {
-                final String id = replaceSpace(obj.name) + "." + replaceSpace(group.name);
+                final String id = replaceSpacesByUnderscores(obj.name) + "." + replaceSpacesByUnderscores(group.name);
+                if (!included.test(id)) {
+                    continue;
+                }
                 final MeshView meshView = buildMeshViewForFaces(group.faces);
                 meshView.setId(id);
                 result.put(id, meshView);
@@ -109,29 +117,86 @@ public class MeshBuilder {
     }
 
     /**
+     * Builds one MeshView per OBJ group.
+     * <p>
+     * Key format: "objectName.groupName". Spaces in names from OBJ file are replaced by underscores.
+     *
+     * @return map with mesh views for OBJ groups
+     */
+    public Map<String, MeshView> buildMeshViewsByGroup() {
+        return buildMeshViewsByGroup(INCLUDE_ALL);
+    }
+
+    /**
      * Builds one MeshView per OBJ object.
      * All groups inside the object are merged.
-     * Key format: "objectName"
+     * <p>
+     * Key format: "objectName". Spaces in names from OBJ file are replaced by underscores.
      *
+     * @param included determines for which IDs mesh views should be created. These are the IDs without spaces!
      * @return map with mesh views for OBJ objects
      */
-    public Map<String, MeshView> buildMeshViewsByObject() {
+    public Map<String, MeshView> buildMeshViewsByObject(Predicate<String> included) {
         final Map<String, MeshView> result = new LinkedHashMap<>();
-
         for (ObjObject obj : model.objects) {
-
+            final String id = replaceSpacesByUnderscores(obj.name);
+            if (!included.test(id)) {
+                continue;
+            }
             final List<ObjFace> allFaces = new ArrayList<>();
             for (ObjGroup group : obj.groups) {
                 allFaces.addAll(group.faces);
             }
-
             final MeshView meshView = buildMeshViewForFaces(allFaces);
-            final String id = replaceSpace(obj.name);
             meshView.setId(id);
-
             result.put(id, meshView);
         }
+        return result;
+    }
 
+    /**
+     * Builds one MeshView per OBJ object.
+     * All groups inside the object are merged.
+     * <p>
+     * Key format: "objectName". Spaces in names from OBJ file are replaced by underscores.
+     *
+     * @return map with mesh views for OBJ objects
+     */
+    public Map<String, MeshView> buildMeshViewsByObject() {
+        return buildMeshViewsByObject(INCLUDE_ALL);
+    }
+
+    /**
+     * Builds one MeshView per material.
+     * Key format: "materialName"
+     *
+     * @param included determines for which IDs mesh views should be created. These are the IDs without spaces!
+     * @return map with mesh views for OBJ materials
+     */
+    public Map<String, MeshView> buildMeshViewsByMaterial(Predicate<String> included) {
+        final Map<String, List<ObjFace>> facesByMaterial = new LinkedHashMap<>();
+        for (ObjObject obj : model.objects) {
+            for (ObjGroup group : obj.groups) {
+                for (ObjFace face : group.faces) {
+                    final String id = replaceSpacesByUnderscores(face.materialName);
+                    facesByMaterial.computeIfAbsent(id, _ -> new ArrayList<>()).add(face);
+                }
+            }
+        }
+        final Map<String, MeshView> result = new LinkedHashMap<>();
+        for (var entry : facesByMaterial.entrySet()) {
+            final String id = replaceSpacesByUnderscores(entry.getKey());
+            if (!included.test(id)) {
+                continue;
+            }
+            final List<ObjFace> faces = entry.getValue();
+            final MeshView meshView = buildMeshViewForFaces(faces);
+            meshView.setId(id);
+            if (materials.containsKey(id)) {
+                meshView.setMaterial(materials.get(id));
+            }
+            result.put(id, meshView);
+        }
         return result;
     }
 
@@ -142,34 +207,7 @@ public class MeshBuilder {
      * @return map with mesh views for OBJ materials
      */
     public Map<String, MeshView> buildMeshViewsByMaterial() {
-        final Map<String, List<ObjFace>> facesByMaterial = new LinkedHashMap<>();
-
-        for (ObjObject obj : model.objects) {
-            for (ObjGroup group : obj.groups) {
-                for (ObjFace face : group.faces) {
-                    final String id = replaceSpace(face.materialName);
-                    facesByMaterial.computeIfAbsent(id, _ -> new ArrayList<>()).add(face);
-                }
-            }
-        }
-
-        final Map<String, MeshView> result = new LinkedHashMap<>();
-
-        for (var entry : facesByMaterial.entrySet()) {
-            final String matName = entry.getKey();
-            final List<ObjFace> faces = entry.getValue();
-
-            final MeshView meshView = buildMeshViewForFaces(faces);
-            meshView.setId(matName);
-
-            if (materials.containsKey(matName)) {
-                meshView.setMaterial(materials.get(matName));
-            }
-
-            result.put(matName, meshView);
-        }
-
-        return result;
+        return buildMeshViewsByMaterial(INCLUDE_ALL);
     }
 
     /* -------------------------------------------------------------
@@ -182,7 +220,7 @@ public class MeshBuilder {
 
         if (!faces.isEmpty()) {
             // Assign material if all faces share one
-            final String matName = replaceSpace(faces.getFirst().materialName);
+            final String matName = replaceSpacesByUnderscores(faces.getFirst().materialName);
             if (materials.containsKey(matName)) {
                 meshView.setMaterial(materials.get(matName));
             }
