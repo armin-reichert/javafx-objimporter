@@ -145,7 +145,8 @@ public class MeshPreview extends StackPane {
         noFocusWarning.setFocusTraversable(false);
         noFocusWarning.setId("noFocusWarning");
         noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
-        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_CENTER);
+        noFocusWarning.setTranslateY(-5);
         getChildren().add(noFocusWarning);
     }
 

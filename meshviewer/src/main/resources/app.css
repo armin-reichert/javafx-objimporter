@@ -76,18 +76,17 @@
 }
 
 #noFocusWarning {
-    -fx-background-color: rgba(150, 150, 180, 0.5);
+    -fx-background-color: rgba(120,120,180,0.5);
     -fx-background-radius: 12;
 
-    -fx-text-fill: white;
     -fx-padding: 10;
 
     -fx-font-family: "Arial";
-    -fx-font-size: 18px;
+    -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: white;
 
-    -fx-border-color: rgb(100,100,100);
+    -fx-border-color: rgb(200,200,200);
     -fx-border-width: 0.5;
     -fx-border-radius: 12;
 }
