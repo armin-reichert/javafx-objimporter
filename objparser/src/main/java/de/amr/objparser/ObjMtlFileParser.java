@@ -152,7 +152,7 @@ public class ObjMtlFileParser {
                 /* --- Scalars --- */
                 case SPECULAR_POWER -> currentObjMaterial.Ns = parseSpecularPower(token.args);
                 case OPACITY        -> currentObjMaterial.d  = parseOpacity(token.args);
-                case TRANSPARENCY   -> currentObjMaterial.d  = 1.0f - parseOpacity(token.args);
+                case TRANSPARENCY   -> currentObjMaterial.Tr  = parseTransparency(token.args);
                 case ILLUMINATION   -> currentObjMaterial.illum = parseIllumination(token.args);
                 case REFRACTION_INDEX -> currentObjMaterial.Ni = parseRefractionIndex(token.args);
 
@@ -287,6 +287,11 @@ public class ObjMtlFileParser {
     private static float parseOpacity(String s) {
         float v = Float.parseFloat(s);
         return (v >= 0 && v <= 1) ? v : ObjMaterial.DEFAULT_OPACITY;
+    }
+
+    private static float parseTransparency(String s) {
+        float v = Float.parseFloat(s);
+        return (v >= 0 && v <= 1) ? v : ObjMaterial.DEFAULT_TRANSPARENCY;
     }
 
     private static float parseRefractionIndex(String s) {

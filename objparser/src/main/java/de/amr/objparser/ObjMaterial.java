@@ -14,6 +14,7 @@ public class ObjMaterial {
 
     // --- Defaults ---
     public static final float DEFAULT_OPACITY = 1f;
+    public static final float DEFAULT_TRANSPARENCY = 0f;
     public static final byte  DEFAULT_ILLUM   = 2;
     public static final float DEFAULT_NI      = 1.0f;
     public static final float DEFAULT_NS      = 10.0f;
@@ -25,7 +26,7 @@ public class ObjMaterial {
 
     // --- Scalar properties ---
     public float d  = DEFAULT_OPACITY;  // dissolve (opacity)
-    public float Tr = -1;               // transparency (optional)
+    public float Tr = DEFAULT_TRANSPARENCY; // transparency (optional)
     public float Ns = DEFAULT_NS;       // specular exponent
     public float Ni = DEFAULT_NI;       // index of refraction
     public byte illum = DEFAULT_ILLUM;  // illumination model
