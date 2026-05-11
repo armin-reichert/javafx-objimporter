@@ -30,10 +30,8 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.*;
-import javafx.scene.shape.Box;
-import javafx.scene.shape.CullFace;
-import javafx.scene.shape.DrawMode;
-import javafx.scene.shape.MeshView;
+import javafx.scene.shape.*;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
@@ -136,12 +134,52 @@ public class MeshPreview extends StackPane {
     }
 
     private Group createFloor(double size) {
-        final Box floor = new Box(size, 0.005, size);
+        final Group g = new Group();
+
+        final double floorThickness = 0.005;
+        final PhongMaterial redMaterial = new PhongMaterial(Color.RED);
+        final PhongMaterial greenMaterial = new PhongMaterial(Color.GREEN);
+        final PhongMaterial whiteMaterial = new PhongMaterial(Color.WHITE);
+
+        final Box floor = new Box(size, floorThickness, size);
         final PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.rgb(50, 50, 50, 0.5));
+        material.setDiffuseColor(Color.rgb(40, 40, 40, 0.6));
         material.setSpecularColor(Color.TRANSPARENT);
         floor.setMaterial(material);
-        return new Group(floor);
+
+
+        final Box xAxis = new Box(size, floorThickness, floorThickness);
+        xAxis.setTranslateY(.5 * floorThickness);
+        xAxis.setMaterial(redMaterial);
+
+        final Box yAxis = new Box(floorThickness, floorThickness, size);
+        yAxis.setTranslateY(.5 * floorThickness);
+        yAxis.setMaterial(greenMaterial);
+
+        g.getChildren().addAll(xAxis,yAxis);
+
+        final double markerRadius = 0.02;
+        final Sphere originMarker = new Sphere(3 * markerRadius);
+        originMarker.setMaterial(whiteMaterial);
+        g.getChildren().add(originMarker);
+
+        for (int i = 1; i <= (int) (0.5 * size); ++i) {
+            final int scale = i % 10 == 0 ? 3 : 1;
+
+            final Sphere markerX = new Sphere(scale * markerRadius);
+            markerX.setMaterial(redMaterial);
+            markerX.setTranslateX(i);
+            g.getChildren().add(markerX);
+
+            final Sphere markerY = new Sphere(scale * markerRadius);
+            markerY.setMaterial(greenMaterial);
+            markerY.setTranslateZ(i);
+            g.getChildren().add(markerY);
+        }
+        
+        g.getChildren().add(floor);
+
+        return g;
     }
 
     public void flash(String message) {
@@ -159,7 +197,7 @@ public class MeshPreview extends StackPane {
         meshesGroup.getChildren().clear();
         meshesGroup.getChildren().addAll(displayedMeshViews);
         // Important: Floor has to be added *last*!
-        meshesGroup.getChildren().add(createFloor(3 * Math.max(bounds.getWidth(), bounds.getHeight())));
+        meshesGroup.getChildren().add(createFloor(2 * Math.max(bounds.getWidth(), bounds.getHeight())));
 
         final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
         meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
