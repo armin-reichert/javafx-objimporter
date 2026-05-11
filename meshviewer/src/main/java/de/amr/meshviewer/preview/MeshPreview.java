@@ -31,7 +31,6 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.*;
 import javafx.scene.shape.*;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
@@ -73,14 +72,10 @@ public class MeshPreview extends StackPane {
     public static final double ZOOM_RATE_LARGE  = 1.0;
     public static final double ZOOM_RATE_HUGE   = 10.0;
 
-    // Flip around x-axis (otherwise many objects are upside-down initially)
-    private static final Rotate FLIP_Y_DIRECTION = new Rotate(180, Rotate.X_AXIS);
-
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty showAxes = new SimpleBooleanProperty(false);
 
     private final Group meshesGroup = new Group();
-    private final PerspectiveCamera cam = new PerspectiveCamera(true);
 
     private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final SubScene subScene;
@@ -101,14 +96,17 @@ public class MeshPreview extends StackPane {
     public MeshPreview() {
         setId("preview");
 
-        final Group preview = new Group();
-        final CoordinateSystem coordinateSystem = new CoordinateSystem();
-        coordinateSystem.visibleProperty().bind(showAxes);
+        final PerspectiveCamera cam = new PerspectiveCamera(true);
+        cam.getTransforms().addAll(camZoom);
+        cam.setNearClip(0.1);
+        cam.setFarClip(10_000);
 
-        preview.getChildren().addAll(coordinateSystem, meshesGroup);
-        preview.getTransforms().add(FLIP_Y_DIRECTION);
+        final Group cameraView = new Group(cam);
+        cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
 
-        subScene = new SubScene(preview, 400, 400, true, SceneAntialiasing.BALANCED);
+        final Group top = new Group(meshesGroup, cameraView);
+
+        subScene = new SubScene(top, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
         subScene.focusedProperty().addListener((_, _, focussed) ->
             Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
@@ -118,7 +116,6 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.setMouseTransparent(true);
         flashMessageOverlay.setPickOnBounds(false);
 
-        configureCamera();
         setKeyboardAndMouseHandlers();
         setBackground(Background.fill(SKY_GRADIENT));
         getChildren().addAll(subScene, flashMessageOverlay);
@@ -133,48 +130,48 @@ public class MeshPreview extends StackPane {
         addNoFocusWarningHint();
     }
 
-    private Group createFloor(double size) {
+    private Group createFloorInXZPlane(double size) {
         final Group g = new Group();
 
-        final double floorThickness = 0.005;
-        final PhongMaterial redMaterial = new PhongMaterial(Color.RED);
-        final PhongMaterial greenMaterial = new PhongMaterial(Color.GREEN);
-        final PhongMaterial whiteMaterial = new PhongMaterial(Color.WHITE);
+        final double ft = 0.005;
 
-        final Box floor = new Box(size, floorThickness, size);
+        final PhongMaterial red = new PhongMaterial(Color.RED);
+        final PhongMaterial blue = new PhongMaterial(Color.BLUE);
+        final PhongMaterial white = new PhongMaterial(Color.WHITE);
+
+        final Box floor = new Box(size, ft, size);
         final PhongMaterial material = new PhongMaterial();
         material.setDiffuseColor(Color.rgb(40, 40, 40, 0.6));
         material.setSpecularColor(Color.TRANSPARENT);
         floor.setMaterial(material);
 
+        final Box xAxis = new Box(size, ft, ft);
+        xAxis.setTranslateY(.5 * ft);
+        xAxis.setMaterial(red);
 
-        final Box xAxis = new Box(size, floorThickness, floorThickness);
-        xAxis.setTranslateY(.5 * floorThickness);
-        xAxis.setMaterial(redMaterial);
+        final Box zAxis = new Box(ft, ft, size);
+        zAxis.setTranslateY(.5 * ft);
+        zAxis.setMaterial(blue);
 
-        final Box yAxis = new Box(floorThickness, floorThickness, size);
-        yAxis.setTranslateY(.5 * floorThickness);
-        yAxis.setMaterial(greenMaterial);
-
-        g.getChildren().addAll(xAxis,yAxis);
+        g.getChildren().addAll(xAxis, zAxis);
 
         final double markerRadius = 0.02;
-        final Sphere originMarker = new Sphere(3 * markerRadius);
-        originMarker.setMaterial(whiteMaterial);
+        final Sphere originMarker = new Sphere(2 * markerRadius);
+        originMarker.setMaterial(white);
         g.getChildren().add(originMarker);
 
         for (int i = 1; i <= (int) (0.5 * size); ++i) {
             final int scale = i % 10 == 0 ? 3 : 1;
 
             final Sphere markerX = new Sphere(scale * markerRadius);
-            markerX.setMaterial(redMaterial);
+            markerX.setMaterial(red);
             markerX.setTranslateX(i);
             g.getChildren().add(markerX);
 
-            final Sphere markerY = new Sphere(scale * markerRadius);
-            markerY.setMaterial(greenMaterial);
-            markerY.setTranslateZ(i);
-            g.getChildren().add(markerY);
+            final Sphere markerZ = new Sphere(scale * markerRadius);
+            markerZ.setMaterial(blue);
+            markerZ.setTranslateZ(i);
+            g.getChildren().add(markerZ);
         }
         
         g.getChildren().add(floor);
@@ -197,7 +194,7 @@ public class MeshPreview extends StackPane {
         meshesGroup.getChildren().clear();
         meshesGroup.getChildren().addAll(displayedMeshViews);
         // Important: Floor has to be added *last*!
-        meshesGroup.getChildren().add(createFloor(2 * Math.max(bounds.getWidth(), bounds.getHeight())));
+        meshesGroup.getChildren().add(createFloorInXZPlane(2 * Math.max(bounds.getWidth(), bounds.getHeight())));
 
         final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
         meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
@@ -309,12 +306,6 @@ public class MeshPreview extends StackPane {
             Logger.info("delta={}", dy);
             zoomBy(dy * rate);
         });
-    }
-
-    private void configureCamera() {
-        cam.getTransforms().addAll(camZoom);
-        cam.setNearClip(0.1);
-        cam.setFarClip(10_000);
     }
 
     public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
