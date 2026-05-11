@@ -128,7 +128,7 @@ public class TrainDemoApp extends Application {
         final PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-40);
 
-        // Crete scene, camera can be zoomed with "+" and "-" keys
+        // Create scene, camera can be zoomed with "+" and "-" keys
         final Scene scene = new Scene(world, 700, 300, true, SceneAntialiasing.BALANCED);
         scene.setCamera(camera);
         scene.setFill(Color.DARKGRAY);
