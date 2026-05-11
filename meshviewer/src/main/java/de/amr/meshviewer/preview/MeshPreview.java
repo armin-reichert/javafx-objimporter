@@ -30,6 +30,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.*;
+import javafx.scene.shape.Box;
 import javafx.scene.shape.CullFace;
 import javafx.scene.shape.DrawMode;
 import javafx.scene.shape.MeshView;
@@ -107,7 +108,6 @@ public class MeshPreview extends StackPane {
         coordinateSystem.visibleProperty().bind(showAxes);
 
         preview.getChildren().addAll(coordinateSystem, meshesGroup);
-
         preview.getTransforms().add(FLIP_Y_DIRECTION);
 
         subScene = new SubScene(preview, 400, 400, true, SceneAntialiasing.BALANCED);
@@ -135,19 +135,17 @@ public class MeshPreview extends StackPane {
         addNoFocusWarningHint();
     }
 
-    public void flash(String message) {
-        flashMessageOverlay.showMessage(message);
+    private Group createFloor(double size) {
+        final Box floor = new Box(size, 0.005, size);
+        final PhongMaterial material = new PhongMaterial();
+        material.setDiffuseColor(Color.rgb(50, 50, 50, 0.5));
+        material.setSpecularColor(Color.TRANSPARENT);
+        floor.setMaterial(material);
+        return new Group(floor);
     }
 
-    private void addNoFocusWarningHint() {
-        final Label noFocusWarning = new Label("Click to focus!");
-        noFocusWarning.setMouseTransparent(true);
-        noFocusWarning.setFocusTraversable(false);
-        noFocusWarning.setId("noFocusWarning");
-        noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
-        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_CENTER);
-        noFocusWarning.setTranslateY(-5);
-        getChildren().add(noFocusWarning);
+    public void flash(String message) {
+        flashMessageOverlay.showMessage(message);
     }
 
     public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
@@ -158,10 +156,12 @@ public class MeshPreview extends StackPane {
         meshesGroup.getChildren().setAll(allMeshViews);
         final Bounds bounds = meshesGroup.getBoundsInLocal();
 
+        meshesGroup.getChildren().clear();
+        meshesGroup.getChildren().addAll(displayedMeshViews);
+        // Important: Floor has to be added *last*!
+        meshesGroup.getChildren().add(createFloor(3 * Math.max(bounds.getWidth(), bounds.getHeight())));
+
         final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
-
-        meshesGroup.getChildren().setAll(displayedMeshViews);
-
         meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
 
         allMeshViews.forEach(meshView -> {
@@ -400,5 +400,16 @@ public class MeshPreview extends StackPane {
             startAutoRotate();
             flash("Auto-Rotate started");
         }
+    }
+
+    private void addNoFocusWarningHint() {
+        final Label noFocusWarning = new Label("Click to focus!");
+        noFocusWarning.setMouseTransparent(true);
+        noFocusWarning.setFocusTraversable(false);
+        noFocusWarning.setId("noFocusWarning");
+        noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
+        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_CENTER);
+        noFocusWarning.setTranslateY(-5);
+        getChildren().add(noFocusWarning);
     }
 }
