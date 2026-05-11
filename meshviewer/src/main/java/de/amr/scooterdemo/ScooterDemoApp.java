@@ -51,13 +51,13 @@ public class ScooterDemoApp extends Application {
     public void start(Stage stage) throws Exception {
         createScooter3D();
         stage.setScene(createScene());
-        stage.setTitle("Scooter (Courtesy of Almas B)");
         createAutoRotateAnimation();
         createScooterWheelsAnimation();
 
         autoRotateAnimation.play();
         wheelsAnimation.play();
 
+        stage.setTitle("Scooter (Courtesy of Almas B)");
         stage.show();
     }
 
@@ -70,8 +70,6 @@ public class ScooterDemoApp extends Application {
                 scooter3D.getChildren().add(part);
                 part.drawModeProperty().bind(drawMode);
             }
-            scooter3D.getTransforms().add(new Rotate(90, Rotate.Y_AXIS));
-            scooter3D.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
             scooter3D.getTransforms().add(autoRotateY);
             // move a bit down
             scooter3D.getTransforms().add(new Translate(0, -0.4, 0));
@@ -81,8 +79,10 @@ public class ScooterDemoApp extends Application {
     private Scene createScene() {
         camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-2.5);
+        final Group cameraView = new Group(camera);
+        cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
 
-        final Group root = new Group(scooter3D);
+        final Group root = new Group(scooter3D, cameraView);
 
         final Scene scene = new Scene(root, 800, 600, true, SceneAntialiasing.BALANCED);
         scene.setFill(Color.LIGHTBLUE);
