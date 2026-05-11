@@ -106,7 +106,7 @@ public class TrainDemoApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        // Load the toy train sample from the resources folder
+        // Load the toy train OBJ file "src/main/resources/samples/toy_train/toyTrain.obj"
         final URL url = getClass().getResource("/samples/toy_train/toyTrain.obj");
         if (url == null) {
             throw new IllegalArgumentException("Could not find train model OBJ file");
@@ -120,16 +120,16 @@ public class TrainDemoApp extends Application {
         final Group train = new Group(meshViews.values().toArray(MeshView[]::new));
         train.setTranslateY(-5);
 
-        // JavaFX coordinate system is upside-down, so flip the world
-        final Group world = new Group(train);
-        world.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
-
         // Camera looks at origin of scene, take a step back
         final PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-40);
 
-        // Create scene, camera can be zoomed with "+" and "-" keys
-        final Scene scene = new Scene(world, 700, 300, true, SceneAntialiasing.BALANCED);
+        // JavaFX coordinate system is upside-down, so flip the camera
+        final Group cameraView = new Group(camera);
+        cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
+
+        // Crete scene, camera can be zoomed with "+" and "-" keys
+        final Scene scene = new Scene(new Group(train, cameraView), 700, 300, true, SceneAntialiasing.BALANCED);
         scene.setCamera(camera);
         scene.setFill(Color.DARKGRAY);
         scene.setOnKeyPressed(event -> {
