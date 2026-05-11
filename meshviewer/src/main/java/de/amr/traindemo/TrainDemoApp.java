@@ -26,7 +26,7 @@ public class TrainDemoApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
 
-        // Load the toy train sample from the resources folder
+        // Load the toy train OBJ file "src/main/resources/samples/toy_train/toyTrain.obj"
         final URL url = getClass().getResource("/samples/toy_train/toyTrain.obj");
         if (url == null) {
             throw new IllegalArgumentException("Could not find train model OBJ file");
