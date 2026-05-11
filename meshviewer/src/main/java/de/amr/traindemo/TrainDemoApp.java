@@ -48,7 +48,7 @@ public class TrainDemoApp extends Application {
         final Group cameraView = new Group(camera);
         cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
 
-        // Crete scene, camera can be zoomed with "+" and "-" keys
+        // Create scene, camera can be zoomed with "+" and "-" keys
         final Scene scene = new Scene(new Group(train, cameraView), 700, 300, true, SceneAntialiasing.BALANCED);
         scene.setCamera(camera);
         scene.setFill(Color.DARKGRAY);
