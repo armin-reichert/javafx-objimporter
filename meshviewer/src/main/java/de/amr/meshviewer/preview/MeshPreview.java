@@ -27,6 +27,9 @@ import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.StackPane;
@@ -60,6 +63,9 @@ public class MeshPreview extends StackPane {
     public static final String KEY_ROTATE_RIGHT = "r";
     public static final String KEY_ROTATE_RIGHT_LARGE = "R";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
+
+    public static final KeyCombination  KEY_RESET_PREVIEW = new KeyCodeCombination(
+        KeyCode.R, KeyCodeCombination.CONTROL_DOWN, KeyCodeCombination.SHIFT_DOWN);
 
     public static final int DEFAULT_ANGLE_X = 0;
     public static final int DEFAULT_ANGLE_Y = 0;
@@ -291,6 +297,12 @@ public class MeshPreview extends StackPane {
         subScene.setOnKeyPressed(e -> {
             boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
 
+            if (KEY_RESET_PREVIEW.match(e)) {
+                reset();
+                e.consume();
+                return;
+            }
+
             switch (e.getCode()) {
 
                 case PLUS -> {
@@ -351,9 +363,6 @@ public class MeshPreview extends StackPane {
 
         subScene.setOnMouseClicked(e -> {
             Logger.trace("Mouse clicked {}", e);
-            if (e.getClickCount() == 2) {
-                reset();
-            }
             assignFocusToSubScene();
             e.consume();
         });
