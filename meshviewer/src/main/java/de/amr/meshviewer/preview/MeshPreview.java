@@ -323,7 +323,8 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByY(1);
                     } else {
-                        moveCamBy(MOVE_DIST, 0);
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        moveCamBy(dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -333,7 +334,8 @@ public class MeshPreview extends StackPane {
                         rotatePreviewByY(-1);
                     }
                     else {
-                        moveCamBy(-MOVE_DIST, 0);
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        moveCamBy(-dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -342,7 +344,8 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByX(-1);
                     } else {
-                        moveCamBy(0, MOVE_DIST);
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        moveCamBy(0, dist);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -351,7 +354,8 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByX(1);
                     } else {
-                        moveCamBy(0, -MOVE_DIST);
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        moveCamBy(0, -dist);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
