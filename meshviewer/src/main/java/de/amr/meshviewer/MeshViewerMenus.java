@@ -81,6 +81,9 @@ public class MeshViewerMenus {
         miInfoAreaVisible.selectedProperty().bindBidirectional(ui.infoArea().visibleProperty());
         miInfoAreaVisible.setOnAction(_ -> ui.showInfoArea(miInfoAreaVisible.isSelected()));
 
+        final MenuItem miResetPreview = new MenuItem("Reset Preview");
+        miResetPreview.setOnAction(_ -> ui.previewArea().reset());
+
         viewMenu.getItems().addAll(
             miFloorVisible, 
             miWireframe,
@@ -88,7 +91,9 @@ public class MeshViewerMenus {
             new SeparatorMenuItem(),
             miShortMeshViewNames,
             miSelectionAreaVisible,
-            miInfoAreaVisible
+            miInfoAreaVisible,
+            new SeparatorMenuItem(),
+        miResetPreview
         );
 
         // -----------------------------
