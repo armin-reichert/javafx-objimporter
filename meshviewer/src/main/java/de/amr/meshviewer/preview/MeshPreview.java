@@ -149,6 +149,7 @@ public class MeshPreview extends StackPane {
     }
 
     public void reset() {
+        //TODO center current mesh view set on screen
         panGroup.setTranslateX(0);
         panGroup.setTranslateY(0);
         rotateX.setAngle(DEFAULT_ANGLE_X);

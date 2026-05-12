@@ -40,7 +40,7 @@ public class TrainDemoApp extends Application {
         final Group train = new Group(meshViews.values().toArray(MeshView[]::new));
         train.setTranslateY(-5);
 
-        // Camera looks at origin of scene, take a step back
+        // Camera looks at origin of scene, take a step back (zoom out)
         final PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-40);
 
