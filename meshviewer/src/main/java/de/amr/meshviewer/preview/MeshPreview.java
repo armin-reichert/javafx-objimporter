@@ -73,9 +73,10 @@ public class MeshPreview extends StackPane {
     public static final double ZOOM_RATE_HUGE   = 10.0;
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    public final BooleanProperty showAxes = new SimpleBooleanProperty(false);
+    public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
 
     private final Group meshesGroup = new Group();
+    private Group floorGroup;
 
     private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final SubScene subScene;
@@ -130,7 +131,7 @@ public class MeshPreview extends StackPane {
         addNoFocusWarningHint();
     }
 
-    private Group createFloorInXZPlane(double size) {
+    private static Group createFloorGroup(double size) {
         final Group g = new Group();
 
         final double ft = 0.005;
@@ -193,8 +194,14 @@ public class MeshPreview extends StackPane {
 
         meshesGroup.getChildren().clear();
         meshesGroup.getChildren().addAll(displayedMeshViews);
+
         // Important: Floor has to be added *last*!
-        meshesGroup.getChildren().add(createFloorInXZPlane(2 * Math.max(bounds.getWidth(), bounds.getHeight())));
+        if (floorGroup != null) {
+            floorGroup.visibleProperty().unbind();
+        }
+        floorGroup = createFloorGroup(2 * Math.max(bounds.getWidth(), bounds.getHeight()));
+        floorGroup.visibleProperty().bindBidirectional(floorVisible);
+        meshesGroup.getChildren().add(floorGroup);
 
         final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
         meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
