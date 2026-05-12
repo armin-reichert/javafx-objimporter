@@ -14,6 +14,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -217,6 +218,7 @@ public class MeshPreview extends StackPane {
         final List<Box> boundingBoxes = new ArrayList<>();
         for (MeshView meshView : allMeshViews) {
             final Box boundingBox = createBoundingBox(meshView, Color.RED);
+            boundingBox.visibleProperty().bind(meshView.visibleProperty().and(boundingBoxesVisible));
             boundingBoxes.add(boundingBox);
             meshesGroup.getChildren().add(new Group(boundingBox, meshView));
         }
