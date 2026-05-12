@@ -51,18 +51,15 @@ public class MeshPreview extends StackPane {
         new Stop(1.0, Color.web("#A7D8FF"))   // pale horizon blue
     );
 
+    public static final String KEY_AUTOPLAY_TOGGLE = "a";
+    public static final String KEY_BOUNDING_BOXES_TOGGLE = "b";
     public static final String KEY_AUTO_ROTATE_HORIZONTALLY = "h";
     public static final String KEY_AUTO_ROTATE_VERTICALLY = "v";
     public static final String KEY_ROTATE_LEFT = "l";
     public static final String KEY_ROTATE_LEFT_LARGE = "L";
     public static final String KEY_ROTATE_RIGHT = "r";
     public static final String KEY_ROTATE_RIGHT_LARGE = "R";
-
-    public static final String KEY_AUTOPLAY_TOGGLE = "a";
-    public static final String KEY_BOUNDING_BOXES_TOGGLE = "b";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
-
-    public static final int ROTATE_SINGLE_STEP_DEGREES = 10;
 
     public static final int DEFAULT_ANGLE_X = 0;
     public static final int DEFAULT_ANGLE_Y = 0;
@@ -310,7 +307,7 @@ public class MeshPreview extends StackPane {
 
                 case LEFT -> {
                     if (control) {
-                        rotatePreviewByY(-1);
+                        rotatePreviewByY(1);
                     } else {
                         moveCamBy(MOVE_DIST, 0);
                     }
@@ -319,7 +316,7 @@ public class MeshPreview extends StackPane {
 
                 case RIGHT -> {
                     if (control) {
-                        rotatePreviewByY(1);
+                        rotatePreviewByY(-1);
                     }
                     else {
                         moveCamBy(-MOVE_DIST, 0);
@@ -348,7 +345,7 @@ public class MeshPreview extends StackPane {
         });
 
         subScene.setOnKeyTyped(e -> {
-            onKeyTypedInPreview(e.getCharacter());
+            onCharTyped(e.getCharacter());
             e.consume();
         });
 
@@ -456,35 +453,35 @@ public class MeshPreview extends StackPane {
         previewAutoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
-    private void onKeyTypedInPreview(String key) {
-        if (KEY_AUTO_ROTATE_HORIZONTALLY.equals(key)) {
+    private void onCharTyped(String ch) {
+        if (KEY_AUTO_ROTATE_HORIZONTALLY.equals(ch)) {
             autoRotateAxis = Rotate.Y_AXIS;
             flash("Auto-Rotate horizontally");
         }
-        else if (KEY_AUTO_ROTATE_VERTICALLY.equals(key)) {
+        else if (KEY_AUTO_ROTATE_VERTICALLY.equals(ch)) {
             autoRotateAxis = Rotate.X_AXIS;
             flash("Auto-Rotate vertically");
         }
-        else if (KEY_ROTATE_LEFT.equals(key)) {
-            rotatePreviewByY(ROTATE_SINGLE_STEP_DEGREES);
+        else if (KEY_ROTATE_LEFT.equals(ch)) {
+            rotatePreviewByY(45);
         }
-        else if (KEY_ROTATE_LEFT_LARGE.equals(key)) {
-            rotatePreviewByY(3 * ROTATE_SINGLE_STEP_DEGREES);
+        else if (KEY_ROTATE_LEFT_LARGE.equals(ch)) {
+            rotatePreviewByY(90);
         }
-        else if (KEY_ROTATE_RIGHT.equals(key)) {
-            rotatePreviewByY(-ROTATE_SINGLE_STEP_DEGREES);
+        else if (KEY_ROTATE_RIGHT.equals(ch)) {
+            rotatePreviewByY(-45);
         }
-        else if (KEY_ROTATE_RIGHT_LARGE.equals(key)) {
-            rotatePreviewByY(-3 * ROTATE_SINGLE_STEP_DEGREES);
+        else if (KEY_ROTATE_RIGHT_LARGE.equals(ch)) {
+            rotatePreviewByY(-90);
         }
-        else if (KEY_WIREFRAME_TOGGLE.equals(key)) {
+        else if (KEY_WIREFRAME_TOGGLE.equals(ch)) {
             final DrawMode mode = drawMode.get() == DrawMode.FILL ? DrawMode.LINE : DrawMode.FILL;
             drawMode.set(mode);
         }
-        else if (KEY_AUTOPLAY_TOGGLE.equals(key)) {
+        else if (KEY_AUTOPLAY_TOGGLE.equals(ch)) {
             toggleAutoRotateWithFlashMessage();
         }
-        else if (KEY_BOUNDING_BOXES_TOGGLE.equals(key)) {
+        else if (KEY_BOUNDING_BOXES_TOGGLE.equals(ch)) {
             boundingBoxesVisible.set(!boundingBoxesVisible.get());
         }
     }
