@@ -193,8 +193,8 @@ public class MeshPreview extends StackPane {
         }
 
         // Compute area of projection to xy-plane for floor size computation
-        final Rectangle2D projection = computeProjection(boundingBoxes);
-        floorGroup = createFloorGroup(projection.getWidth(), projection.getHeight());
+        final Rectangle2D projection = computeProjectionXZPlane(boundingBoxes);
+        floorGroup = createFloorGroup(2 * projection.getWidth(), 2 * projection.getHeight());
         floorGroup.visibleProperty().bindBidirectional(floorVisible);
 
         meshesPivot.getChildren().add(floorGroup);
@@ -223,19 +223,19 @@ public class MeshPreview extends StackPane {
         return box;
     }
 
-    private Rectangle2D computeProjection(Collection<Box> boxes) {
+    private Rectangle2D computeProjectionXZPlane(Collection<Box> boxes) {
         double minX = Double.POSITIVE_INFINITY;
         double maxX = Double.NEGATIVE_INFINITY;
-        double minY = Double.POSITIVE_INFINITY;
-        double maxY = Double.NEGATIVE_INFINITY;
+        double minZ = Double.POSITIVE_INFINITY;
+        double maxZ = Double.NEGATIVE_INFINITY;
         for (Box box : boxes) {
             final Bounds b = box.getBoundsInLocal();
             minX = Math.min(minX, b.getMinX());
             maxX = Math.max(maxX, b.getMaxX());
-            minY = Math.min(minY, b.getMinY());
-            maxY = Math.max(maxY, b.getMaxY());
+            minZ = Math.min(minZ, b.getMinZ());
+            maxZ = Math.max(maxZ, b.getMaxZ());
         }
-        return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
+        return new Rectangle2D(minX, minZ, maxX - minX, maxZ - minZ);
     }
 
     public void assignFocusToSubScene() {
