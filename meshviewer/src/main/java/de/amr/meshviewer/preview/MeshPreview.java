@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
@@ -185,33 +186,36 @@ public class MeshPreview extends StackPane {
     }
 
     public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
+
+        allMeshViews.forEach(meshView -> meshView.setVisible(true));
+        final Bounds bounds = bounds(allMeshViews);
+        final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
+        final double floorSize = Math.max(bounds.getWidth(), bounds.getHeight());
+
+        allMeshViews.forEach(meshView -> meshView.setVisible(displayedMeshViews.contains(meshView)));
         allMeshViews.forEach(meshView -> {
             meshView.setCullFace(CullFace.NONE);
-            meshView.setVisible(true); // such that bounds computation takes it into account
+            meshView.drawModeProperty().bind(drawMode);
         });
-        meshesGroup.getChildren().setAll(allMeshViews);
-        final Bounds bounds = meshesGroup.getBoundsInLocal();
-
-        meshesGroup.getChildren().clear();
-        meshesGroup.getChildren().addAll(displayedMeshViews);
 
         // Important: Floor has to be added *last*!
         if (floorGroup != null) {
             floorGroup.visibleProperty().unbind();
         }
-        floorGroup = createFloorGroup(2 * Math.max(bounds.getWidth(), bounds.getHeight()));
+        floorGroup = createFloorGroup(floorSize);
         floorGroup.visibleProperty().bindBidirectional(floorVisible);
-        meshesGroup.getChildren().add(floorGroup);
-
-        final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
         meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
 
-        allMeshViews.forEach(meshView -> {
-            meshView.drawModeProperty().bind(drawMode);
-            meshView.setVisible(displayedMeshViews.contains(meshView));
-        });
+        meshesGroup.getChildren().clear();
+        meshesGroup.getChildren().addAll(displayedMeshViews);
+        meshesGroup.getChildren().add(floorGroup);
 
         assignFocusToSubScene();
+    }
+
+    private Bounds bounds(Collection<MeshView> meshViews) {
+        final Group g = new Group(meshViews.toArray(MeshView[]::new));
+        return g.getBoundsInLocal();
     }
 
     public void reset() {
