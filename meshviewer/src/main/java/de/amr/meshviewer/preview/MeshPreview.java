@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
@@ -36,7 +37,9 @@ import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import org.tinylog.Logger;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public class MeshPreview extends StackPane {
@@ -72,6 +75,8 @@ public class MeshPreview extends StackPane {
     public static final double ZOOM_RATE_LARGE  = 1.0;
     public static final double ZOOM_RATE_HUGE   = 10.0;
 
+    public static final double MOVE_DIST = 0.25;
+
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
@@ -84,8 +89,11 @@ public class MeshPreview extends StackPane {
 
     private double mouseOldX, mouseOldY;
 
+    // Transforms
     private final Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
+
+    private final Translate camTranslate = new Translate(0, 0);
 
     // Preview Animation
     private Animation previewAutoRotateAnimation;
@@ -104,7 +112,7 @@ public class MeshPreview extends StackPane {
         cam.setFarClip(10_000);
 
         final Group cameraView = new Group(cam);
-        cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
+        cameraView.getTransforms().addAll(new Rotate(180, Rotate.X_AXIS), camTranslate);
 
         final Group top = new Group(meshesGroup, cameraView);
 
@@ -132,9 +140,10 @@ public class MeshPreview extends StackPane {
         addNoFocusWarningHint();
     }
 
-    private static Group createFloorGroup(double size) {
+    private static Group createFloorGroup(double width, double height) {
         final Group g = new Group();
 
+        final double size = Math.max(width, height);
         final double ft = 0.005;
 
         final PhongMaterial red = new PhongMaterial(Color.RED);
@@ -185,44 +194,58 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.showMessage(message);
     }
 
-    public void selectDisplayedMeshViews(
-        Collection<MeshView> allMeshViews,
-        Set<MeshView> displayedMeshViews)
-    {
+    public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
+        meshesGroup.getChildren().clear();
 
-        allMeshViews.forEach(meshView -> meshView.setVisible(true));
-        final Bounds bounds = bounds(allMeshViews);
-        final Translate center = new Translate(-bounds.getCenterX(), -bounds.getCenterY(), -bounds.getCenterZ());
-        final double floorSize = Math.max(bounds.getWidth(), bounds.getHeight());
+        if (displayedMeshViews.isEmpty()) {
+            assignFocusToSubScene();
+            return;
+        }
 
-        allMeshViews.forEach(meshView -> meshView.setVisible(displayedMeshViews.contains(meshView)));
+        // Compute bounds of all meshes for centering
+        final Group tmp = new Group(allMeshViews.toArray(MeshView[]::new));
+        final Bounds totalBounds = tmp.getBoundsInLocal();
+
         allMeshViews.forEach(meshView -> {
+            meshView.setVisible(true);
             meshView.setCullFace(CullFace.NONE);
             meshView.drawModeProperty().bind(drawMode);
         });
+
+        // Add bounding boxes to displayed mesh views
+        final List<Box> boundingBoxes = new ArrayList<>();
+        for (MeshView meshView : allMeshViews) {
+            final Box boundingBox = createBoundingBox(meshView, Color.RED);
+            boundingBoxes.add(boundingBox);
+            meshesGroup.getChildren().add(new Group(boundingBox, meshView));
+        }
 
         // Important: Floor has to be added *last*!
         if (floorGroup != null) {
             floorGroup.visibleProperty().unbind();
         }
-        floorGroup = createFloorGroup(floorSize);
+
+        // Compute area of projection to xy-plane for floor size computation
+        final Rectangle2D projection = computeProjection(boundingBoxes);
+        floorGroup = createFloorGroup(projection.getWidth(), projection.getHeight());
         floorGroup.visibleProperty().bindBidirectional(floorVisible);
-        meshesGroup.getTransforms().setAll(center, rotateX, rotateY, autoRotateX, autoRotateY);
-
-        meshesGroup.getChildren().clear();
-        meshesGroup.getChildren().addAll(displayedMeshViews);
-
-        for (MeshView meshView : displayedMeshViews) {
-            Group wrapped = wrapWithBoundingBox(meshView, Color.RED);
-            meshesGroup.getChildren().add(wrapped);
-        }
 
         meshesGroup.getChildren().add(floorGroup);
+
+        final Bounds meshesBounds = meshesGroup.getBoundsInLocal();
+        meshesGroup.getTransforms().setAll(
+            //new Translate(-meshesBounds.getCenterX(), -meshesBounds.getCenterY(), -meshesBounds.getCenterZ()),
+            rotateX, rotateY, autoRotateX, autoRotateY);
+
+        // Only show those in displayedMeshViews set
+        allMeshViews.forEach(meshView -> {
+            meshView.setVisible(displayedMeshViews.contains(meshView));
+        });
 
         assignFocusToSubScene();
     }
 
-    public Group wrapWithBoundingBox(MeshView meshView, Color color) {
+    private Box createBoundingBox(MeshView meshView, Color color) {
         Bounds b = meshView.getBoundsInLocal(); // local, not parent
 
         Box box = new Box(b.getWidth(), b.getHeight(), b.getDepth());
@@ -234,12 +257,22 @@ public class MeshPreview extends StackPane {
         box.setTranslateY(b.getCenterY());
         box.setTranslateZ(b.getCenterZ());
 
-        return new Group(meshView, box);
+        return box;
     }
 
-    private Bounds bounds(Collection<MeshView> meshViews) {
-        final Group g = new Group(meshViews.toArray(MeshView[]::new));
-        return g.getBoundsInLocal();
+    private Rectangle2D computeProjection(Collection<Box> boxes) {
+        double minX = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        for (Box box : boxes) {
+            final Bounds b = box.getBoundsInLocal();
+            minX = Math.min(minX, b.getMinX());
+            maxX = Math.max(maxX, b.getMaxX());
+            minY = Math.min(minY, b.getMinY());
+            maxY = Math.max(maxY, b.getMaxY());
+        }
+        return new Rectangle2D(minX, minY, maxX - minX, maxY - minY);
     }
 
     public void reset() {
@@ -264,31 +297,55 @@ public class MeshPreview extends StackPane {
     private void setKeyboardAndMouseHandlers() {
         subScene.setOnKeyPressed(e -> {
             boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
+
             switch (e.getCode()) {
+
                 case PLUS -> {
                     final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
                     zoomBy(rate);
                     e.consume();
                 }
+
                 case MINUS -> {
                     final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
                     zoomBy(-rate);
                     e.consume();
                 }
+
                 case LEFT -> {
-                    rotateYBy(-1);
+                    if (control) {
+                        rotatePreviewByY(-1);
+                    } else {
+                        moveCamBy(MOVE_DIST, 0);
+                    }
                     e.consume(); // do not deliver event to tab pane
                 }
+
                 case RIGHT -> {
-                    rotateYBy(1);
+                    if (control) {
+                        rotatePreviewByY(1);
+                    }
+                    else {
+                        moveCamBy(-MOVE_DIST, 0);
+                    }
                     e.consume(); // do not deliver event to tab pane
                 }
+
                 case UP -> {
-                    rotateXBy(-1);
+                    if (control) {
+                        rotatePreviewByX(-1);
+                    } else {
+                        moveCamBy(0, MOVE_DIST);
+                    }
                     e.consume(); // do not deliver event to tab pane
                 }
+
                 case DOWN -> {
-                    rotateXBy(1);
+                    if (control) {
+                        rotatePreviewByX(1);
+                    } else {
+                        moveCamBy(0, -MOVE_DIST);
+                    }
                     e.consume(); // do not deliver event to tab pane
                 }
             }
@@ -322,8 +379,8 @@ public class MeshPreview extends StackPane {
 
             if (e.getButton() == MouseButton.PRIMARY) {
                 // TODO: How to implement correctly with flipped world?
-                rotateYBy(0.5 * dx);
-                rotateXBy(0.5 * dy);
+                rotatePreviewByY(0.5 * dx);
+                rotatePreviewByX(0.5 * dy);
             }
 
             mouseOldX = e.getSceneX();
@@ -412,16 +469,16 @@ public class MeshPreview extends StackPane {
             flash("Auto-Rotate vertically");
         }
         else if (KEY_ROTATE_LEFT.equals(key)) {
-            rotateYBy(ROTATE_SINGLE_STEP_DEGREES);
+            rotatePreviewByY(ROTATE_SINGLE_STEP_DEGREES);
         }
         else if (KEY_ROTATE_LEFT_LARGE.equals(key)) {
-            rotateYBy(3 * ROTATE_SINGLE_STEP_DEGREES);
+            rotatePreviewByY(3 * ROTATE_SINGLE_STEP_DEGREES);
         }
         else if (KEY_ROTATE_RIGHT.equals(key)) {
-            rotateYBy(-ROTATE_SINGLE_STEP_DEGREES);
+            rotatePreviewByY(-ROTATE_SINGLE_STEP_DEGREES);
         }
         else if (KEY_ROTATE_RIGHT_LARGE.equals(key)) {
-            rotateYBy(-3 * ROTATE_SINGLE_STEP_DEGREES);
+            rotatePreviewByY(-3 * ROTATE_SINGLE_STEP_DEGREES);
         }
         else if (KEY_WIREFRAME_TOGGLE.equals(key)) {
             final DrawMode mode = drawMode.get() == DrawMode.FILL ? DrawMode.LINE : DrawMode.FILL;
@@ -438,11 +495,16 @@ public class MeshPreview extends StackPane {
         Logger.info("Zoom: " + z);
     }
 
-    private void rotateXBy(double delta) {
+    private void moveCamBy(double dx, double dy) {
+        camTranslate.setX(camTranslate.getX() + dx);
+        camTranslate.setY(camTranslate.getY() + dy);
+    }
+
+    private void rotatePreviewByX(double delta) {
         rotateX.setAngle((rotateX.getAngle() + delta) % 360);
     }
 
-    private void rotateYBy(double delta) {
+    private void rotatePreviewByY(double delta) {
         rotateY.setAngle((rotateY.getAngle() + delta) % 360);
     }
 
