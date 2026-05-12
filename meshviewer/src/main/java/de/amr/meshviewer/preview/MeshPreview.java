@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SceneAntialiasing;
@@ -75,6 +74,7 @@ public class MeshPreview extends StackPane {
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
+    public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
 
     private final Group meshesGroup = new Group();
     private Group floorGroup;
@@ -185,7 +185,10 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.showMessage(message);
     }
 
-    public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
+    public void selectDisplayedMeshViews(
+        Collection<MeshView> allMeshViews,
+        Set<MeshView> displayedMeshViews)
+    {
 
         allMeshViews.forEach(meshView -> meshView.setVisible(true));
         final Bounds bounds = bounds(allMeshViews);
@@ -219,12 +222,13 @@ public class MeshPreview extends StackPane {
         assignFocusToSubScene();
     }
 
-    public static Group wrapWithBoundingBox(MeshView meshView, Color color) {
+    public Group wrapWithBoundingBox(MeshView meshView, Color color) {
         Bounds b = meshView.getBoundsInLocal(); // local, not parent
 
         Box box = new Box(b.getWidth(), b.getHeight(), b.getDepth());
         box.setDrawMode(DrawMode.LINE);
         box.setMaterial(new PhongMaterial(color));
+        box.visibleProperty().bind(boundingBoxesVisible);
 
         box.setTranslateX(b.getCenterX());
         box.setTranslateY(b.getCenterY());

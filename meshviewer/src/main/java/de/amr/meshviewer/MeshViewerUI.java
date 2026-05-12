@@ -74,8 +74,9 @@ public class MeshViewerUI {
     public static final int INFO_AREA_WIDTH = 300;
     public static final int INFO_AREA_LABEL_COLUMN_WIDTH = 125;
 
-    public  final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    public  final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
+    public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
+    public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
+    public final BooleanProperty meshViewNamesShort = new SimpleBooleanProperty(true);
 
     private final ObservableList<SampleInfo> samples = FXCollections.observableArrayList();
     private final ObservableList<SampleInfo> userSamples = FXCollections.observableArrayList();
@@ -353,11 +354,12 @@ public class MeshViewerUI {
     private void createPreviewArea() {
         previewArea = new MeshPreview();
         previewArea.drawMode.bindBidirectional(drawMode);
+        previewArea.boundingBoxesVisible.bind(boundingBoxesVisible);
     }
 
     private void createMeshTreePane() {
         meshTreePane = new MeshTreePane(TREE_AREA_WIDTH);
-        meshTreePane.shortMeshViewNames.bind(shortMeshViewNames);
+        meshTreePane.meshViewNamesShort.bind(meshViewNamesShort);
 
         for (InnerTreeNode.NodeCategory category : InnerTreeNode.NodeCategory.values()) {
             final ObservableSet<MeshTreeNode> selectedNodes = FXCollections.observableSet();

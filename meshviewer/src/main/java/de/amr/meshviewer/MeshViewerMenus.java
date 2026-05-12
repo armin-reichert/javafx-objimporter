@@ -7,10 +7,7 @@ package de.amr.meshviewer;
 import de.amr.meshviewer.info.SampleInfo;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.shape.DrawMode;
 import org.tinylog.Logger;
 
@@ -70,23 +67,29 @@ public class MeshViewerMenus {
         miWireframe.selectedProperty().addListener((_, _, sel) -> ui.drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
         ui.drawMode.addListener((_, _, mode) -> miWireframe.setSelected(mode == DrawMode.LINE));
 
-        final CheckMenuItem miShortMeshViewNames = new CheckMenuItem("Short Mesh Names");
-        miShortMeshViewNames.selectedProperty().bindBidirectional(ui.shortMeshViewNames);
+        final CheckMenuItem miBoundingBoxes = new CheckMenuItem("Bounding Boxes");
+        miBoundingBoxes.selectedProperty().bindBidirectional(ui.boundingBoxesVisible);
 
-        final CheckMenuItem miSelectionAreaVisible = new CheckMenuItem("Selection");
+        final CheckMenuItem miShortMeshViewNames = new CheckMenuItem("Short Mesh Names");
+        miShortMeshViewNames.selectedProperty().bindBidirectional(ui.meshViewNamesShort);
+
+        final CheckMenuItem miSelectionAreaVisible = new CheckMenuItem("Selection Area");
         miSelectionAreaVisible.selectedProperty().bindBidirectional(ui.selectionTabPane().visibleProperty());
         miSelectionAreaVisible.setOnAction(_ -> ui.showSelectionArea(miSelectionAreaVisible.isSelected()));
 
-        final CheckMenuItem miInfoVisible = new CheckMenuItem("Info");
-        miInfoVisible.selectedProperty().bindBidirectional(ui.infoArea().visibleProperty());
-        miInfoVisible.setOnAction(_ -> ui.showInfoArea(miInfoVisible.isSelected()));
+        final CheckMenuItem miInfoAreaVisible = new CheckMenuItem("Info Area");
+        miInfoAreaVisible.selectedProperty().bindBidirectional(ui.infoArea().visibleProperty());
+        miInfoAreaVisible.setOnAction(_ -> ui.showInfoArea(miInfoAreaVisible.isSelected()));
 
         viewMenu.getItems().addAll(
             miFloorVisible, 
-            miWireframe, 
-            miShortMeshViewNames, 
-            miSelectionAreaVisible, 
-            miInfoVisible);
+            miWireframe,
+            miBoundingBoxes,
+            new SeparatorMenuItem(),
+            miShortMeshViewNames,
+            miSelectionAreaVisible,
+            miInfoAreaVisible
+        );
 
         // -----------------------------
         // Samples menu

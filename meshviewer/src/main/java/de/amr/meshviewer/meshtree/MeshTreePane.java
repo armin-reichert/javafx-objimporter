@@ -5,7 +5,6 @@
 package de.amr.meshviewer.meshtree;
 
 import de.amr.meshviewer.ObjModelFX;
-import de.amr.objparser.ObjModel;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.layout.VBox;
@@ -19,7 +18,7 @@ public class MeshTreePane extends VBox {
 
     public static final String CSS_ID_OBJ_MODEL_TREE = "objModelTree";
 
-    public final BooleanProperty shortMeshViewNames = new SimpleBooleanProperty(true);
+    public final BooleanProperty meshViewNamesShort = new SimpleBooleanProperty(true);
 
     private final MeshTreeView meshTreeView;
 
@@ -27,7 +26,7 @@ public class MeshTreePane extends VBox {
         setMinWidth(minWidth);
 
         meshTreeView = new MeshTreeView(CSS_ID_OBJ_MODEL_TREE);
-        meshTreeView.showShortMeshNames.bind(shortMeshViewNames);
+        meshTreeView.showShortMeshNames.bind(meshViewNamesShort);
         meshTreeView.prefHeightProperty().bind(heightProperty().subtract(1));
         getChildren().add(meshTreeView);
     }

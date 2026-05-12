@@ -6,16 +6,16 @@
     "path": "/samples/newell_teaset/",
     "downloadURL": "https://www.cs.utah.edu/~natevm/newell_teaset/newell_teaset.zip",
     "homepage": "https://graphics.cs.utah.edu/teapot/",
-    "licenseType": "LICENSE?",
+    "licenseType": "Unknown License",
     "licenseURL": null,
     "initSettings": {
-      "zoom": -10,
+      "zoom": -20,
       "rotateX": 0,
       "rotateY": 0,
       "rotateZ": 0,
       "initialMeshSelection": "ALL_GROUPS",
       "wireframe": false,
-      "autorotate": true
+      "autorotate": false
     }
   },
   {
