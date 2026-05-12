@@ -208,9 +208,29 @@ public class MeshPreview extends StackPane {
 
         meshesGroup.getChildren().clear();
         meshesGroup.getChildren().addAll(displayedMeshViews);
+
+        for (MeshView meshView : displayedMeshViews) {
+            Group wrapped = wrapWithBoundingBox(meshView, Color.RED);
+            meshesGroup.getChildren().add(wrapped);
+        }
+
         meshesGroup.getChildren().add(floorGroup);
 
         assignFocusToSubScene();
+    }
+
+    public static Group wrapWithBoundingBox(MeshView meshView, Color color) {
+        Bounds b = meshView.getBoundsInLocal(); // local, not parent
+
+        Box box = new Box(b.getWidth(), b.getHeight(), b.getDepth());
+        box.setDrawMode(DrawMode.LINE);
+        box.setMaterial(new PhongMaterial(color));
+
+        box.setTranslateX(b.getCenterX());
+        box.setTranslateY(b.getCenterY());
+        box.setTranslateZ(b.getCenterZ());
+
+        return new Group(meshView, box);
     }
 
     private Bounds bounds(Collection<MeshView> meshViews) {
