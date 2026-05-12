@@ -84,16 +84,17 @@ public class MeshPreview extends StackPane {
     private final Group meshesGroup = new Group();
     private Group floorGroup;
 
-    private final Translate camZoom = new Translate(0, 0, DEFAULT_ZOOM);
     private final SubScene subScene;
 
     private double mouseOldX, mouseOldY;
+
+    // Camera transforms
+    private final Translate camTranslate = new Translate(0, 0, DEFAULT_ZOOM);
 
     // Transforms
     private final Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
 
-    private final Translate camTranslate = new Translate(0, 0);
 
     // Preview Animation
     private Animation previewAutoRotateAnimation;
@@ -107,7 +108,6 @@ public class MeshPreview extends StackPane {
         setId("preview");
 
         final PerspectiveCamera cam = new PerspectiveCamera(true);
-        cam.getTransforms().addAll(camZoom);
         cam.setNearClip(0.1);
         cam.setFarClip(10_000);
 
@@ -202,10 +202,6 @@ public class MeshPreview extends StackPane {
             return;
         }
 
-        // Compute bounds of all meshes for centering
-        final Group tmp = new Group(allMeshViews.toArray(MeshView[]::new));
-        final Bounds totalBounds = tmp.getBoundsInLocal();
-
         allMeshViews.forEach(meshView -> {
             meshView.setVisible(true);
             meshView.setCullFace(CullFace.NONE);
@@ -231,11 +227,7 @@ public class MeshPreview extends StackPane {
         floorGroup.visibleProperty().bindBidirectional(floorVisible);
 
         meshesGroup.getChildren().add(floorGroup);
-
-        final Bounds meshesBounds = meshesGroup.getBoundsInLocal();
-        meshesGroup.getTransforms().setAll(
-            //new Translate(-meshesBounds.getCenterX(), -meshesBounds.getCenterY(), -meshesBounds.getCenterZ()),
-            rotateX, rotateY, autoRotateX, autoRotateY);
+        meshesGroup.getTransforms().setAll(rotateX, rotateY, autoRotateX, autoRotateY);
 
         // Only show those in displayedMeshViews set
         allMeshViews.forEach(meshView -> {
@@ -280,7 +272,9 @@ public class MeshPreview extends StackPane {
         rotateY.setAngle(DEFAULT_ANGLE_Y);
         autoRotateX.setAngle(DEFAULT_ANGLE_X);
         autoRotateY.setAngle(DEFAULT_ANGLE_Y);
-        camZoom.setZ(DEFAULT_ZOOM);
+        camTranslate.setX(0);
+        camTranslate.setY(0);
+        camTranslate.setZ(DEFAULT_ZOOM);
     }
 
     public void assignFocusToSubScene() {
@@ -403,7 +397,8 @@ public class MeshPreview extends StackPane {
     public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
         final SampleInitSettings settings = sample.initSettings();
 
-        camZoom.setZ(settings.zoom());
+        // TODO initial cam x, y
+        camTranslate.setZ(settings.zoom());
 
         if (settings.rotateX() != 0) {
             meshesGroup.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
@@ -490,8 +485,8 @@ public class MeshPreview extends StackPane {
     }
 
     private void zoomBy(double delta) {
-        double z = Math.clamp(camZoom.getZ() + delta, ZOOM_MIN, ZOOM_MAX);
-        camZoom.setZ(z);
+        double z = Math.clamp(camTranslate.getZ() + delta, ZOOM_MIN, ZOOM_MAX);
+        camTranslate.setZ(z);
         Logger.info("Zoom: " + z);
     }
 
