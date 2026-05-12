@@ -301,7 +301,6 @@ public class MeshViewerUI {
         });
     }
 
-
     private void createSceneLayout() {
         createSelectionArea();
         createPreviewArea();
@@ -354,7 +353,7 @@ public class MeshViewerUI {
     private void createPreviewArea() {
         previewArea = new MeshPreview();
         previewArea.drawMode.bindBidirectional(drawMode);
-        previewArea.boundingBoxesVisible.bind(boundingBoxesVisible);
+        previewArea.boundingBoxesVisible.bindBidirectional(boundingBoxesVisible);
     }
 
     private void createMeshTreePane() {

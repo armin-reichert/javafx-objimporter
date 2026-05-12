@@ -57,7 +57,9 @@ public class MeshPreview extends StackPane {
     public static final String KEY_ROTATE_LEFT_LARGE = "L";
     public static final String KEY_ROTATE_RIGHT = "r";
     public static final String KEY_ROTATE_RIGHT_LARGE = "R";
-    public static final String KEY_AUTOPLAY_TOGGLE = " ";
+
+    public static final String KEY_AUTOPLAY_TOGGLE = "a";
+    public static final String KEY_BOUNDING_BOXES_TOGGLE = "b";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
 
     public static final int ROTATE_SINGLE_STEP_DEGREES = 10;
@@ -481,6 +483,9 @@ public class MeshPreview extends StackPane {
         }
         else if (KEY_AUTOPLAY_TOGGLE.equals(key)) {
             toggleAutoRotateWithFlashMessage();
+        }
+        else if (KEY_BOUNDING_BOXES_TOGGLE.equals(key)) {
+            boundingBoxesVisible.set(!boundingBoxesVisible.get());
         }
     }
 
