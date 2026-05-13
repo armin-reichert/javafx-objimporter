@@ -87,8 +87,9 @@ public class MeshPreview extends StackPane {
     public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
 
-    private final Group panGroup = new Group();
+    private final Group meshesPivotParent = new Group();
     private final Group meshesPivot = new Group();
+
     private Group floorGroup;
 
     private final SubScene subScene;
@@ -122,13 +123,11 @@ public class MeshPreview extends StackPane {
         final Rotate cameraFlipUpsideDown = new Rotate(180, Rotate.X_AXIS);
         cameraView.getTransforms().addAll(cameraFlipUpsideDown, cameraZoom);
 
-        panGroup.getChildren().add(meshesPivot);
-        final Group top = new Group(panGroup, cameraView);
+        meshesPivotParent.getChildren().add(meshesPivot);
+        final Group world = new Group(meshesPivotParent, cameraView);
 
-        subScene = new SubScene(top, 400, 400, true, SceneAntialiasing.BALANCED);
+        subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
-        subScene.focusedProperty().addListener((_, _, focussed) ->
-            Logger.info("Subscene {}", focussed? "got focus" : "lost focus"));
 
         flashMessageOverlay = new FlashMessageOverlay();
         flashMessageOverlay.setFocusTraversable(false);
@@ -152,8 +151,8 @@ public class MeshPreview extends StackPane {
 
     public void reset() {
         //TODO center current mesh view set on screen
-        panGroup.setTranslateX(0);
-        panGroup.setTranslateY(0);
+        meshesPivotParent.setTranslateX(0);
+        meshesPivotParent.setTranslateY(0);
         rotateX.setAngle(DEFAULT_ANGLE_X);
         rotateY.setAngle(DEFAULT_ANGLE_Y);
         autoRotateX.setAngle(DEFAULT_ANGLE_X);
@@ -513,8 +512,8 @@ public class MeshPreview extends StackPane {
     }
 
     private void movePanGroup(double dx, double dy) {
-        panGroup.setTranslateX(panGroup.getTranslateX() + dx);
-        panGroup.setTranslateY(panGroup.getTranslateY() + dy);
+        meshesPivotParent.setTranslateX(meshesPivotParent.getTranslateX() + dx);
+        meshesPivotParent.setTranslateY(meshesPivotParent.getTranslateY() + dy);
     }
 
     private void rotatePreviewByX(double delta) {
@@ -558,9 +557,10 @@ public class MeshPreview extends StackPane {
 
     private void addTransformStatusLabel() {
         final Label label = new Label();
-        label.textProperty().bind(Bindings.createStringBinding(
-            () -> formatTransformStatus(cameraZoom.getZ()),
-            cameraZoom.zProperty()
+        label.textProperty().bind(Bindings.createStringBinding(this::formatTransformStatus,
+            cameraZoom.zProperty(),
+            meshesPivotParent.translateXProperty(), meshesPivotParent.translateYProperty(),
+            rotateX.angleProperty(), rotateY.angleProperty()
         ));
         label.setId("transformStatus");
         label.setMouseTransparent(true);
@@ -569,7 +569,12 @@ public class MeshPreview extends StackPane {
         getChildren().add(label);
     }
 
-    private static String formatTransformStatus(double zoom) {
-        return "Zoom: %.0f".formatted(zoom);
+    private String formatTransformStatus() {
+        final double zoom = cameraZoom.getZ();
+        final double x = meshesPivotParent.getTranslateX();
+        final double y = meshesPivotParent.getTranslateY();
+        final double rotX = rotateX.getAngle();
+        final double rotY = rotateY.getAngle();
+        return "Zoom: %.2f | Position: x=%.2f y=%.2f | Rotation: x=%.2f y=%.2f".formatted(zoom, x, y, rotX, rotY);
     }
 }
