@@ -39,7 +39,7 @@ which has to be placed in the folder above.
 
 The format of this file is like this:
 
-```
+```javascript
 [
   {
     "title": "Teapot",
@@ -65,6 +65,7 @@ The format of this file is like this:
 
 ]
 ```
+
 Here, the `path` attribute must store the relative path to your model from the `samples` folder and should be terminated with a `/`.
 In the `initSettings` object, you can specify the initial preview settings which may vary between samples such that the sample is e.g. zoomed
 appropriately when displayed for the first time.
@@ -77,7 +78,7 @@ For each registered sample, the menu "User Samples" will create an entry where y
 
 Is it difficult to show a 3D model parsed from an OBJ file on the screen? Here a simple example application showing a toy train:
 
-```
+```java {numberLines}
 package de.amr.traindemo;
 
 import de.amr.meshbuilder.MeshBuilder;
