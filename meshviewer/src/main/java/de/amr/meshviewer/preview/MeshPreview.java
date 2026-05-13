@@ -83,8 +83,8 @@ public class MeshPreview extends StackPane {
     public static final PhongMaterial BLUE_MATERIAL = new PhongMaterial(Color.BLUE);
     public static final PhongMaterial WHITE_MATERIAL = new PhongMaterial(Color.WHITE);
 
-    public static final PhongMaterial TRANSPARENT_LIGHTGRAY_MATERIAL = new PhongMaterial(Color.rgb(150, 150, 150, 0.6));
-    public static final PhongMaterial TRANSPARENT_DARK_GRAY_MATERIAL = new PhongMaterial(Color.rgb(30, 30, 30, 0.5));
+    public static final PhongMaterial TRANSPARENT_LIGHTGRAY_MATERIAL = new PhongMaterial(Color.rgb(150, 150, 150, 0.4));
+    public static final PhongMaterial TRANSPARENT_DARK_GRAY_MATERIAL = new PhongMaterial(Color.rgb(30, 30, 30, 0.6));
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty xzPlaneVisible = new SimpleBooleanProperty(false);
@@ -320,37 +320,41 @@ public class MeshPreview extends StackPane {
         final Group planeGroup = new Group();
 
         final double r = 0.5 * Math.max(width, height);
-        final double h = 0.02;
+        final double h = 0.01 * r;
 
         final Cylinder plane = new Cylinder(10 * r, h);
         plane.setMaterial(TRANSPARENT_LIGHTGRAY_MATERIAL);
 
-        final Cylinder shadow = new Cylinder(r, 1.1 * h);
+        final Cylinder shadow = new Cylinder(r, 4 * h);
         shadow.setMaterial(TRANSPARENT_DARK_GRAY_MATERIAL);
 
-        final Box xAxis = new Box(2*r, h, h);
+        final Box xAxis = new Box(2 * r, h, h);
         xAxis.setMaterial(RED_MATERIAL);
 
-        final Box zAxis = new Box(h, h, 2*r);
+        final Box zAxis = new Box(h, h, 2 * r);
         zAxis.setMaterial(BLUE_MATERIAL);
 
         planeGroup.getChildren().addAll(xAxis, zAxis);
 
-        final double markerRadius = 0.02;
-        final Sphere originMarker = new Sphere(2 * markerRadius);
+        final Sphere originMarker = new Sphere(2 * h);
         originMarker.setMaterial(WHITE_MATERIAL);
         planeGroup.getChildren().add(originMarker);
 
+        boolean drawUnitMarkers = r < 5;
         for (int i = 1; i <= (int) r; ++i) {
-            final int scale = i % 10 == 0 ? 3 : 1;
+            boolean ten = i % 10 == 0;
+            if (!ten && !drawUnitMarkers) {
+                continue;
+            }
+            final double scale = ten ? 2 : 1.5;
 
-            final Sphere markerX = new Sphere(scale * markerRadius);
-            markerX.setMaterial(RED_MATERIAL);
+            final Sphere markerX = new Sphere(scale * h);
+            markerX.setMaterial(ten ? WHITE_MATERIAL : RED_MATERIAL);
             markerX.setTranslateX(i);
             planeGroup.getChildren().add(markerX);
 
-            final Sphere markerZ = new Sphere(scale * markerRadius);
-            markerZ.setMaterial(BLUE_MATERIAL);
+            final Sphere markerZ = new Sphere(scale * h);
+            markerZ.setMaterial(ten ? WHITE_MATERIAL : BLUE_MATERIAL);
             markerZ.setTranslateZ(i);
             planeGroup.getChildren().add(markerZ);
         }
