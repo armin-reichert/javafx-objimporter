@@ -8,9 +8,7 @@ import de.amr.meshviewer.FlashMessageOverlay;
 import de.amr.meshviewer.MeshViewerUI;
 import de.amr.meshviewer.SampleInitSettings;
 import de.amr.meshviewer.info.SampleInfo;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -21,10 +19,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.SceneAntialiasing;
-import javafx.scene.SubScene;
+import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -549,7 +544,14 @@ public class MeshPreview extends StackPane {
 
     private void createTransformInfoLabel() {
         transformInfoLabel = new Label();
-        transformInfoLabel.visibleProperty().bind(transformInfoVisible);
+//        transformInfoLabel.visibleProperty().bind(transformInfoVisible);
+        transformInfoVisible.addListener((_, _, _visible) -> {
+            if (_visible) {
+                fadeIn(transformInfoLabel);
+            } else {
+                fadeOut(transformInfoLabel);
+            }
+        });
         transformInfoLabel.textProperty().bind(Bindings.createStringBinding(this::formatTransformStatus,
             cameraZoom.zProperty(),
             meshesPivotParent.translateXProperty(), meshesPivotParent.translateYProperty(),
@@ -579,5 +581,23 @@ public class MeshPreview extends StackPane {
 
     private static double normalizedAngle(double angle) {
         return  ((angle % 360) + 360) % 360;
+    }
+
+    private void fadeIn(Node node) {
+        node.setVisible(true);
+        final FadeTransition ft = new FadeTransition(Duration.millis(1000), node);
+        ft.setInterpolator(Interpolator.EASE_IN);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
+    }
+
+    private void fadeOut(Node node) {
+        final FadeTransition ft = new FadeTransition(Duration.millis(1000), node);
+        ft.setInterpolator(Interpolator.EASE_OUT);
+        ft.setFromValue(1);
+        ft.setToValue(0);
+        ft.setOnFinished(e -> node.setVisible(false));
+        ft.play();
     }
 }
