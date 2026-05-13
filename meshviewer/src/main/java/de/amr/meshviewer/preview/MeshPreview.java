@@ -8,9 +8,6 @@ import de.amr.meshviewer.FlashMessageOverlay;
 import de.amr.meshviewer.MeshViewerUI;
 import de.amr.meshviewer.SampleInitSettings;
 import de.amr.meshviewer.info.SampleInfo;
-import de.amr.meshviewer.meshtree.InnerTreeNode;
-import de.amr.meshviewer.meshtree.MeshSelection;
-import de.amr.meshviewer.meshtree.MeshTreeView;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -88,6 +85,11 @@ public class MeshPreview extends StackPane {
     public static final double MOVE_DIST = 0.25;
 
     public static final Rotate CAMERA_UPSIDE_DOWN = new Rotate(180, Rotate.X_AXIS);
+
+    public static final PhongMaterial RED_MATERIAL = new PhongMaterial(Color.RED);
+    public static final PhongMaterial BLUE_MATERIAL = new PhongMaterial(Color.BLUE);
+    public static final PhongMaterial WHITE_MATERIAL = new PhongMaterial(Color.WHITE);
+    public static final PhongMaterial TRANSPARENT_GRAY_MATERIAL = new PhongMaterial(Color.rgb(88, 88, 88, 0.5));
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty xzPlaneVisible = new SimpleBooleanProperty(false);
@@ -288,39 +290,32 @@ public class MeshPreview extends StackPane {
         final double a = Math.max(width, height);
         final double h = 0.005;
 
-        final PhongMaterial red = new PhongMaterial(Color.RED);
-        final PhongMaterial blue = new PhongMaterial(Color.BLUE);
-        final PhongMaterial white = new PhongMaterial(Color.WHITE);
-
-        final PhongMaterial transparentGray = new PhongMaterial(Color.rgb(40, 40, 40, 0.6));
-        transparentGray.setSpecularColor(Color.TRANSPARENT);
-
         final Box planeQuad = new Box(a, h, a);
-        planeQuad.setMaterial(transparentGray);
+        planeQuad.setMaterial(TRANSPARENT_GRAY_MATERIAL);
 
         final Box xAxis = new Box(a, h, h);
-        xAxis.setMaterial(red);
+        xAxis.setMaterial(RED_MATERIAL);
 
         final Box zAxis = new Box(h, h, a);
-        zAxis.setMaterial(blue);
+        zAxis.setMaterial(BLUE_MATERIAL);
 
         plane.getChildren().addAll(xAxis, zAxis);
 
         final double markerRadius = 0.02;
         final Sphere originMarker = new Sphere(2 * markerRadius);
-        originMarker.setMaterial(white);
+        originMarker.setMaterial(WHITE_MATERIAL);
         plane.getChildren().add(originMarker);
 
         for (int i = 1; i <= (int) (0.5 * a); ++i) {
             final int scale = i % 10 == 0 ? 3 : 1;
 
             final Sphere markerX = new Sphere(scale * markerRadius);
-            markerX.setMaterial(red);
+            markerX.setMaterial(RED_MATERIAL);
             markerX.setTranslateX(i);
             plane.getChildren().add(markerX);
 
             final Sphere markerZ = new Sphere(scale * markerRadius);
-            markerZ.setMaterial(blue);
+            markerZ.setMaterial(BLUE_MATERIAL);
             markerZ.setTranslateZ(i);
             plane.getChildren().add(markerZ);
         }
