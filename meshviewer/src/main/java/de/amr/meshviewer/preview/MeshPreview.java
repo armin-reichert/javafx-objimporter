@@ -292,7 +292,7 @@ public class MeshPreview extends StackPane {
             minZ = Math.min(minZ, b.getMinZ());
             maxZ = Math.max(maxZ, b.getMaxZ());
         }
-        return new Rectangle2D(minX, minZ, maxX - minX, maxZ - minZ);
+        return new Rectangle2D(minX, minZ, Math.max(maxX - minX, 1), Math.max(maxZ - minZ, 1));
     }
 
     public void assignFocusToSubScene() {
@@ -618,7 +618,7 @@ public class MeshPreview extends StackPane {
         ft.setInterpolator(Interpolator.EASE_OUT);
         ft.setFromValue(1);
         ft.setToValue(0);
-        ft.setOnFinished(e -> node.setVisible(false));
+        ft.setOnFinished(_ -> node.setVisible(false));
         ft.play();
     }
 }
