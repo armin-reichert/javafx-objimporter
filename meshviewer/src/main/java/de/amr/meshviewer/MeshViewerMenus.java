@@ -60,6 +60,9 @@ public class MeshViewerMenus {
 
         final Menu viewMenu = new Menu("View");
 
+        final CheckMenuItem miTransformInfoVisible = new CheckMenuItem("Show Transform Info");
+        miTransformInfoVisible.selectedProperty().bindBidirectional(ui.previewArea().transformInfoVisible);
+
         final CheckMenuItem miXZPlaneVisible = new CheckMenuItem("Show xz-Plane");
         miXZPlaneVisible.selectedProperty().bindBidirectional(ui.previewArea().xzPlaneVisible);
         
@@ -85,6 +88,7 @@ public class MeshViewerMenus {
         miResetPreview.setOnAction(_ -> ui.previewArea().reset());
 
         viewMenu.getItems().addAll(
+            miTransformInfoVisible,
             miXZPlaneVisible,
             miWireframe,
             miBoundingBoxes,

@@ -86,15 +86,22 @@ public class MeshPreview extends StackPane {
 
     public static final double MOVE_DIST = 0.25;
 
+    public static final Rotate CAMERA_UPSIDE_DOWN = new Rotate(180, Rotate.X_AXIS);
+
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty xzPlaneVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
+    public final BooleanProperty transformInfoVisible = new SimpleBooleanProperty(true);
 
     private final SubScene subScene;
     private final Group world = new Group();
+    private final PerspectiveCamera cam = new PerspectiveCamera(true);
+    private final Group camPivot = new Group();
     private final Group meshesPivotParent = new Group();
     private final Group meshesPivot = new Group();
     private Group xzPlane;
+    private Label focusLostLabel;
+    private Label transformInfoLabel;
 
     // Camera transforms
     private final Translate cameraZoom = new Translate(0, 0, DEFAULT_ZOOM);
@@ -116,24 +123,22 @@ public class MeshPreview extends StackPane {
     public MeshPreview() {
         setId("preview");
 
-        final PerspectiveCamera cam = new PerspectiveCamera(true);
-        final Group camPivot = new Group(cam);
-        final Rotate cameraUpsideDown = new Rotate(180, Rotate.X_AXIS);
         cam.setNearClip(0.1);
         cam.setFarClip(10_000);
-        camPivot.getTransforms().addAll(cameraUpsideDown, cameraZoom);
-
-        meshesPivotParent.getChildren().add(meshesPivot);
-        world.getChildren().addAll(meshesPivotParent, camPivot);
+        camPivot.getTransforms().addAll(CAMERA_UPSIDE_DOWN, cameraZoom);
 
         subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
 
-        addNoFocusWarningHint();
-        addTransformStatusLabel();
         createFlashMessageOverlay();
+        createTransformInfoLabel();
+        createFocusLostLabel();
 
-        getChildren().addAll(subScene, flashMessageOverlay);
+        // Compose scene graph
+        camPivot.getChildren().add(cam);
+        meshesPivotParent.getChildren().add(meshesPivot);
+        world.getChildren().addAll(meshesPivotParent, camPivot);
+        getChildren().addAll(subScene, transformInfoLabel, focusLostLabel, flashMessageOverlay);
 
         // Make key and mouse events work as expected
         subScene.setFocusTraversable(true);
@@ -536,30 +541,29 @@ public class MeshPreview extends StackPane {
         }
     }
 
-    private void addNoFocusWarningHint() {
-        final Label label = new Label("Click to focus!");
-        label.setId("noFocusWarning");
-        label.setMouseTransparent(true);
-        label.setFocusTraversable(false);
-        label.visibleProperty().bind(subScene.focusedProperty().not());
-        StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
-        label.setTranslateY(-5);
-        getChildren().add(label);
+    private void createFocusLostLabel() {
+        focusLostLabel = new Label("Click to focus!");
+        focusLostLabel.setId("noFocusWarning");
+        focusLostLabel.setMouseTransparent(true);
+        focusLostLabel.setFocusTraversable(false);
+        focusLostLabel.visibleProperty().bind(subScene.focusedProperty().not());
+        StackPane.setAlignment(focusLostLabel, Pos.BOTTOM_CENTER);
+        focusLostLabel.setTranslateY(-40);
     }
 
-    private void addTransformStatusLabel() {
-        final Label label = new Label();
-        label.textProperty().bind(Bindings.createStringBinding(this::formatTransformStatus,
+    private void createTransformInfoLabel() {
+        transformInfoLabel = new Label();
+        transformInfoLabel.visibleProperty().bind(transformInfoVisible);
+        transformInfoLabel.textProperty().bind(Bindings.createStringBinding(this::formatTransformStatus,
             cameraZoom.zProperty(),
             meshesPivotParent.translateXProperty(), meshesPivotParent.translateYProperty(),
             rotateX.angleProperty(), rotateY.angleProperty(),
             autoRotateX.angleProperty(), autoRotateY.angleProperty()
         ));
-        label.setId("transformStatus");
-        label.setMouseTransparent(true);
-        label.setFocusTraversable(false);
-        StackPane.setAlignment(label, Pos.BOTTOM_RIGHT);
-        getChildren().add(label);
+        transformInfoLabel.setId("transformStatus");
+        transformInfoLabel.setMouseTransparent(true);
+        transformInfoLabel.setFocusTraversable(false);
+        StackPane.setAlignment(transformInfoLabel, Pos.BOTTOM_CENTER);
     }
 
     private String formatTransformStatus() {
