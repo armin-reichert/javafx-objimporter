@@ -60,8 +60,8 @@ public class MeshViewerMenus {
 
         final Menu viewMenu = new Menu("View");
 
-        final CheckMenuItem miFloorVisible = new CheckMenuItem("Show Floor");
-        miFloorVisible.selectedProperty().bindBidirectional(ui.previewArea().floorVisible);
+        final CheckMenuItem miXZPlaneVisible = new CheckMenuItem("Show xz-Plane");
+        miXZPlaneVisible.selectedProperty().bindBidirectional(ui.previewArea().xzPlaneVisible);
         
         final CheckMenuItem miWireframe = new CheckMenuItem("Wireframe");
         miWireframe.selectedProperty().addListener((_, _, sel) -> ui.drawMode.set(sel ? DrawMode.LINE : DrawMode.FILL));
@@ -85,7 +85,7 @@ public class MeshViewerMenus {
         miResetPreview.setOnAction(_ -> ui.previewArea().reset());
 
         viewMenu.getItems().addAll(
-            miFloorVisible, 
+            miXZPlaneVisible,
             miWireframe,
             miBoundingBoxes,
             new SeparatorMenuItem(),

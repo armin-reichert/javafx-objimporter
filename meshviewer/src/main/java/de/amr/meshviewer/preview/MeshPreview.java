@@ -87,13 +87,14 @@ public class MeshPreview extends StackPane {
     public static final double MOVE_DIST = 0.25;
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
-    public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
+    public final BooleanProperty xzPlaneVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
 
     private final SubScene subScene;
+    private final Group world = new Group();
     private final Group meshesPivotParent = new Group();
     private final Group meshesPivot = new Group();
-    private Group floorGroup;
+    private Group xzPlane;
 
     // Camera transforms
     private final Translate cameraZoom = new Translate(0, 0, DEFAULT_ZOOM);
@@ -123,7 +124,7 @@ public class MeshPreview extends StackPane {
         camPivot.getTransforms().addAll(cameraUpsideDown, cameraZoom);
 
         meshesPivotParent.getChildren().add(meshesPivot);
-        final Group world = new Group(meshesPivotParent, camPivot);
+        world.getChildren().addAll(meshesPivotParent, camPivot);
 
         subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
@@ -189,17 +190,17 @@ public class MeshPreview extends StackPane {
             meshesPivot.getChildren().add(new Group(boundingBox, meshView));
         }
 
-        // Important: Floor has to be added *last*!
-        if (floorGroup != null) {
-            floorGroup.visibleProperty().unbind();
+        // Important: Plane has to be added *last*!
+        if (xzPlane != null) {
+            xzPlane.visibleProperty().unbind();
         }
 
-        // Compute area of projection to xy-plane for floor size computation
-        final Rectangle2D projection = computeProjectionXZPlane(boundingBoxes);
-        floorGroup = createFloorGroup(2 * projection.getWidth(), 2 * projection.getHeight());
-        floorGroup.visibleProperty().bindBidirectional(floorVisible);
+        // Compute area of projection to xy-plane for size computation
+        final Rectangle2D xzProjection = computeXZProjection(boundingBoxes);
+        xzPlane = createXZPlane(2 * xzProjection.getWidth(), 2 * xzProjection.getHeight());
+        xzPlane.visibleProperty().bindBidirectional(xzPlaneVisible);
 
-        meshesPivot.getChildren().add(floorGroup);
+        meshesPivot.getChildren().add(xzPlane);
         meshesPivot.getTransforms().setAll(rotateX, rotateY, autoRotateX, autoRotateY);
 
         // Only show those in displayedMeshViews set
@@ -223,7 +224,7 @@ public class MeshPreview extends StackPane {
         return box;
     }
 
-    private Rectangle2D computeProjectionXZPlane(Collection<Box> boxes) {
+    private Rectangle2D computeXZProjection(Collection<Box> boxes) {
         double minX = Double.POSITIVE_INFINITY;
         double maxX = Double.NEGATIVE_INFINITY;
         double minZ = Double.POSITIVE_INFINITY;
@@ -249,54 +250,52 @@ public class MeshPreview extends StackPane {
 
     // private
 
-    private static Group createFloorGroup(double width, double height) {
-        final Group g = new Group();
+    private static Group createXZPlane(double width, double height) {
+        final Group plane = new Group();
 
-        final double size = Math.max(width, height);
-        final double ft = 0.005;
+        final double a = Math.max(width, height);
+        final double h = 0.005;
 
         final PhongMaterial red = new PhongMaterial(Color.RED);
         final PhongMaterial blue = new PhongMaterial(Color.BLUE);
         final PhongMaterial white = new PhongMaterial(Color.WHITE);
 
-        final Box floor = new Box(size, ft, size);
-        final PhongMaterial material = new PhongMaterial();
-        material.setDiffuseColor(Color.rgb(40, 40, 40, 0.6));
-        material.setSpecularColor(Color.TRANSPARENT);
-        floor.setMaterial(material);
+        final PhongMaterial transparentGray = new PhongMaterial(Color.rgb(40, 40, 40, 0.6));
+        transparentGray.setSpecularColor(Color.TRANSPARENT);
 
-        final Box xAxis = new Box(size, ft, ft);
-        xAxis.setTranslateY(.5 * ft);
+        final Box planeQuad = new Box(a, h, a);
+        planeQuad.setMaterial(transparentGray);
+
+        final Box xAxis = new Box(a, h, h);
         xAxis.setMaterial(red);
 
-        final Box zAxis = new Box(ft, ft, size);
-        zAxis.setTranslateY(.5 * ft);
+        final Box zAxis = new Box(h, h, a);
         zAxis.setMaterial(blue);
 
-        g.getChildren().addAll(xAxis, zAxis);
+        plane.getChildren().addAll(xAxis, zAxis);
 
         final double markerRadius = 0.02;
         final Sphere originMarker = new Sphere(2 * markerRadius);
         originMarker.setMaterial(white);
-        g.getChildren().add(originMarker);
+        plane.getChildren().add(originMarker);
 
-        for (int i = 1; i <= (int) (0.5 * size); ++i) {
+        for (int i = 1; i <= (int) (0.5 * a); ++i) {
             final int scale = i % 10 == 0 ? 3 : 1;
 
             final Sphere markerX = new Sphere(scale * markerRadius);
             markerX.setMaterial(red);
             markerX.setTranslateX(i);
-            g.getChildren().add(markerX);
+            plane.getChildren().add(markerX);
 
             final Sphere markerZ = new Sphere(scale * markerRadius);
             markerZ.setMaterial(blue);
             markerZ.setTranslateZ(i);
-            g.getChildren().add(markerZ);
+            plane.getChildren().add(markerZ);
         }
 
-        g.getChildren().add(floor);
+        plane.getChildren().add(planeQuad);
 
-        return g;
+        return plane;
     }
 
     public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
@@ -553,7 +552,8 @@ public class MeshPreview extends StackPane {
         label.textProperty().bind(Bindings.createStringBinding(this::formatTransformStatus,
             cameraZoom.zProperty(),
             meshesPivotParent.translateXProperty(), meshesPivotParent.translateYProperty(),
-            rotateX.angleProperty(), rotateY.angleProperty()
+            rotateX.angleProperty(), rotateY.angleProperty(),
+            autoRotateX.angleProperty(), autoRotateY.angleProperty()
         ));
         label.setId("transformStatus");
         label.setMouseTransparent(true);
@@ -566,14 +566,18 @@ public class MeshPreview extends StackPane {
         final double zoom = cameraZoom.getZ();
         final double x = meshesPivotParent.getTranslateX();
         final double y = meshesPivotParent.getTranslateY();
-        final double rotX = rotateX.getAngle();
-        final double rotY = rotateY.getAngle();
+        final double angleX = normalizedAngle(rotateX.getAngle() + autoRotateX.getAngle());
+        final double angleY = normalizedAngle(rotateY.getAngle() + autoRotateY.getAngle());
         return "Zoom: %s | Position: x=%s y=%s | Rotation: x=%s y=%s".formatted(
             DECIMAL_FORMAT.format(zoom),
             DECIMAL_FORMAT.format(x),
             DECIMAL_FORMAT.format(y),
-            DECIMAL_FORMAT.format(rotX),
-            DECIMAL_FORMAT.format(rotY)
+            DECIMAL_FORMAT.format(angleX),
+            DECIMAL_FORMAT.format(angleY)
         );
+    }
+
+    private static double normalizedAngle(double angle) {
+        return  ((angle % 360) + 360) % 360;
     }
 }
