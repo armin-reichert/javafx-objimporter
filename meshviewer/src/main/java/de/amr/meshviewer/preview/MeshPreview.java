@@ -74,7 +74,8 @@ public class MeshPreview extends StackPane {
     public static final double ZOOM_RATE_LARGE  = 1.0;
     public static final double ZOOM_RATE_HUGE   = 10.0;
 
-    public static final double MOVE_DIST = 0.25;
+    public static final double MOVE_DIST = 0.05;
+    public static final double MOVE_DIST_LARGE = 10 * MOVE_DIST;
 
     public static final Rotate CAMERA_UPSIDE_DOWN = new Rotate(180, Rotate.X_AXIS);
 
@@ -354,7 +355,8 @@ public class MeshPreview extends StackPane {
             planeGroup.getChildren().add(markerZ);
         }
 
-        planeGroup.getChildren().addAll(plane, shadow);
+        //TODO add plane again when flickering issue is solved
+        planeGroup.getChildren().addAll(shadow);
 
         return planeGroup;
     }
@@ -407,7 +409,7 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByY(-1);
                     } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        final double dist = shift ? MOVE_DIST_LARGE : MOVE_DIST;
                         move(meshesPivotParent, -dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
@@ -418,7 +420,7 @@ public class MeshPreview extends StackPane {
                         rotatePreviewByY(1);
                     }
                     else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        final double dist = shift ? MOVE_DIST_LARGE : MOVE_DIST;
                         move(meshesPivotParent, dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
@@ -428,7 +430,7 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByX(-1);
                     } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        final double dist = shift ? MOVE_DIST_LARGE : MOVE_DIST;
                         move(meshesPivotParent, 0, dist);
                     }
                     e.consume(); // do not deliver event to tab pane
@@ -438,7 +440,7 @@ public class MeshPreview extends StackPane {
                     if (control) {
                         rotatePreviewByX(1);
                     } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        final double dist = shift ? MOVE_DIST_LARGE : MOVE_DIST;
                         move(meshesPivotParent, 0, -dist);
                     }
                     e.consume(); // do not deliver event to tab pane
