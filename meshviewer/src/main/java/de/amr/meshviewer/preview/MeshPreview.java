@@ -15,10 +15,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.geometry.Bounds;
-import javafx.geometry.Point3D;
-import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
+import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -217,6 +214,15 @@ public class MeshPreview extends StackPane {
         }
     }
 
+    //TODO Still unclear if this is correct
+    public void centerMeshViewSet(Collection<MeshView> meshViews) {
+        final Collection<Box> boundingBoxes = meshViews.stream().map(this::createBoundingBox).toList();
+        Rectangle2D rect = computeXYProjection(boundingBoxes);
+        Logger.info("Projection into xy plane: {}", rect);
+        double y = 0.5 * (rect.getMaxY() - rect.getMinY());
+        meshesPivotParent.setTranslateY(-y);
+    }
+
     public void initSample(SampleInfo sample) {
         final SampleInitSettings settings = sample.initSettings();
 
@@ -257,6 +263,21 @@ public class MeshPreview extends StackPane {
         box.setTranslateZ(b.getCenterZ());
 
         return box;
+    }
+
+    private Rectangle2D computeXYProjection(Collection<Box> boxes) {
+        double minX = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+        for (Box box : boxes) {
+            final Bounds b = box.getBoundsInLocal();
+            minX = Math.min(minX, b.getMinX());
+            maxX = Math.max(maxX, b.getMaxX());
+            minY = Math.min(minY, b.getMinY());
+            maxY = Math.max(maxY, b.getMaxY());
+        }
+        return new Rectangle2D(minX, minY, Math.max(maxX - minX, 1), Math.max(maxY - minY, 1));
     }
 
     private Rectangle2D computeXZProjection(Collection<Box> boxes) {
@@ -382,7 +403,7 @@ public class MeshPreview extends StackPane {
                         rotatePreviewByY(-1);
                     } else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        movePanGroup(-dist, 0);
+                        move(meshesPivotParent, -dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -393,7 +414,7 @@ public class MeshPreview extends StackPane {
                     }
                     else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        movePanGroup(dist, 0);
+                        move(meshesPivotParent, dist, 0);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -403,7 +424,7 @@ public class MeshPreview extends StackPane {
                         rotatePreviewByX(-1);
                     } else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        movePanGroup(0, dist);
+                        move(meshesPivotParent, 0, dist);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -413,7 +434,7 @@ public class MeshPreview extends StackPane {
                         rotatePreviewByX(1);
                     } else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        movePanGroup(0, -dist);
+                        move(meshesPivotParent, 0, -dist);
                     }
                     e.consume(); // do not deliver event to tab pane
                 }
@@ -499,9 +520,9 @@ public class MeshPreview extends StackPane {
         Logger.info("Zoom: " + z);
     }
 
-    private void movePanGroup(double dx, double dy) {
-        meshesPivotParent.setTranslateX(meshesPivotParent.getTranslateX() + dx);
-        meshesPivotParent.setTranslateY(meshesPivotParent.getTranslateY() + dy);
+    private void move(Node node, double dx, double dy) {
+        node.setTranslateX(node.getTranslateX() + dx);
+        node.setTranslateY(node.getTranslateY() + dy);
     }
 
     private void rotatePreviewByX(double delta) {

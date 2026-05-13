@@ -454,6 +454,7 @@ public class MeshViewerUI {
         }
         allMeshViews.forEach(meshView -> meshView.drawModeProperty().bind(drawMode));
         previewArea.display(allMeshViews, selectedMeshViews);
+        previewArea.centerMeshViewSet(selectedMeshViews);
     }
 
     private Set<MeshView> collectMeshViews(TreeItem<MeshTreeNode> selectedTreeItem) {
