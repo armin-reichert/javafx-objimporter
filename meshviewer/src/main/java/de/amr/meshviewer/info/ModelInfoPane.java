@@ -43,7 +43,7 @@ public class ModelInfoPane extends InfoPane {
         addRow(++row, new Label("Faces:"), lblFaces);
         addRow(++row, new Label("Smoothing Groups:"), lblSmoothingGroups);
         addRow(++row, new Label("Materials:"), lblMaterials);
-        addRow(++row, new Label("Parsing:"), lblParsingTime);
+        addRow(++row, new Label("OBJ File Parsing:"), lblParsingTime);
     }
 
     public void clear() {
