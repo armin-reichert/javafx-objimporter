@@ -325,7 +325,7 @@ public class MeshPreview extends StackPane {
 
                 case LEFT -> {
                     if (control) {
-                        rotatePreviewByY(1);
+                        rotatePreviewByY(-1);
                     } else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
                         moveMeshesPivot(-dist, 0);
@@ -335,7 +335,7 @@ public class MeshPreview extends StackPane {
 
                 case RIGHT -> {
                     if (control) {
-                        rotatePreviewByY(-1);
+                        rotatePreviewByY(1);
                     }
                     else {
                         final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
