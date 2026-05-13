@@ -120,7 +120,7 @@ public class TrainDemoApp extends Application {
         final Group train = new Group(meshViews.values().toArray(MeshView[]::new));
         train.setTranslateY(-5);
 
-        // Camera looks at origin of scene, take a step back
+        // Camera looks at origin of scene, take a step back (zoom out)
         final PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setTranslateZ(-40);
 
@@ -128,7 +128,7 @@ public class TrainDemoApp extends Application {
         final Group cameraView = new Group(camera);
         cameraView.getTransforms().add(new Rotate(180, Rotate.X_AXIS));
 
-        // Crete scene, camera can be zoomed with "+" and "-" keys
+        // Create scene, camera can be zoomed with "+" and "-" keys
         final Scene scene = new Scene(new Group(train, cameraView), 700, 300, true, SceneAntialiasing.BALANCED);
         scene.setCamera(camera);
         scene.setFill(Color.DARKGRAY);

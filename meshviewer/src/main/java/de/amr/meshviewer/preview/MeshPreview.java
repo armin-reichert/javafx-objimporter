@@ -52,6 +52,8 @@ import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 
 public class MeshPreview extends StackPane {
 
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat(" 0.00;-0.00");
+
     public static final Paint SKY_GRADIENT = new LinearGradient(
         0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
         new Stop(0.0, Color.web("#3A8DFF")),  // deep zenith blue
@@ -64,9 +66,7 @@ public class MeshPreview extends StackPane {
     public static final String KEY_AUTO_ROTATE_HORIZONTALLY = "h";
     public static final String KEY_AUTO_ROTATE_VERTICALLY = "v";
     public static final String KEY_ROTATE_LEFT = "l";
-    public static final String KEY_ROTATE_LEFT_LARGE = "L";
     public static final String KEY_ROTATE_RIGHT = "r";
-    public static final String KEY_ROTATE_RIGHT_LARGE = "R";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
 
     public static final KeyCombination KEY_RESET_PREVIEW = new KeyCodeCombination(KeyCode.R, CONTROL_DOWN, SHIFT_DOWN);
@@ -481,16 +481,10 @@ public class MeshPreview extends StackPane {
             flash("Auto-Rotate vertically");
         }
         else if (KEY_ROTATE_LEFT.equals(ch)) {
-            rotatePreviewByY(45);
-        }
-        else if (KEY_ROTATE_LEFT_LARGE.equals(ch)) {
-            rotatePreviewByY(90);
+            rotatePreviewByY(30);
         }
         else if (KEY_ROTATE_RIGHT.equals(ch)) {
-            rotatePreviewByY(-45);
-        }
-        else if (KEY_ROTATE_RIGHT_LARGE.equals(ch)) {
-            rotatePreviewByY(-90);
+            rotatePreviewByY(-30);
         }
         else if (KEY_WIREFRAME_TOGGLE.equals(ch)) {
             final DrawMode mode = drawMode.get() == DrawMode.FILL ? DrawMode.LINE : DrawMode.FILL;
@@ -568,8 +562,6 @@ public class MeshPreview extends StackPane {
         getChildren().add(label);
     }
 
-    private static final DecimalFormat SIGNED = new DecimalFormat(" 0.00;-0.00");
-
     private String formatTransformStatus() {
         final double zoom = cameraZoom.getZ();
         final double x = meshesPivotParent.getTranslateX();
@@ -577,11 +569,11 @@ public class MeshPreview extends StackPane {
         final double rotX = rotateX.getAngle();
         final double rotY = rotateY.getAngle();
         return "Zoom: %s | Position: x=%s y=%s | Rotation: x=%s y=%s".formatted(
-            SIGNED.format(zoom),
-            SIGNED.format(x),
-            SIGNED.format(y),
-            SIGNED.format(rotX),
-            SIGNED.format(rotY)
+            DECIMAL_FORMAT.format(zoom),
+            DECIMAL_FORMAT.format(x),
+            DECIMAL_FORMAT.format(y),
+            DECIMAL_FORMAT.format(rotX),
+            DECIMAL_FORMAT.format(rotY)
         );
     }
 }
