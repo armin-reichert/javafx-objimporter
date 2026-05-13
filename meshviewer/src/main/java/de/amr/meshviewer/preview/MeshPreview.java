@@ -96,6 +96,7 @@ public class MeshPreview extends StackPane {
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty transformInfoVisible = new SimpleBooleanProperty(true);
 
+    private FlashMessageOverlay flashMessageOverlay;
     private final SubScene subScene;
     private final Group world = new Group();
     private final PerspectiveCamera cam = new PerspectiveCamera(true);
@@ -112,23 +113,26 @@ public class MeshPreview extends StackPane {
     // Content transforms
     private final Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
-
-    // Preview Animation
-    private Animation previewAutoRotateAnimation;
     private final Rotate autoRotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate autoRotateY = new Rotate(0, Rotate.Y_AXIS);
-    private Point3D autoRotateAxis = Rotate.Y_AXIS; // horizontally be default
 
-    private FlashMessageOverlay flashMessageOverlay;
+    // Animation
+    private Animation autoRotateAnimation;
+    private Point3D autoRotateAxis = Rotate.Y_AXIS; // y-axis (horizontally) by default
 
     private double mouseOldX, mouseOldY;
 
     public MeshPreview(MeshViewerUI ui) {
-        setId("preview");
+        setId("preview"); // CSS ID
 
         cam.setNearClip(0.1);
         cam.setFarClip(10_000);
+        cam.setFieldOfView(30);
+
+        // Flip y-direction because 3D models usually have positive y-direction upwards and in JavaFX it's downwards
         camPivot.getTransforms().addAll(CAMERA_UPSIDE_DOWN, cameraZoom);
+
+        meshesPivot.getTransforms().setAll(rotateX, rotateY, autoRotateX, autoRotateY);
 
         subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
@@ -137,10 +141,23 @@ public class MeshPreview extends StackPane {
         createTransformInfoLabel();
         createFocusLostLabel();
 
-        // Compose scene graph
+        // Scene graph:
+        // StackPane (MeshPreview)
+        //   + Subscene
+        //       + world
+        //           + meshesPivotParent
+        //             - meshesPivot
+        //       + camPivot
+        //           - cam
+        //   - transformInfoLabel
+        //   - focusLostLabel
+        //   - flashMessageOverlay
+
         camPivot.getChildren().add(cam);
         meshesPivotParent.getChildren().add(meshesPivot);
+
         world.getChildren().addAll(meshesPivotParent, camPivot);
+
         getChildren().addAll(subScene, transformInfoLabel, focusLostLabel, flashMessageOverlay);
 
         // Make key and mouse events work as expected
@@ -152,11 +169,44 @@ public class MeshPreview extends StackPane {
         setInputHandlers(ui);
     }
 
-    private void createFlashMessageOverlay() {
-        flashMessageOverlay = new FlashMessageOverlay();
-        flashMessageOverlay.setFocusTraversable(false);
-        flashMessageOverlay.setMouseTransparent(true);
-        flashMessageOverlay.setPickOnBounds(false);
+    public void display(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
+        meshesPivot.getChildren().clear();
+
+        if (displayedMeshViews.isEmpty()) {
+            assignFocusToSubScene();
+            return;
+        }
+
+        allMeshViews.forEach(meshView -> {
+            meshView.setCullFace(CullFace.NONE);
+            meshView.drawModeProperty().bind(drawMode);
+        });
+
+        // Add bounding boxes to displayed mesh views
+        final List<Box> boundingBoxes = new ArrayList<>();
+        for (MeshView meshView : allMeshViews) {
+            final Box boundingBox = createBoundingBox(meshView);
+            boundingBox.visibleProperty().bind(meshView.visibleProperty().and(boundingBoxesVisible));
+            boundingBoxes.add(boundingBox);
+            meshesPivot.getChildren().add(new Group(boundingBox, meshView));
+        }
+
+        // Important: Plane has to be added *last*!
+        if (xzPlane != null) {
+            xzPlane.visibleProperty().unbind();
+        }
+
+        // Compute area of projection to xy-plane for size computation
+        final Rectangle2D xzProjection = computeXZProjection(boundingBoxes);
+        xzPlane = createXZPlane(2 * xzProjection.getWidth(), 2 * xzProjection.getHeight());
+        xzPlane.visibleProperty().bindBidirectional(xzPlaneVisible);
+
+        meshesPivot.getChildren().add(xzPlane);
+
+        // Only show those in displayedMeshViews set
+        allMeshViews.forEach(meshView -> meshView.setVisible(displayedMeshViews.contains(meshView)));
+
+        assignFocusToSubScene();
     }
 
     public void reset(SampleInfo sample) {
@@ -197,48 +247,6 @@ public class MeshPreview extends StackPane {
 
     public void showMessage(String message) {
         flashMessageOverlay.showMessage(message);
-    }
-
-    public void selectDisplayedMeshViews(Collection<MeshView> allMeshViews, Set<MeshView> displayedMeshViews) {
-        meshesPivot.getChildren().clear();
-
-        if (displayedMeshViews.isEmpty()) {
-            assignFocusToSubScene();
-            return;
-        }
-
-        allMeshViews.forEach(meshView -> {
-            meshView.setVisible(true);
-            meshView.setCullFace(CullFace.NONE);
-            meshView.drawModeProperty().bind(drawMode);
-        });
-
-        // Add bounding boxes to displayed mesh views
-        final List<Box> boundingBoxes = new ArrayList<>();
-        for (MeshView meshView : allMeshViews) {
-            final Box boundingBox = createBoundingBox(meshView);
-            boundingBox.visibleProperty().bind(meshView.visibleProperty().and(boundingBoxesVisible));
-            boundingBoxes.add(boundingBox);
-            meshesPivot.getChildren().add(new Group(boundingBox, meshView));
-        }
-
-        // Important: Plane has to be added *last*!
-        if (xzPlane != null) {
-            xzPlane.visibleProperty().unbind();
-        }
-
-        // Compute area of projection to xy-plane for size computation
-        final Rectangle2D xzProjection = computeXZProjection(boundingBoxes);
-        xzPlane = createXZPlane(2 * xzProjection.getWidth(), 2 * xzProjection.getHeight());
-        xzPlane.visibleProperty().bindBidirectional(xzPlaneVisible);
-
-        meshesPivot.getChildren().add(xzPlane);
-        meshesPivot.getTransforms().setAll(rotateX, rotateY, autoRotateX, autoRotateY);
-
-        // Only show those in displayedMeshViews set
-        allMeshViews.forEach(meshView -> meshView.setVisible(displayedMeshViews.contains(meshView)));
-
-        assignFocusToSubScene();
     }
 
     private Box createBoundingBox(MeshView meshView) {
@@ -282,6 +290,13 @@ public class MeshPreview extends StackPane {
 
     // private
 
+    private void createFlashMessageOverlay() {
+        flashMessageOverlay = new FlashMessageOverlay();
+        flashMessageOverlay.setFocusTraversable(false);
+        flashMessageOverlay.setMouseTransparent(true);
+        flashMessageOverlay.setPickOnBounds(false);
+    }
+
     private static Group createXZPlane(double width, double height) {
         final Group plane = new Group();
 
@@ -324,14 +339,14 @@ public class MeshPreview extends StackPane {
     }
 
     private Animation autoRotateAnimation() {
-        if (previewAutoRotateAnimation == null) {
+        if (autoRotateAnimation == null) {
             createAutoRotateAnimation();
         }
-        return previewAutoRotateAnimation;
+        return autoRotateAnimation;
     }
 
     private void createAutoRotateAnimation() {
-        previewAutoRotateAnimation = new Timeline(
+        autoRotateAnimation = new Timeline(
             new KeyFrame(Duration.millis(16), _ -> {
                 if (autoRotateAxis == Rotate.X_AXIS) {
                     autoRotateX.setAngle(autoRotateX.getAngle() + AUTO_ROTATE_SPEED);
@@ -340,7 +355,7 @@ public class MeshPreview extends StackPane {
                 }
             }) // ~60 FPS
         );
-        previewAutoRotateAnimation.setCycleCount(Animation.INDEFINITE);
+        autoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
     private void setInputHandlers(MeshViewerUI ui) {

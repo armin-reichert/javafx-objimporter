@@ -9,6 +9,7 @@ import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.info.SampleInfoPane;
 import de.amr.meshviewer.materialtree.MaterialInfoPane;
 import de.amr.meshviewer.meshtree.*;
+import de.amr.meshviewer.meshtree.InnerTreeNode.NodeCategory;
 import de.amr.meshviewer.preview.MeshPreview;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
@@ -97,7 +98,7 @@ public class MeshViewerUI {
 
     // Selection Area
     private TabPane selectionTabPane = new TabPane();
-    private MeshTreePane meshTreePane;
+    private MeshTreePane treePane;
     private MaterialInfoPane materialInfoPane;
 
     // Preview Area
@@ -145,11 +146,11 @@ public class MeshViewerUI {
 
     private void handleModelChange(ObservableValue<? extends ObjModelFX> py, ObjModelFX oldModel, ObjModelFX newModel) {
         if (newModel != ObjModelFX.EMPTY) {
-            meshTreePane.update(newModel);
+            treePane.update(newModel);
             materialInfoPane.update(newModel);
             modelInfoPane.update(newModel, parsingTimeMillis);
         } else {
-            meshTreePane.clear();
+            treePane.clear();
             materialInfoPane.clear();
             modelInfoPane.clear();
         }
@@ -260,32 +261,33 @@ public class MeshViewerUI {
         previewArea.reset(currentSample);
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
-        meshTreePane.setInitialSelection();
+        treePane.setInitialSelection();
     }
 
-    public void showObjModel(URL url, SampleInfo sampleInfo) throws IOException {
+    public void showObjModel(URL url, SampleInfo sample) throws IOException {
         requireNonNull(url);
+        currentSample = sample;
         loadModelFromURL(url);
         previewArea.reset(currentSample);
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
-        meshTreePane.setInitialExpansionState();
+        treePane.setInitialExpansionState();
     }
 
     private void initTreeForSample(SampleInfo sample) {
-        final MeshTreeView tree = meshTreePane.modelTreeView();
+        final MeshTreeView tree = treePane.modelTreeView();
         tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
         switch (sample.initSettings().initialMeshSelection()) {
             case MeshSelection.ALL_OBJECTS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByObjects);
+                tree.selectAllMeshesFromCategory(NodeCategory.MeshesByObjects);
                 tree.getRoot().getChildren().getFirst().setExpanded(true);
             }
             case MeshSelection.ALL_GROUPS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByGroups);
+                tree.selectAllMeshesFromCategory(NodeCategory.MeshesByGroups);
                 tree.getRoot().getChildren().get(1).setExpanded(true);
             }
             case MeshSelection.ALL_MATERIALS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
+                tree.selectAllMeshesFromCategory(NodeCategory.MeshesByMaterials);
                 tree.getRoot().getChildren().getLast().setExpanded(true);
             }
         }
@@ -359,7 +361,7 @@ public class MeshViewerUI {
 
         materialInfoPane = new MaterialInfoPane();
 
-        final Tab meshTreeTab = new Tab("Mesh Tree", meshTreePane);
+        final Tab meshTreeTab = new Tab("Mesh Tree", treePane);
         meshTreeTab.setClosable(false);
 
         final Tab materialInfoTab = new Tab("Materials", materialInfoPane);
@@ -384,49 +386,49 @@ public class MeshViewerUI {
     }
 
     private void createMeshTreePane() {
-        meshTreePane = new MeshTreePane(TREE_AREA_WIDTH);
-        meshTreePane.meshViewNamesShort.bind(meshViewNamesShort);
+        treePane = new MeshTreePane(TREE_AREA_WIDTH);
+        treePane.meshViewNamesShort.bind(meshViewNamesShort);
 
-        for (InnerTreeNode.NodeCategory category : InnerTreeNode.NodeCategory.values()) {
+        for (NodeCategory category : NodeCategory.values()) {
             final ObservableSet<MeshTreeNode> selectedNodes = FXCollections.observableSet();
-            meshTreePane.modelTreeView().selection().put(category, selectedNodes);
+            treePane.modelTreeView().selection().put(category, selectedNodes);
             selectedNodes.addListener((SetChangeListener<MeshTreeNode>) change -> {
                 Logger.debug("Selection changed for category {}: {}", category, change);
-                updateDisplayedMeshViewSet(
-                    meshTreePane.modelTreeView().getSelectionModel().getSelectedItem()
+                displaySelectedMeshViews(
+                    treePane.modelTreeView().getSelectionModel().getSelectedItem()
                 );
             });
         }
 
-        meshTreePane.modelTreeView().getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
+        treePane.modelTreeView().getSelectionModel().selectedItemProperty().addListener((_, _, selectedItem) -> {
             Logger.debug("Selected item: {}", selectedItem);
-            updateDisplayedMeshViewSet(selectedItem);
+            displaySelectedMeshViews(selectedItem);
         });
 
     }
 
-    private void updateDisplayedMeshViewSet(TreeItem<MeshTreeNode> selectedTreeItem) {
+    private void displaySelectedMeshViews(TreeItem<MeshTreeNode> selectedTreeItem) {
         if (selectedTreeItem == null) {
             Logger.debug("Nothing selected");
             return;
         }
-        Collection<MeshView> all = Set.of();
-        final Set<MeshView> displayed = new HashSet<>();
+        Collection<MeshView> allMeshViews = Set.of();
+        final Set<MeshView> selectedMeshViews = new HashSet<>();
 
         if (selectedTreeItem.getValue() instanceof InnerTreeNode innerTreeNode) {
             switch (innerTreeNode.nodeCategory) {
                 case Model -> {}
                 case MeshesByObjects -> {
-                    all = fxModel.get().objectMeshViews().values();
-                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                    allMeshViews = fxModel.get().objectMeshViews().values();
+                    selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                 }
                 case MeshesByGroups -> {
-                    all = fxModel.get().groupMeshViews().values();
-                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                    allMeshViews = fxModel.get().groupMeshViews().values();
+                    selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                 }
                 case MeshesByMaterials -> {
-                    all = fxModel.get().materialMeshViews().values();
-                    displayed.addAll(collectMeshViews(selectedTreeItem));
+                    allMeshViews = fxModel.get().materialMeshViews().values();
+                    selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                 }
             }
         }
@@ -436,21 +438,22 @@ public class MeshViewerUI {
                 switch (innerTreeNode.nodeCategory) {
                     case Model -> {}
                     case MeshesByObjects -> {
-                        all = fxModel.get().objectMeshViews().values();
-                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                        allMeshViews = fxModel.get().objectMeshViews().values();
+                        selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                     }
                     case MeshesByGroups -> {
-                        all = fxModel.get().groupMeshViews().values();
-                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                        allMeshViews = fxModel.get().groupMeshViews().values();
+                        selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                     }
                     case MeshesByMaterials -> {
-                        all = fxModel.get().materialMeshViews().values();
-                        displayed.addAll(collectMeshViews(selectedTreeItem));
+                        allMeshViews = fxModel.get().materialMeshViews().values();
+                        selectedMeshViews.addAll(collectMeshViews(selectedTreeItem));
                     }
                 }
             }
         }
-        previewArea.selectDisplayedMeshViews(all, displayed);
+        allMeshViews.forEach(meshView -> meshView.drawModeProperty().bind(drawMode));
+        previewArea.display(allMeshViews, selectedMeshViews);
     }
 
     private Set<MeshView> collectMeshViews(TreeItem<MeshTreeNode> selectedTreeItem) {
