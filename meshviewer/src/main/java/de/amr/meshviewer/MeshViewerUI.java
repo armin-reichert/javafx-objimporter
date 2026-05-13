@@ -204,7 +204,7 @@ public class MeshViewerUI {
                 showIntegratedSample(samples.getFirst());
             } catch (IOException x){
                 Logger.error(x, "Cannot show first sample model");
-                previewArea.flash("Cannot show sample model");
+                previewArea.showMessage("Cannot show sample model");
             }
         }
         showInfoArea(false);

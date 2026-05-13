@@ -195,9 +195,7 @@ public class MeshPreview extends StackPane {
         }
     }
 
-
-
-    public void flash(String message) {
+    public void showMessage(String message) {
         flashMessageOverlay.showMessage(message);
     }
 
@@ -461,11 +459,11 @@ public class MeshPreview extends StackPane {
     private void onCharTyped(String ch) {
         if (KEY_AUTO_ROTATE_HORIZONTALLY.equals(ch)) {
             autoRotateAxis = Rotate.Y_AXIS;
-            flash("Auto-Rotate horizontally");
+            showMessage("Auto-Rotate horizontally");
         }
         else if (KEY_AUTO_ROTATE_VERTICALLY.equals(ch)) {
             autoRotateAxis = Rotate.X_AXIS;
-            flash("Auto-Rotate vertically");
+            showMessage("Auto-Rotate vertically");
         }
         else if (KEY_ROTATE_LEFT.equals(ch)) {
             rotatePreviewByY(30);
@@ -517,10 +515,10 @@ public class MeshPreview extends StackPane {
     private void toggleAutoRotateWithFlashMessage() {
         if (autoRotateAnimation().getStatus() == Animation.Status.RUNNING) {
             pauseAutoRotate();
-            flash("Auto-Rotate paused");
+            showMessage("Auto-Rotate paused");
         } else {
             startAutoRotate();
-            flash("Auto-Rotate started");
+            showMessage("Auto-Rotate started");
         }
     }
 
