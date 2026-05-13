@@ -14,6 +14,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -134,7 +135,7 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.setMouseTransparent(true);
         flashMessageOverlay.setPickOnBounds(false);
 
-        setKeyboardAndMouseHandlers();
+        setInputHandlers();
         setBackground(Background.fill(SKY_GRADIENT));
         getChildren().addAll(subScene, flashMessageOverlay);
 
@@ -146,6 +147,7 @@ public class MeshPreview extends StackPane {
         subScene.setPickOnBounds(true);
 
         addNoFocusWarningHint();
+        addTransformStatusLabel();
     }
 
     public void reset() {
@@ -299,119 +301,6 @@ public class MeshPreview extends StackPane {
         return g;
     }
 
-    private void setKeyboardAndMouseHandlers() {
-        subScene.setOnKeyPressed(e -> {
-            boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
-
-            if (KEY_RESET_PREVIEW.match(e)) {
-                reset();
-                e.consume();
-                return;
-            }
-
-            switch (e.getCode()) {
-
-                case PLUS -> {
-                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
-                    zoomBy(rate);
-                    e.consume();
-                }
-
-                case MINUS -> {
-                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
-                    zoomBy(-rate);
-                    e.consume();
-                }
-
-                case LEFT -> {
-                    if (control) {
-                        rotatePreviewByY(-1);
-                    } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        moveMeshesPivot(-dist, 0);
-                    }
-                    e.consume(); // do not deliver event to tab pane
-                }
-
-                case RIGHT -> {
-                    if (control) {
-                        rotatePreviewByY(1);
-                    }
-                    else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        moveMeshesPivot(dist, 0);
-                    }
-                    e.consume(); // do not deliver event to tab pane
-                }
-
-                case UP -> {
-                    if (control) {
-                        rotatePreviewByX(-1);
-                    } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        moveMeshesPivot(0, dist);
-                    }
-                    e.consume(); // do not deliver event to tab pane
-                }
-
-                case DOWN -> {
-                    if (control) {
-                        rotatePreviewByX(1);
-                    } else {
-                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
-                        moveMeshesPivot(0, -dist);
-                    }
-                    e.consume(); // do not deliver event to tab pane
-                }
-            }
-        });
-
-        subScene.setOnKeyTyped(e -> {
-            onCharTyped(e.getCharacter());
-            e.consume();
-        });
-
-        subScene.setOnMouseClicked(e -> {
-            Logger.trace("Mouse clicked {}", e);
-            assignFocusToSubScene();
-            e.consume();
-        });
-
-        subScene.setOnMousePressed(e -> {
-            Logger.trace("Mouse pressed {}", e);
-            mouseOldX = e.getSceneX();
-            mouseOldY = e.getSceneY();
-            e.consume();
-        });
-
-        subScene.setOnMouseDragged(e -> {
-            Logger.trace("Mouse dragged {}", e);
-            double dx = e.getSceneX() - mouseOldX;
-            double dy = e.getSceneY() - mouseOldY;
-
-            if (e.getButton() == MouseButton.PRIMARY) {
-                // TODO: How to implement correctly with flipped world?
-                rotatePreviewByY(0.5 * dx);
-                rotatePreviewByX(0.5 * dy);
-            }
-
-            mouseOldX = e.getSceneX();
-            mouseOldY = e.getSceneY();
-
-            e.consume();
-        });
-
-        subScene.setOnScroll(e -> {
-            Logger.trace("Scroll event {}", e);
-            boolean control = e.isControlDown();
-            // Note: SHIFT + scroll is interpreted as horizontal scroll and deltaY is 0 in this case!
-            double rate = control ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
-            double dy = e.getDeltaY() / 40.0; // normalize
-            Logger.info("delta={}", dy);
-            zoomBy(dy * rate);
-        });
-    }
-
     public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
         final SampleInitSettings settings = sample.initSettings();
 
@@ -471,6 +360,119 @@ public class MeshPreview extends StackPane {
         previewAutoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
+    private void setInputHandlers() {
+        subScene.setOnKeyPressed(e -> {
+            boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
+
+            if (KEY_RESET_PREVIEW.match(e)) {
+                reset();
+                e.consume();
+                return;
+            }
+
+            switch (e.getCode()) {
+
+                case PLUS -> {
+                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+                    zoomBy(rate);
+                    e.consume();
+                }
+
+                case MINUS -> {
+                    final double rate = controlShift ? ZOOM_RATE_HUGE : shift ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+                    zoomBy(-rate);
+                    e.consume();
+                }
+
+                case LEFT -> {
+                    if (control) {
+                        rotatePreviewByY(-1);
+                    } else {
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        movePanGroup(-dist, 0);
+                    }
+                    e.consume(); // do not deliver event to tab pane
+                }
+
+                case RIGHT -> {
+                    if (control) {
+                        rotatePreviewByY(1);
+                    }
+                    else {
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        movePanGroup(dist, 0);
+                    }
+                    e.consume(); // do not deliver event to tab pane
+                }
+
+                case UP -> {
+                    if (control) {
+                        rotatePreviewByX(-1);
+                    } else {
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        movePanGroup(0, dist);
+                    }
+                    e.consume(); // do not deliver event to tab pane
+                }
+
+                case DOWN -> {
+                    if (control) {
+                        rotatePreviewByX(1);
+                    } else {
+                        final double dist = shift ? 10 * MOVE_DIST : MOVE_DIST;
+                        movePanGroup(0, -dist);
+                    }
+                    e.consume(); // do not deliver event to tab pane
+                }
+            }
+        });
+
+        subScene.setOnKeyTyped(e -> {
+            onCharTyped(e.getCharacter());
+            e.consume();
+        });
+
+        subScene.setOnMouseClicked(e -> {
+            Logger.trace("Mouse clicked {}", e);
+            assignFocusToSubScene();
+            e.consume();
+        });
+
+        subScene.setOnMousePressed(e -> {
+            Logger.trace("Mouse pressed {}", e);
+            mouseOldX = e.getSceneX();
+            mouseOldY = e.getSceneY();
+            e.consume();
+        });
+
+        subScene.setOnMouseDragged(e -> {
+            Logger.trace("Mouse dragged {}", e);
+            double dx = e.getSceneX() - mouseOldX;
+            double dy = e.getSceneY() - mouseOldY;
+
+            if (e.getButton() == MouseButton.PRIMARY) {
+                // TODO: How to implement correctly with flipped world?
+                rotatePreviewByY(0.5 * dx);
+                rotatePreviewByX(0.5 * dy);
+            }
+
+            mouseOldX = e.getSceneX();
+            mouseOldY = e.getSceneY();
+
+            e.consume();
+        });
+
+        subScene.setOnScroll(e -> {
+            Logger.trace("Scroll event {}", e);
+            boolean control = e.isControlDown();
+            // Note: SHIFT + scroll is interpreted as horizontal scroll and deltaY is 0 in this case!
+            double rate = control ? ZOOM_RATE_LARGE : ZOOM_RATE_NORMAL;
+            double dy = e.getDeltaY() / 40.0; // normalize
+            Logger.info("delta={}", dy);
+            zoomBy(dy * rate);
+        });
+    }
+
     private void onCharTyped(String ch) {
         if (KEY_AUTO_ROTATE_HORIZONTALLY.equals(ch)) {
             autoRotateAxis = Rotate.Y_AXIS;
@@ -510,7 +512,7 @@ public class MeshPreview extends StackPane {
         Logger.info("Zoom: " + z);
     }
 
-    private void moveMeshesPivot(double dx, double dy) {
+    private void movePanGroup(double dx, double dy) {
         panGroup.setTranslateX(panGroup.getTranslateX() + dx);
         panGroup.setTranslateY(panGroup.getTranslateY() + dy);
     }
@@ -544,13 +546,30 @@ public class MeshPreview extends StackPane {
     }
 
     private void addNoFocusWarningHint() {
-        final Label noFocusWarning = new Label("Click to focus!");
-        noFocusWarning.setMouseTransparent(true);
-        noFocusWarning.setFocusTraversable(false);
-        noFocusWarning.setId("noFocusWarning");
-        noFocusWarning.visibleProperty().bind(subScene.focusedProperty().not());
-        StackPane.setAlignment(noFocusWarning, Pos.BOTTOM_CENTER);
-        noFocusWarning.setTranslateY(-5);
-        getChildren().add(noFocusWarning);
+        final Label label = new Label("Click to focus!");
+        label.setId("noFocusWarning");
+        label.setMouseTransparent(true);
+        label.setFocusTraversable(false);
+        label.visibleProperty().bind(subScene.focusedProperty().not());
+        StackPane.setAlignment(label, Pos.BOTTOM_CENTER);
+        label.setTranslateY(-5);
+        getChildren().add(label);
+    }
+
+    private void addTransformStatusLabel() {
+        final Label label = new Label();
+        label.textProperty().bind(Bindings.createStringBinding(
+            () -> formatTransformStatus(cameraZoom.getZ()),
+            cameraZoom.zProperty()
+        ));
+        label.setId("transformStatus");
+        label.setMouseTransparent(true);
+        label.setFocusTraversable(false);
+        StackPane.setAlignment(label, Pos.BOTTOM_RIGHT);
+        getChildren().add(label);
+    }
+
+    private static String formatTransformStatus(double zoom) {
+        return "Zoom: %.0f".formatted(zoom);
     }
 }
