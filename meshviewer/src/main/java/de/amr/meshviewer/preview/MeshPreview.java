@@ -5,6 +5,7 @@
 package de.amr.meshviewer.preview;
 
 import de.amr.meshviewer.FlashMessageOverlay;
+import de.amr.meshviewer.MeshViewerUI;
 import de.amr.meshviewer.SampleInitSettings;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.meshtree.InnerTreeNode;
@@ -120,7 +121,7 @@ public class MeshPreview extends StackPane {
 
     private double mouseOldX, mouseOldY;
 
-    public MeshPreview() {
+    public MeshPreview(MeshViewerUI ui) {
         setId("preview");
 
         cam.setNearClip(0.1);
@@ -146,7 +147,7 @@ public class MeshPreview extends StackPane {
         setPickOnBounds(false);
 
         setBackground(Background.fill(SKY_GRADIENT));
-        setInputHandlers();
+        setInputHandlers(ui);
     }
 
     private void createFlashMessageOverlay() {
@@ -156,8 +157,7 @@ public class MeshPreview extends StackPane {
         flashMessageOverlay.setPickOnBounds(false);
     }
 
-    public void reset() {
-        //TODO center current mesh view set on screen
+    public void reset(SampleInfo sample) {
         meshesPivotParent.setTranslateX(0);
         meshesPivotParent.setTranslateY(0);
         rotateX.setAngle(DEFAULT_ANGLE_X);
@@ -165,7 +165,34 @@ public class MeshPreview extends StackPane {
         autoRotateX.setAngle(DEFAULT_ANGLE_X);
         autoRotateY.setAngle(DEFAULT_ANGLE_Y);
         cameraZoom.setZ(DEFAULT_ZOOM);
+        if (sample != null) {
+            initSample(sample);
+        }
     }
+
+    public void initSample(SampleInfo sample) {
+        final SampleInitSettings settings = sample.initSettings();
+
+        cameraZoom.setZ(settings.zoom());
+        if (settings.rotateX() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
+        }
+        if (settings.rotateY() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateY(), Rotate.Y_AXIS));
+        }
+        if (settings.rotateZ() != 0) {
+            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateZ(), Rotate.Z_AXIS));
+        }
+
+        drawMode.set(settings.wireframe() ? DrawMode.LINE : DrawMode.FILL);
+
+        if (settings.autorotate()) {
+            autoRotateAnimation().playFromStart();
+        } else {
+            autoRotateAnimation().stop();
+        }
+    }
+
 
 
     public void flash(String message) {
@@ -303,45 +330,6 @@ public class MeshPreview extends StackPane {
         return plane;
     }
 
-    public void initSampleModel(MeshTreeView tree, SampleInfo sample) {
-        final SampleInitSettings settings = sample.initSettings();
-
-        cameraZoom.setZ(settings.zoom());
-
-        if (settings.rotateX() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateX(), Rotate.X_AXIS));
-        }
-        if (settings.rotateY() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateY(), Rotate.Y_AXIS));
-        }
-        if (settings.rotateZ() != 0) {
-            meshesPivot.getTransforms().addLast(new Rotate(settings.rotateZ(), Rotate.Z_AXIS));
-        }
-
-        tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
-        switch (settings.initialMeshSelection()) {
-            case MeshSelection.ALL_OBJECTS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByObjects);
-                tree.getRoot().getChildren().getFirst().setExpanded(true);
-            }
-            case MeshSelection.ALL_GROUPS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByGroups);
-                tree.getRoot().getChildren().get(1).setExpanded(true);
-            }
-            case MeshSelection.ALL_MATERIALS -> {
-                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
-                tree.getRoot().getChildren().getLast().setExpanded(true);
-            }
-        }
-
-        drawMode.set(settings.wireframe() ? DrawMode.LINE : DrawMode.FILL);
-        if (settings.autorotate()) {
-            autoRotateAnimation().playFromStart();
-        } else {
-            autoRotateAnimation().stop();
-        }
-    }
-
     private Animation autoRotateAnimation() {
         if (previewAutoRotateAnimation == null) {
             createAutoRotateAnimation();
@@ -362,12 +350,12 @@ public class MeshPreview extends StackPane {
         previewAutoRotateAnimation.setCycleCount(Animation.INDEFINITE);
     }
 
-    private void setInputHandlers() {
+    private void setInputHandlers(MeshViewerUI ui) {
         subScene.setOnKeyPressed(e -> {
             boolean shift = e.isShiftDown(), control = e.isControlDown(), controlShift = control && shift;
 
             if (KEY_RESET_PREVIEW.match(e)) {
-                reset();
+                reset(ui.currentSample());
                 e.consume();
                 return;
             }

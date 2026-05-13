@@ -8,10 +8,7 @@ import de.amr.meshviewer.info.ModelInfoPane;
 import de.amr.meshviewer.info.SampleInfo;
 import de.amr.meshviewer.info.SampleInfoPane;
 import de.amr.meshviewer.materialtree.MaterialInfoPane;
-import de.amr.meshviewer.meshtree.InnerTreeNode;
-import de.amr.meshviewer.meshtree.MeshTreeLeaf;
-import de.amr.meshviewer.meshtree.MeshTreeNode;
-import de.amr.meshviewer.meshtree.MeshTreePane;
+import de.amr.meshviewer.meshtree.*;
 import de.amr.meshviewer.preview.MeshPreview;
 import de.amr.objparser.ObjFileParser;
 import de.amr.objparser.ObjModel;
@@ -113,6 +110,8 @@ public class MeshViewerUI {
 
     private final AboutDialog aboutDialog = new AboutDialog();
 
+    private SampleInfo currentSample;
+
     public MeshViewerUI(Stage stage, double width, double height, HostServices hostServices) {
         this.stage = requireNonNull(stage);
         this.hostServices = requireNonNull(hostServices);
@@ -194,6 +193,10 @@ public class MeshViewerUI {
         return userSamples;
     }
 
+    public SampleInfo currentSample() {
+        return currentSample;
+    }
+
     public void show() {
         stage.show();
         if (!samples.isEmpty()) {
@@ -223,19 +226,23 @@ public class MeshViewerUI {
     }
 
     public void showIntegratedSample(SampleInfo sample) throws IOException {
+        this.currentSample = requireNonNull(sample);
         final URL url = getClass().getResource(sample.path() + sample.fileName());
-        showObjModel(url);
-        previewArea.initSampleModel(meshTreePane.modelTreeView(), sample);
+        showObjModel(url, sample);
+        previewArea.initSample(sample);
+        initTreeForSample(sample);
         sampleInfoPane.setVisible(true);
         sampleInfoPane.update(sample);
     }
 
     public void showUserSample(File userSampleDir, SampleInfo sample) {
+        this.currentSample = requireNonNull(sample);
         final File objFile = new File(userSampleDir, sample.path() + sample.fileName());
         if (objFile.exists() && objFile.isFile()) {
             try {
-                showObjModel(objFile);
-                previewArea.initSampleModel(meshTreePane.modelTreeView(), sample);
+                showObjModel(objFile, sample);
+                previewArea.initSample(sample);
+                initTreeForSample(sample);
                 sampleInfoPane.setVisible(true);
                 sampleInfoPane.update(sample);
             }
@@ -245,23 +252,43 @@ public class MeshViewerUI {
         }
     }
 
-    public void showObjModel(File objFile) throws IOException {
+    public void showObjModel(File objFile, SampleInfo sample) throws IOException {
         requireNonNull(objFile);
+        currentSample = sample;
         loadModelFromURL(objFile.toURI().toURL());
         currentModelDir = objFile.getParentFile();
-        previewArea.reset();
+        previewArea.reset(currentSample);
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
         meshTreePane.setInitialSelection();
     }
 
-    public void showObjModel(URL url) throws IOException {
+    public void showObjModel(URL url, SampleInfo sampleInfo) throws IOException {
         requireNonNull(url);
         loadModelFromURL(url);
-        previewArea.reset();
+        previewArea.reset(currentSample);
         previewArea.assignFocusToSubScene();
         sampleInfoPane.setVisible(false);
         meshTreePane.setInitialExpansionState();
+    }
+
+    private void initTreeForSample(SampleInfo sample) {
+        final MeshTreeView tree = meshTreePane.modelTreeView();
+        tree.getRoot().getChildren().forEach(node -> node.setExpanded(false));
+        switch (sample.initSettings().initialMeshSelection()) {
+            case MeshSelection.ALL_OBJECTS -> {
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByObjects);
+                tree.getRoot().getChildren().getFirst().setExpanded(true);
+            }
+            case MeshSelection.ALL_GROUPS -> {
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByGroups);
+                tree.getRoot().getChildren().get(1).setExpanded(true);
+            }
+            case MeshSelection.ALL_MATERIALS -> {
+                tree.selectAllMeshesFromCategory(InnerTreeNode.NodeCategory.MeshesByMaterials);
+                tree.getRoot().getChildren().getLast().setExpanded(true);
+            }
+        }
     }
 
     public void showSelectionArea(boolean visible) {
@@ -351,7 +378,7 @@ public class MeshViewerUI {
     }
 
     private void createPreviewArea() {
-        previewArea = new MeshPreview();
+        previewArea = new MeshPreview(this);
         previewArea.drawMode.bindBidirectional(drawMode);
         previewArea.boundingBoxesVisible.bindBidirectional(boundingBoxesVisible);
     }
@@ -495,7 +522,7 @@ public class MeshViewerUI {
                 if (file.getName().toLowerCase().endsWith(".obj")) {
                     success = true;
                     try {
-                        showObjModel(file);
+                        showObjModel(file, null);
                     } catch (IOException x) {
                         Logger.error(x, "Cannot show OBJ model file {}", file);
                     }

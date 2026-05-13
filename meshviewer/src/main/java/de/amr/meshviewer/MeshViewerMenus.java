@@ -44,7 +44,7 @@ public class MeshViewerMenus {
             final File objFile = ui.fileChooser().showOpenDialog(ui.stage());
             if (objFile != null) {
                 try {
-                    ui.showObjModel(objFile);
+                    ui.showObjModel(objFile,null);
                 } catch (IOException x) {
                     Logger.error(x, "Cannot show OBJ model from file {}", objFile);
                     ui.previewArea().flash("Cannot show OBJ model");
@@ -85,7 +85,7 @@ public class MeshViewerMenus {
         miInfoAreaVisible.setOnAction(_ -> ui.showInfoArea(miInfoAreaVisible.isSelected()));
 
         final MenuItem miResetPreview = new MenuItem("Reset Preview");
-        miResetPreview.setOnAction(_ -> ui.previewArea().reset());
+        miResetPreview.setOnAction(_ -> ui.previewArea().reset(ui.currentSample()));
 
         viewMenu.getItems().addAll(
             miTransformInfoVisible,
