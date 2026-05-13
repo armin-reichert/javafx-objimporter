@@ -46,6 +46,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
+
 public class MeshPreview extends StackPane {
 
     public static final Paint SKY_GRADIENT = new LinearGradient(
@@ -65,8 +68,7 @@ public class MeshPreview extends StackPane {
     public static final String KEY_ROTATE_RIGHT_LARGE = "R";
     public static final String KEY_WIREFRAME_TOGGLE = "w";
 
-    public static final KeyCombination  KEY_RESET_PREVIEW = new KeyCodeCombination(
-        KeyCode.R, KeyCodeCombination.CONTROL_DOWN, KeyCodeCombination.SHIFT_DOWN);
+    public static final KeyCombination KEY_RESET_PREVIEW = new KeyCodeCombination(KeyCode.R, CONTROL_DOWN, SHIFT_DOWN);
 
     public static final int DEFAULT_ANGLE_X = 0;
     public static final int DEFAULT_ANGLE_Y = 0;
@@ -87,18 +89,15 @@ public class MeshPreview extends StackPane {
     public final BooleanProperty floorVisible = new SimpleBooleanProperty(false);
     public final BooleanProperty boundingBoxesVisible = new SimpleBooleanProperty(false);
 
+    private final SubScene subScene;
     private final Group meshesPivotParent = new Group();
     private final Group meshesPivot = new Group();
-
     private Group floorGroup;
 
-    private final SubScene subScene;
-
-    private double mouseOldX, mouseOldY;
-
+    // Camera transforms
     private final Translate cameraZoom = new Translate(0, 0, DEFAULT_ZOOM);
 
-    // Transforms
+    // Content transforms
     private final Rotate rotateX = new Rotate(0, Rotate.X_AXIS);
     private final Rotate rotateY = new Rotate(0, Rotate.Y_AXIS);
 
@@ -108,45 +107,46 @@ public class MeshPreview extends StackPane {
     private final Rotate autoRotateY = new Rotate(0, Rotate.Y_AXIS);
     private Point3D autoRotateAxis = Rotate.Y_AXIS; // horizontally be default
 
-    private final FlashMessageOverlay flashMessageOverlay;
+    private FlashMessageOverlay flashMessageOverlay;
+
+    private double mouseOldX, mouseOldY;
 
     public MeshPreview() {
         setId("preview");
 
         final PerspectiveCamera cam = new PerspectiveCamera(true);
+        final Group camPivot = new Group(cam);
+        final Rotate cameraUpsideDown = new Rotate(180, Rotate.X_AXIS);
         cam.setNearClip(0.1);
         cam.setFarClip(10_000);
-
-        final Group cameraView = new Group(cam);
-
-        // Camera transforms
-        final Rotate cameraFlipUpsideDown = new Rotate(180, Rotate.X_AXIS);
-        cameraView.getTransforms().addAll(cameraFlipUpsideDown, cameraZoom);
+        camPivot.getTransforms().addAll(cameraUpsideDown, cameraZoom);
 
         meshesPivotParent.getChildren().add(meshesPivot);
-        final Group world = new Group(meshesPivotParent, cameraView);
+        final Group world = new Group(meshesPivotParent, camPivot);
 
         subScene = new SubScene(world, 400, 400, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(cam);
 
+        addNoFocusWarningHint();
+        addTransformStatusLabel();
+        createFlashMessageOverlay();
+
+        getChildren().addAll(subScene, flashMessageOverlay);
+
+        // Make key and mouse events work as expected
+        subScene.setFocusTraversable(true);
+        subScene.setPickOnBounds(true);
+        setPickOnBounds(false);
+
+        setBackground(Background.fill(SKY_GRADIENT));
+        setInputHandlers();
+    }
+
+    private void createFlashMessageOverlay() {
         flashMessageOverlay = new FlashMessageOverlay();
         flashMessageOverlay.setFocusTraversable(false);
         flashMessageOverlay.setMouseTransparent(true);
         flashMessageOverlay.setPickOnBounds(false);
-
-        setInputHandlers();
-        setBackground(Background.fill(SKY_GRADIENT));
-        getChildren().addAll(subScene, flashMessageOverlay);
-
-        // Make key events work as expected
-        subScene.setFocusTraversable(true);
-
-        // Make mouse events work as expected
-        setPickOnBounds(false);
-        subScene.setPickOnBounds(true);
-
-        addNoFocusWarningHint();
-        addTransformStatusLabel();
     }
 
     public void reset() {
@@ -182,7 +182,7 @@ public class MeshPreview extends StackPane {
         // Add bounding boxes to displayed mesh views
         final List<Box> boundingBoxes = new ArrayList<>();
         for (MeshView meshView : allMeshViews) {
-            final Box boundingBox = createBoundingBox(meshView, Color.RED);
+            final Box boundingBox = createBoundingBox(meshView);
             boundingBox.visibleProperty().bind(meshView.visibleProperty().and(boundingBoxesVisible));
             boundingBoxes.add(boundingBox);
             meshesPivot.getChildren().add(new Group(boundingBox, meshView));
@@ -202,19 +202,17 @@ public class MeshPreview extends StackPane {
         meshesPivot.getTransforms().setAll(rotateX, rotateY, autoRotateX, autoRotateY);
 
         // Only show those in displayedMeshViews set
-        allMeshViews.forEach(meshView -> {
-            meshView.setVisible(displayedMeshViews.contains(meshView));
-        });
+        allMeshViews.forEach(meshView -> meshView.setVisible(displayedMeshViews.contains(meshView)));
 
         assignFocusToSubScene();
     }
 
-    private Box createBoundingBox(MeshView meshView, Color color) {
+    private Box createBoundingBox(MeshView meshView) {
         Bounds b = meshView.getBoundsInLocal(); // local, not parent
 
         Box box = new Box(b.getWidth(), b.getHeight(), b.getDepth());
         box.setDrawMode(DrawMode.LINE);
-        box.setMaterial(new PhongMaterial(color));
+        box.setMaterial(new PhongMaterial(Color.RED));
         box.visibleProperty().bind(boundingBoxesVisible);
 
         box.setTranslateX(b.getCenterX());
