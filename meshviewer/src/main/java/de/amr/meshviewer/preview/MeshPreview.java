@@ -41,6 +41,7 @@ import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 import org.tinylog.Logger;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -567,12 +568,20 @@ public class MeshPreview extends StackPane {
         getChildren().add(label);
     }
 
+    private static final DecimalFormat SIGNED = new DecimalFormat(" 0.00;-0.00");
+
     private String formatTransformStatus() {
         final double zoom = cameraZoom.getZ();
         final double x = meshesPivotParent.getTranslateX();
         final double y = meshesPivotParent.getTranslateY();
         final double rotX = rotateX.getAngle();
         final double rotY = rotateY.getAngle();
-        return "Zoom: %.2f | Position: x=%.2f y=%.2f | Rotation: x=%.2f y=%.2f".formatted(zoom, x, y, rotX, rotY);
+        return "Zoom: %s | Position: x=%s y=%s | Rotation: x=%s y=%s".formatted(
+            SIGNED.format(zoom),
+            SIGNED.format(x),
+            SIGNED.format(y),
+            SIGNED.format(rotX),
+            SIGNED.format(rotY)
+        );
     }
 }
