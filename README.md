@@ -78,7 +78,7 @@ For each registered sample, the menu "User Samples" will create an entry where y
 
 Is it difficult to show a 3D model parsed from an OBJ file on the screen? Here a simple example application showing a toy train:
 
-```java {numberLines}
+```java {.numberLines}
 package de.amr.traindemo;
 
 import de.amr.meshbuilder.MeshBuilder;
