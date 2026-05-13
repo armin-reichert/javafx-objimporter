@@ -140,7 +140,7 @@ public class MeshViewerUI {
 
         Platform.runLater(() -> {
             showSelectionArea(false);
-            showInfoArea(true);
+            showInfoArea(false);
         });
     }
 

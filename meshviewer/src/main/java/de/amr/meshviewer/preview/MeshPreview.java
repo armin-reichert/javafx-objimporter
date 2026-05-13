@@ -81,7 +81,9 @@ public class MeshPreview extends StackPane {
     public static final PhongMaterial RED_MATERIAL = new PhongMaterial(Color.RED);
     public static final PhongMaterial BLUE_MATERIAL = new PhongMaterial(Color.BLUE);
     public static final PhongMaterial WHITE_MATERIAL = new PhongMaterial(Color.WHITE);
-    public static final PhongMaterial TRANSPARENT_GRAY_MATERIAL = new PhongMaterial(Color.rgb(88, 88, 88, 0.5));
+
+    public static final PhongMaterial TRANSPARENT_LIGHTGRAY_MATERIAL = new PhongMaterial(Color.rgb(150, 150, 150, 0.6));
+    public static final PhongMaterial TRANSPARENT_DARK_GRAY_MATERIAL = new PhongMaterial(Color.rgb(30, 30, 30, 0.5));
 
     public final ObjectProperty<DrawMode> drawMode = new SimpleObjectProperty<>(DrawMode.FILL);
     public final BooleanProperty xzPlaneVisible = new SimpleBooleanProperty(false);
@@ -314,44 +316,47 @@ public class MeshPreview extends StackPane {
     }
 
     private static Group createXZPlane(double width, double height) {
-        final Group plane = new Group();
+        final Group planeGroup = new Group();
 
-        final double a = Math.max(width, height);
-        final double h = 0.005;
+        final double r = 0.5 * Math.max(width, height);
+        final double h = 0.02;
 
-        final Box planeQuad = new Box(a, h, a);
-        planeQuad.setMaterial(TRANSPARENT_GRAY_MATERIAL);
+        final Cylinder plane = new Cylinder(10 * r, h);
+        plane.setMaterial(TRANSPARENT_LIGHTGRAY_MATERIAL);
 
-        final Box xAxis = new Box(a, h, h);
+        final Cylinder shadow = new Cylinder(r, 1.1 * h);
+        shadow.setMaterial(TRANSPARENT_DARK_GRAY_MATERIAL);
+
+        final Box xAxis = new Box(2*r, h, h);
         xAxis.setMaterial(RED_MATERIAL);
 
-        final Box zAxis = new Box(h, h, a);
+        final Box zAxis = new Box(h, h, 2*r);
         zAxis.setMaterial(BLUE_MATERIAL);
 
-        plane.getChildren().addAll(xAxis, zAxis);
+        planeGroup.getChildren().addAll(xAxis, zAxis);
 
         final double markerRadius = 0.02;
         final Sphere originMarker = new Sphere(2 * markerRadius);
         originMarker.setMaterial(WHITE_MATERIAL);
-        plane.getChildren().add(originMarker);
+        planeGroup.getChildren().add(originMarker);
 
-        for (int i = 1; i <= (int) (0.5 * a); ++i) {
+        for (int i = 1; i <= (int) r; ++i) {
             final int scale = i % 10 == 0 ? 3 : 1;
 
             final Sphere markerX = new Sphere(scale * markerRadius);
             markerX.setMaterial(RED_MATERIAL);
             markerX.setTranslateX(i);
-            plane.getChildren().add(markerX);
+            planeGroup.getChildren().add(markerX);
 
             final Sphere markerZ = new Sphere(scale * markerRadius);
             markerZ.setMaterial(BLUE_MATERIAL);
             markerZ.setTranslateZ(i);
-            plane.getChildren().add(markerZ);
+            planeGroup.getChildren().add(markerZ);
         }
 
-        plane.getChildren().add(planeQuad);
+        planeGroup.getChildren().addAll(plane, shadow);
 
-        return plane;
+        return planeGroup;
     }
 
     private Animation autoRotateAnimation() {
@@ -565,7 +570,6 @@ public class MeshPreview extends StackPane {
 
     private void createTransformInfoLabel() {
         transformInfoLabel = new Label();
-//        transformInfoLabel.visibleProperty().bind(transformInfoVisible);
         transformInfoVisible.addListener((_, _, _visible) -> {
             if (_visible) {
                 fadeIn(transformInfoLabel);
