@@ -220,10 +220,10 @@ public class MeshPreview extends StackPane {
     //TODO Still unclear if this is correct
     public void centerMeshViewSet(Collection<MeshView> meshViews) {
         final Collection<Box> boundingBoxes = meshViews.stream().map(this::createBoundingBox).toList();
-        Rectangle2D rect = computeXYProjection(boundingBoxes);
-        Logger.info("Projection into xy plane: {}", rect);
-        double y = 0.5 * (rect.getMaxY() - rect.getMinY());
-        meshesPivotParent.setTranslateY(-y);
+        Rectangle2D projection = computeXYProjection(boundingBoxes);
+        Logger.info("Projection into xy plane: {}", projection);
+        double dy = -0.5 * (projection.getMaxY() - projection.getMinY());
+        meshesPivotParent.setTranslateY(dy);
     }
 
     public void initSample(SampleInfo sample) {
